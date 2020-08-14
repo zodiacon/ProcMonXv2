@@ -2,6 +2,7 @@
 
 #include <tdh.h>
 #include <evntcons.h>
+#include <assert.h>
 
 struct EventProperty {
 	friend class EventData;
@@ -17,6 +18,7 @@ struct EventProperty {
 	template<typename T>
 	T GetValue() const {
 		static_assert(std::is_pod<T>() && !std::is_pointer<T>());
+		assert(sizeof(T) == Length);
 		return *(T*)Data;
 	}
 
@@ -30,6 +32,7 @@ private:
 };
 
 class EventData {
+	friend class TraceManager;
 public:
 	EventData(PEVENT_RECORD rec, std::wstring processName, std::wstring eventName);
 
@@ -40,7 +43,6 @@ public:
 	DWORD GetThreadId() const;
 	DWORD GetCPU() const;
 	LONGLONG GetTimeStamp() const;
-	std::wstring GetEventDetails() const;
 	void SetDetails(std::wstring details);
 	const std::wstring& GetDetails() const;
 
@@ -48,6 +50,9 @@ public:
 	const EventProperty* GetProperty(PCWSTR name) const;
 
 	std::wstring FormatProperty(const EventProperty& prop) const;
+
+protected:
+	void SetProcessName(std::wstring name);
 
 private:
 	EVENT_HEADER _header;

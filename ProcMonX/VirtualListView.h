@@ -99,8 +99,13 @@ protected:
 		auto& item = lv->item;
 		auto col = GetRealColumn(hdr->hwndFrom, item.iSubItem);
 		auto p = static_cast<T*>(this);
-		if (item.mask & LVIF_TEXT)
-			::StringCchCopy(item.pszText, item.cchTextMax, p->GetColumnText(hdr->hwndFrom, item.iItem, col));
+		if (item.mask & LVIF_TEXT) {
+			auto name = p->GetColumnTextPointer(hdr->hwndFrom, item.iItem, col);
+			if (name)
+				item.pszText = (PWSTR)name;
+			else
+				::StringCchCopy(item.pszText, item.cchTextMax, p->GetColumnText(hdr->hwndFrom, item.iItem, col));
+		}
 		if (item.mask & LVIF_IMAGE)
 			item.iImage = p->GetRowImage(item.iItem);
 		if (item.mask & LVIF_INDENT)
@@ -243,6 +248,11 @@ protected:
 	CString GetColumnText(HWND hWnd, int row, int column) const {
 		return L"";
 	}
+
+	PCWSTR GetColumnTextPointer(HWND, int row, int col) const {
+		return nullptr;
+	}
+
 	int GetRowImage(int row) const {
 		return 0;
 	}

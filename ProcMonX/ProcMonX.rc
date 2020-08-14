@@ -62,33 +62,35 @@ BEGIN
     END
     POPUP "&Edit"
     BEGIN
-        MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
-        MENUITEM SEPARATOR
         MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
         MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
         MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
     END
     POPUP "&View"
     BEGIN
+        MENUITEM "&Columns...",                 ID_VIEW_COLUMNS
+        MENUITEM SEPARATOR
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
     END
     POPUP "&Monitor"
     BEGIN
         MENUITEM "&Start",                      ID_MONITOR_START
         MENUITEM "S&top",                       ID_MONITOR_STOP
+        MENUITEM SEPARATOR
+        MENUITEM "&Clear",                      ID_MONITOR_CL
     END
     POPUP "&Options"
     BEGIN
         MENUITEM "&Always On Top",              ID_OPTIONS_ALWAYSONTOP
     END
-    POPUP "&Window"
+    POPUP "&Tab"
     BEGIN
         MENUITEM "&Close\tCtrl+F4",             ID_WINDOW_CLOSE
         MENUITEM "Close &All",                  ID_WINDOW_CLOSE_ALL
     END
     POPUP "&Help"
     BEGIN
-        MENUITEM "&About ProcMonX",             ID_APP_ABOUT
+        MENUITEM "&About Process Monitor X...", ID_APP_ABOUT
     END
 END
 
@@ -102,6 +104,38 @@ END
 // remains consistent on all systems.
 IDR_MAINFRAME           ICON                    "res\\ProcMonX.ico"
 
+IDI_CANCEL              ICON                    "res\\cancel.ico"
+
+IDI_DRIVER              ICON                    "res\\Driver.ico"
+
+IDI_FILTER              ICON                    "res\\filter.ico"
+
+IDI_FILTER_ADD          ICON                    "res\\filter-add.ico"
+
+IDI_FILTER_DELETE       ICON                    "res\\filter-delete.ico"
+
+IDI_FIND                ICON                    "res\\find.ico"
+
+IDI_MEMORY              ICON                    "res\\memory.ico"
+
+IDI_DLL                 ICON                    "res\\Modules.ico"
+
+IDI_NETWORK             ICON                    "res\\network.ico"
+
+IDI_OK                  ICON                    "res\\ok.ico"
+
+IDI_PLAY                ICON                    "res\\Play.ico"
+
+IDI_PROCESSES           ICON                    "res\\processes.ico"
+
+IDI_REGISTRY            ICON                    "res\\registry.ico"
+
+IDI_STOP                ICON                    "res\\Stop.ico"
+
+IDI_THREAD              ICON                    "res\\threads.ico"
+
+IDI_TOOLS               ICON                    "res\\tools.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -110,12 +144,12 @@ IDR_MAINFRAME           ICON                    "res\\ProcMonX.ico"
 
 IDD_ABOUTBOX DIALOGEX 0, 0, 187, 102
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "About"
+CAPTION "About Process Explorer X"
 FONT 9, "Segoe UI", 0, 0, 0x0
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,68,81,50,14
-    CTEXT           "Process Monitor X v2.0\n\n(C)2020 Pavel Yosifovich",IDC_STATIC,54,24,78,32
-    ICON            IDR_MAINFRAME,IDC_STATIC,6,6,18,17
+    CTEXT           "Process Monitor X v2.0 Alpha\n\n(C)2020 Pavel Yosifovich",IDC_STATIC,42,24,108,32
+    ICON            IDR_MAINFRAME,IDC_STATIC,6,6,20,20
 END
 
 
@@ -218,7 +252,8 @@ END
 
 STRINGTABLE
 BEGIN
-    IDR_MAINFRAME           "ProcMonX"
+    IDR_MAINFRAME           "Process Monitor X"
+    IDS_TITLE               "Process Monitor X"
 END
 
 STRINGTABLE

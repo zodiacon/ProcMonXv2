@@ -73,7 +73,7 @@ LONGLONG EventData::GetTimeStamp() const {
 }
 
 const std::vector<EventProperty>& EventData::GetProperties() const {
-	if (!_properties.empty())
+	if (!_properties.empty() || _info == nullptr)
 		return _properties;
 
 	_properties.reserve(_info->TopLevelPropertyCount);
@@ -124,7 +124,7 @@ std::wstring EventData::FormatProperty(const EventProperty& property) const {
 	ULONG size;
 	EVENT_MAP_INFO* eventMap = nullptr;
 	auto& prop = property.Info;
-	BYTE buffer[1024];
+	WCHAR buffer[1024];
 	if (prop.nonStructType.MapNameOffset) {
 		auto mapName = (PWSTR)((PBYTE)_info + prop.nonStructType.MapNameOffset);
 		eventMap = reinterpret_cast<EVENT_MAP_INFO*>(buffer);
@@ -141,53 +141,14 @@ std::wstring EventData::FormatProperty(const EventProperty& property) const {
 	USHORT consumed;
 	auto status = ::TdhFormatProperty(_info, eventMap, (_header.Flags & EVENT_HEADER_FLAG_32_BIT_HEADER) ? 4 : 8,
 		prop.nonStructType.InType, prop.nonStructType.OutType, len, (USHORT)property.Length, property.Data,
-		&size, (PWCHAR)buffer, &consumed);
+		&size, buffer, &consumed);
 	if (status == STATUS_SUCCESS)
-		return std::wstring((PCWSTR)buffer);
+		return std::wstring(buffer);
 
 	return L"";
 }
 
-std::wstring EventData::GetEventDetails() const {
-	std::wstring details;
-	//auto count = _info->TopLevelPropertyCount;
-	//BYTE buffer[1 << 11];
-	//auto userData = reinterpret_cast<PBYTE>(record.UserData);
-	//auto userDataLength = record.UserDataLength;
-	//USHORT consumed;
-	//for (decltype(count) i = 0; i < count; i++) {
-	//	const auto& prop = info->EventPropertyInfoArray[i];
-	//	auto name = CString((PCWSTR)((PBYTE)info + prop.NameOffset));
-	//	ULONG size;
-	//	EVENT_MAP_INFO* eventMap = nullptr;
-	//	if (prop.nonStructType.MapNameOffset) {
-	//		auto mapName = (PWSTR)((PBYTE)info + prop.nonStructType.MapNameOffset);
-	//		eventMap = reinterpret_cast<EVENT_MAP_INFO*>(buffer);
-	//		size = sizeof(buffer);
-	//		::TdhGetEventMapInformation((PEVENT_RECORD)&record, mapName, eventMap, &size);
-	//	}
-	//	size = sizeof(buffer);
-
-	//	// length special case for IPV6
-	//	auto len = prop.length;
-	//	if (prop.nonStructType.InType == TDH_INTYPE_BINARY && prop.nonStructType.OutType == TDH_OUTTYPE_IPV6)
-	//		len = sizeof(IN6_ADDR);
-
-	//	auto status = ::TdhFormatProperty(info, eventMap, (record.EventHeader.Flags & EVENT_HEADER_FLAG_32_BIT_HEADER) ? 4 : 8,
-	//		prop.nonStructType.InType, prop.nonStructType.OutType, len, userDataLength, userData,
-	//		&size, (PWCHAR)buffer, &consumed);
-	//	if (STATUS_SUCCESS == status) {
-	//		userData += consumed;
-	//		userDataLength -= consumed;
-
-	//		if (name.Left(8) != L"Reserved" && name != L"ProcessId" && name != L"TThreadId") {
-	//			CString value((PCWSTR)buffer);
-	//			if (!value.IsEmpty())
-	//				details += name + L":;;" + value + L";;";
-	//		}
-	//	}
-	//	else if (status != ERROR_EVT_INVALID_EVENT_DATA)
-	//		DebugBreak();
-	//}
-	return details;
+void EventData::SetProcessName(std::wstring name) {
+	_processName = std::move(name);
 }
+

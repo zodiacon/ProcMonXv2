@@ -29,6 +29,7 @@ extern CAppModule _Module;
 #include <vector>
 #include <memory>
 #include <string>
+#include <algorithm>
 
 #include <tdh.h>
 #include <evntcons.h>

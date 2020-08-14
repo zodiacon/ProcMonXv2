@@ -22,6 +22,10 @@ public:
 	void AddEvent(std::shared_ptr<EventData> data);
 	void StartMonitoring(bool start);
 	CString GetColumnText(HWND, int row, int col) const;
+	PCWSTR GetColumnTextPointer(HWND, int row, int col) const;
+
+	bool IsSortable(int col) const;
+	void DoSort(const SortInfo* si);
 
 	BOOL PreTranslateMessage(MSG* pMsg);
 

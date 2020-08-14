@@ -39,8 +39,8 @@ private:
 private:
 	struct ProcessInfo {
 		DWORD Id;
-		DWORD ParentId;
 		std::wstring ImageName;
+		LONGLONG CreateTime;
 	};
 
 	TRACEHANDLE _handle{ 0 };
@@ -53,6 +53,7 @@ private:
 	KernelEventTypes _kernelEventTypes{ KernelEventTypes::None };
 	mutable std::shared_mutex _processesLock;
 	std::unordered_map<DWORD, std::wstring> _processes;
-	mutable std::unordered_map<DWORD, std::wstring> _kernelEventNames;
+	mutable std::unordered_map<ULONGLONG, std::wstring> _kernelEventNames;
+	std::vector<DWORD> _cleanupPids;
 };
 

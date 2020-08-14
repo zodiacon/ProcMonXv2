@@ -181,7 +181,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <ExceptionHandling />
+      <ExceptionHandling>Sync</ExceptionHandling>
       <DebugInformationFormat />
       <PreprocessorDefinitions>_WINDOWS;STRICT;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -240,7 +240,23 @@
     <ResourceCompile Include="ProcMonX.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\cancel.ico" />
+    <Image Include="res\Driver.ico" />
+    <Image Include="res\filter-add.ico" />
+    <Image Include="res\filter-delete.ico" />
+    <Image Include="res\filter.ico" />
+    <Image Include="res\find.ico" />
+    <Image Include="res\memory.ico" />
+    <Image Include="res\Modules.ico" />
+    <Image Include="res\network.ico" />
+    <Image Include="res\ok.ico" />
+    <Image Include="res\Play.ico" />
+    <Image Include="res\processes.ico" />
     <Image Include="res\ProcMonX.ico" />
+    <Image Include="res\registry.ico" />
+    <Image Include="res\Stop.ico" />
+    <Image Include="res\threads.ico" />
+    <Image Include="res\tools.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

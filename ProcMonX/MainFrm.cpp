@@ -22,6 +22,9 @@ BOOL CMainFrame::OnIdle() {
 }
 
 LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/) {
+	::SetPriorityClass(::GetCurrentProcess(), HIGH_PRIORITY_CLASS);
+	::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
+
 	CreateSimpleStatusBar();
 
 	m_hWndClient = m_view.Create(m_hWnd, rcDefault, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, WS_EX_CLIENTEDGE);
@@ -102,7 +105,7 @@ LRESULT CMainFrame::OnWindowActivate(WORD /*wNotifyCode*/, WORD wID, HWND /*hWnd
 }
 
 LRESULT CMainFrame::OnMonitorStart(WORD, WORD, HWND, BOOL&) {
-	m_tm.SetKernelEventTypes(KernelEventTypes::Process);
+	m_tm.SetKernelEventTypes(KernelEventTypes::Process | KernelEventTypes::ImageLoad | KernelEventTypes::Network | KernelEventTypes::FileIOInit);
 	for (auto& view : m_EventViews)
 		view->StartMonitoring(true);
 	m_tm.Start([&](auto data) {

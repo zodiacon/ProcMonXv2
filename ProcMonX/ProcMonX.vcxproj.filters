@@ -13,6 +13,9 @@
       <UniqueIdentifier>{ca97204c-89ee-440c-9afa-698a9cb9543a}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;jpg;jpeg;jpe;manifest</Extensions>
     </Filter>
+    <Filter Include="Resource Files\Icons">
+      <UniqueIdentifier>{e141c0fe-a444-4856-9d99-18deb69f19fd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ProcMonX.cpp">
@@ -84,8 +87,56 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\cancel.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\Driver.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\filter.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\filter-add.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\filter-delete.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\find.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\memory.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\Modules.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\network.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\ok.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\Play.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\processes.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
     <Image Include="res\ProcMonX.ico">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\registry.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\Stop.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\threads.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\tools.ico">
+      <Filter>Resource Files\Icons</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
