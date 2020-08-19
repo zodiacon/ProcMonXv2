@@ -158,12 +158,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="EventData.h" />
+    <ClInclude Include="FilterBase.h" />
     <ClInclude Include="KernelEvents.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="TraceManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EventData.cpp" />
+    <ClCompile Include="FilterBase.cpp" />
     <ClCompile Include="KernelEvents.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

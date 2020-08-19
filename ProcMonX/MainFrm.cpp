@@ -18,6 +18,9 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg) {
 }
 
 BOOL CMainFrame::OnIdle() {
+	UIUpdateToolBar();
+	UIUpdateStatusBar();
+
 	return FALSE;
 }
 
@@ -25,10 +28,34 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 	::SetPriorityClass(::GetCurrentProcess(), HIGH_PRIORITY_CLASS);
 	::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
 
+	HWND hWndCmdBar = m_CmdBar.Create(m_hWnd, rcDefault, nullptr, ATL_SIMPLE_CMDBAR_PANE_STYLE);
+	CMenuHandle hMenu = GetMenu();
+	UIAddMenu(hMenu);
+	m_CmdBar.AttachMenu(hMenu);
+	m_CmdBar.m_bAlphaImages = true;
+	SetMenu(nullptr);
+
+	InitCommandBar();
+
+	CToolBarCtrl tb;
+	auto hWndToolBar = tb.Create(m_hWnd, nullptr, nullptr, ATL_SIMPLE_TOOLBAR_PANE_STYLE, 0, ATL_IDW_TOOLBAR);
+	InitToolBar(tb);
+
+	CreateSimpleReBar(ATL_SIMPLE_REBAR_NOBORDER_STYLE);
+	AddSimpleReBarBand(hWndCmdBar);
+	AddSimpleReBarBand(hWndToolBar, nullptr, TRUE);
+	UIAddToolBar(hWndToolBar);
+
+	CReBarCtrl(m_hWndToolBar).LockBands(TRUE);
+
 	CreateSimpleStatusBar();
+	UIAddStatusBar(m_hWndStatusBar);
 
 	m_hWndClient = m_view.Create(m_hWnd, rcDefault, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, WS_EX_CLIENTEDGE);
 	UISetCheck(ID_VIEW_STATUS_BAR, 1);
+
+	CMenuHandle menuMain = m_CmdBar.GetMenu();
+	m_view.SetWindowMenu(menuMain.GetSubMenu(WINDOW_MENU_POSITION));
 
 	// register object for message filtering and idle updates
 	CMessageLoop* pLoop = _Module.GetMessageLoop();
@@ -36,8 +63,9 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 	pLoop->AddMessageFilter(this);
 	pLoop->AddIdleHandler(this);
 
-	CMenuHandle menuMain = GetMenu();
-	m_view.SetWindowMenu(menuMain.GetSubMenu(WINDOW_MENU_POSITION));
+	UIEnable(ID_MONITOR_STOP, FALSE);
+
+	PostMessage(WM_COMMAND, ID_FILE_NEW);
 
 	return 0;
 }
@@ -105,13 +133,17 @@ LRESULT CMainFrame::OnWindowActivate(WORD /*wNotifyCode*/, WORD wID, HWND /*hWnd
 }
 
 LRESULT CMainFrame::OnMonitorStart(WORD, WORD, HWND, BOOL&) {
-	m_tm.SetKernelEventTypes(KernelEventTypes::Process | KernelEventTypes::ImageLoad | KernelEventTypes::Network | KernelEventTypes::FileIOInit);
+	m_tm.SetKernelEventTypes(KernelEventTypes::Process | KernelEventTypes::Network 
+		| KernelEventTypes::DebugPrint | KernelEventTypes::Debug | KernelEventTypes::Job | KernelEventTypes::ALPC | KernelEventTypes::ProcessCounters);
 	for (auto& view : m_EventViews)
 		view->StartMonitoring(true);
 	m_tm.Start([&](auto data) {
 		for (auto& view : m_EventViews)
 			view->AddEvent(data);
 		});
+
+	UIEnable(ID_MONITOR_STOP, TRUE);
+	UIEnable(ID_MONITOR_START, FALSE);
 
 	return 0;
 }
@@ -121,6 +153,18 @@ LRESULT CMainFrame::OnMonitorStop(WORD, WORD, HWND, BOOL&) {
 	for (auto& view : m_EventViews)
 		view->StartMonitoring(false);
 
+	UIEnable(ID_MONITOR_STOP, FALSE);
+	UIEnable(ID_MONITOR_START, TRUE);
+
+	return 0;
+}
+
+LRESULT CMainFrame::OnForwardToActiveTab(WORD, WORD wID, HWND, BOOL&) {
+	auto page = m_view.GetActivePage();
+	if (page >= 0) {
+		auto hWnd = m_view.GetPageHWND(page);
+		::SendMessage(hWnd, WM_COMMAND, wID, 0);
+	}
 	return 0;
 }
 
@@ -140,3 +184,44 @@ void CMainFrame::ViewDestroyed(void* view) {
 TraceManager& CMainFrame::GetTraceManager() {
 	return m_tm;
 }
+
+void CMainFrame::InitCommandBar() {
+	struct {
+		UINT id, icon;
+	} cmds[] = {
+		{ ID_MONITOR_START, IDI_PLAY },
+		{ ID_MONITOR_STOP, IDI_STOP },
+		{ ID_MONITOR_CLEAR, IDI_CANCEL },
+		//		{ ID_FILE_OPEN, IDI_OPEN },
+	};
+	for (auto& cmd : cmds)
+		m_CmdBar.AddIcon(AtlLoadIcon(cmd.icon), cmd.id);
+}
+
+void CMainFrame::InitToolBar(CToolBarCtrl& tb, int size) {
+	CImageList tbImages;
+	tbImages.Create(size, size, ILC_COLOR32, 8, 4);
+	tb.SetImageList(tbImages);
+
+	struct {
+		UINT id;
+		int image;
+		int style = BTNS_BUTTON;
+	} buttons[] = {
+		{ ID_MONITOR_START, IDI_PLAY },
+		{ ID_MONITOR_STOP, IDI_STOP },
+		{ 0 },
+		{ ID_MONITOR_CLEAR, IDI_CANCEL },
+		{ 0 },
+		{ ID_VIEW_REFRESH, IDI_FILTER },
+	};
+	for (auto& b : buttons) {
+		if (b.id == 0)
+			tb.AddSeparator(0);
+		else {
+			int image = tbImages.AddIcon(AtlLoadIconImage(b.image, 0, size, size));
+			tb.AddButton(b.id, b.style, TBSTATE_ENABLED, image, nullptr, 0);
+		}
+	}
+}
+

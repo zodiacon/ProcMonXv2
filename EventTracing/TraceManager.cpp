@@ -171,8 +171,8 @@ bool TraceManager::ParseProcessStartStop(EventData* data) {
 			break;
 		}
 
-		case 11:		// process terminated
-			//RemoveProcessName(header.ProcessId);
+		case 2:		// process end
+			RemoveProcessName(header.ProcessId);
 			break;
 
 	}
@@ -192,6 +192,12 @@ void TraceManager::OnEventRecord(PEVENT_RECORD rec) {
 	if (rec->ExtendedData)
 		DebugBreak();
 
+	if (!processEvent) {
+		std::wstring_view cat(data->GetEventName().c_str(), 6);
+		if (cat == L"TcpIp/" || cat == L"UdpIp/")
+			ParseNetworkEvent(data.get());
+	}
+
 	if (_callback && (!processEvent || ((_kernelEventTypes & KernelEventTypes::Process) == KernelEventTypes::Process)))
 		_callback(data);
 }
@@ -204,18 +210,29 @@ DWORD TraceManager::Run() {
 	return error;
 }
 
+void TraceManager::ParseNetworkEvent(EventData* data) {
+	auto prop = data->GetProperty(L"PID");
+	if(prop == nullptr)
+		prop = data->GetProperty(L"ProcessId");
+	if (prop) {
+		auto pid = prop->GetValue<DWORD>();
+		data->_header.ProcessId = pid;
+		data->SetProcessName(GetProcessImageById(pid));
+	}
+}
+
 std::wstring TraceManager::GetkernelEventName(EVENT_RECORD* rec) const {
-	//auto& desc = rec->EventHeader.EventDescriptor;
-	//auto key = desc.Task | (desc.Opcode << 16) | (desc.Version << 24);
-	//if (auto it = _kernelEventNames.find(key); it != _kernelEventNames.end())
-	//	return it->second;
+	auto& desc = rec->EventHeader.EventDescriptor;
+	auto key = desc.Task | (desc.Opcode << 16) | (desc.Version << 24);
+	if (auto it = _kernelEventNames.find(key); it != _kernelEventNames.end())
+		return it->second;
 
 	BYTE buffer[1 << 10];
 	ULONG size = sizeof(buffer);
 	auto info = reinterpret_cast<PTRACE_EVENT_INFO>(buffer);
 	if (::TdhGetEventInformation(rec, 0, nullptr, info, &size) == STATUS_SUCCESS) {
 		auto name = std::wstring((PCWSTR)((PBYTE)info + info->TaskNameOffset)) + L"/" + std::wstring((PCWSTR)((PBYTE)info + info->OpcodeNameOffset));
-		//_kernelEventNames.insert({ key, name });
+		_kernelEventNames.insert({ key, name });
 		return name;
 	}
 	return L"";

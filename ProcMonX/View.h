@@ -23,6 +23,7 @@ public:
 	void StartMonitoring(bool start);
 	CString GetColumnText(HWND, int row, int col) const;
 	PCWSTR GetColumnTextPointer(HWND, int row, int col) const;
+	std::wstring ProcessSpecialEvent(EventData* data);
 
 	bool IsSortable(int col) const;
 	void DoSort(const SortInfo* si);
@@ -34,6 +35,7 @@ public:
 	BEGIN_MSG_MAP(CView)
 		MESSAGE_HANDLER(WM_CREATE, OnCreate)
 		MESSAGE_HANDLER(WM_TIMER, OnTimer)
+		COMMAND_ID_HANDLER(ID_MONITOR_CLEAR, OnClear)
 		CHAIN_MSG_MAP(CVirtualListView<CView>)
 		CHAIN_MSG_MAP(CCustomDraw<CView>)
 		CHAIN_MSG_MAP(CViewBase<CView>)
@@ -46,6 +48,7 @@ public:
 
 	LRESULT OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnTimer(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
+	LRESULT OnClear(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 
 private:
 	CListViewCtrl m_List;

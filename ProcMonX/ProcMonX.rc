@@ -53,7 +53,6 @@ IDR_MAINFRAME MENU
 BEGIN
     POPUP "&File"
     BEGIN
-        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
         MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
         MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
         MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
@@ -77,7 +76,7 @@ BEGIN
         MENUITEM "&Start",                      ID_MONITOR_START
         MENUITEM "S&top",                       ID_MONITOR_STOP
         MENUITEM SEPARATOR
-        MENUITEM "&Clear",                      ID_MONITOR_CL
+        MENUITEM "&Clear",                      ID_MONITOR_CLEAR
     END
     POPUP "&Options"
     BEGIN

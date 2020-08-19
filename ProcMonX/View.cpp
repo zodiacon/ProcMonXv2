@@ -15,14 +15,17 @@ void CView::AddEvent(std::shared_ptr<EventData> data) {
 	if (data->GetEventName().empty())
 		return;
 
-	std::wstring details;
-	for (auto& prop : data->GetProperties()) {
-		if (prop.Name.substr(0, 8) != L"Reserved") {
-			auto value = data->FormatProperty(prop);
-			if (!value.empty()) {
-				if (value.size() > 255)
-					value = value.substr(0, 253) + L"...";
-				details += prop.Name + L": " + value + L"; ";
+	auto details = ProcessSpecialEvent(data.get());
+	if (details.empty()) {
+
+		for (auto& prop : data->GetProperties()) {
+			if (prop.Name.substr(0, 8) != L"Reserved" && prop.Name.substr(0, 4) != L"TTID") {
+				auto value = data->FormatProperty(prop);
+				if (!value.empty()) {
+					if (value.size() > 150)
+						value = value.substr(0, 149) + L"...";
+					details += prop.Name + L": " + value + L"; ";
+				}
 			}
 		}
 	}
@@ -42,7 +45,7 @@ CString CView::GetColumnText(HWND, int row, int col) const {
 	CString text;
 
 	switch (col) {
-		case 0: 
+		case 0:
 		{
 			auto ts = item->GetTimeStamp();
 			text.Format(L".%06d", (ts / 10) % 1000000);
@@ -51,7 +54,7 @@ CString CView::GetColumnText(HWND, int row, int col) const {
 		case 1:
 			return item->GetEventName().c_str();
 
-		case 2: 
+		case 2:
 		{
 			auto pid = item->GetProcessId();
 			if (pid != (DWORD)-1)
@@ -59,7 +62,7 @@ CString CView::GetColumnText(HWND, int row, int col) const {
 			break;
 		}
 		case 3: return item->GetProcessId() == (DWORD)-1 ? L"" : GetFrame()->GetTraceManager().GetProcessImageById(item->GetProcessId()).c_str();
-		case 4: 
+		case 4:
 		{
 			auto tid = item->GetThreadId();
 			if (tid != (DWORD)-1)
@@ -77,6 +80,20 @@ PCWSTR CView::GetColumnTextPointer(HWND, int row, int col) const {
 		case 6: return  m_Events[row]->GetDetails().c_str();
 	}
 	return nullptr;
+}
+
+std::wstring CView::ProcessSpecialEvent(EventData* data) {
+	std::wstring details;
+	CString text;
+	auto& name = data->GetEventName();
+	if (name == L"Process/Start") {
+		text.Format(L"PID: %u; Image: %s; Command Line: %s",
+			data->GetProperty(L"ProcessId")->GetValue<DWORD>(),
+			CString(data->GetProperty(L"ImageFileName")->GetAnsiString()),
+			data->GetProperty(L"CommandLine")->GetUnicodeString());
+		details = std::move(text);
+	}
+	return details;
 }
 
 bool CView::IsSortable(int col) const {
@@ -108,19 +125,19 @@ void CView::OnFinalMessage(HWND /*hWnd*/) {
 }
 
 LRESULT CView::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/) {
-	m_hWndClient = m_List.Create(*this, rcDefault, nullptr, 
+	m_hWndClient = m_List.Create(*this, rcDefault, nullptr,
 		WS_VISIBLE | WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS |
 		LVS_REPORT | LVS_SHOWSELALWAYS | LVS_OWNERDATA);
 	m_List.SetExtendedListViewStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP | LVS_EX_LABELTIP | LVS_EX_DOUBLEBUFFER);
 
 	auto cm = GetColumnManager(m_List);
 	cm->AddColumn(L"Time", LVCFMT_LEFT, 150);
-	cm->AddColumn(L"Event", LVCFMT_LEFT, 100);
+	cm->AddColumn(L"Event", LVCFMT_LEFT, 160);
 	cm->AddColumn(L"PID", LVCFMT_RIGHT, 100, ColumnFlags::Numeric | ColumnFlags::Visible);
 	cm->AddColumn(L"Process Name", LVCFMT_LEFT, 150);
 	cm->AddColumn(L"TID", LVCFMT_RIGHT, 100, ColumnFlags::Numeric | ColumnFlags::Visible);
 	cm->AddColumn(L"CPU", LVCFMT_CENTER, 45, ColumnFlags::Numeric);
-	cm->AddColumn(L"Details", LVCFMT_LEFT, 600);
+	cm->AddColumn(L"Details", LVCFMT_LEFT, 700);
 
 	cm->UpdateColumns();
 
@@ -140,5 +157,13 @@ LRESULT CView::OnTimer(UINT, WPARAM id, LPARAM, BOOL&) {
 		}
 		UpdateList(m_List, static_cast<int>(m_Events.size()));
 	}
+	return 0;
+}
+
+LRESULT CView::OnClear(WORD, WORD, HWND, BOOL&) {
+	std::lock_guard lock(m_EventsLock);
+	m_Events.clear();
+	m_TempEvents.clear();
+	m_List.SetItemCount(0);
 	return 0;
 }

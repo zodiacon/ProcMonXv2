@@ -24,6 +24,7 @@ extern CAppModule _Module;
 #include <atlctrls.h>
 #include <atldlgs.h>
 #include <atlctrlx.h>
+#include <atlctrlw.h>
 #include <strsafe.h>
 
 #include <vector>

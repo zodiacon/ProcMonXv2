@@ -35,6 +35,7 @@ private:
 	bool ParseProcessStartStop(EventData* data);
 	void OnEventRecord(PEVENT_RECORD rec);
 	DWORD Run();
+	void ParseNetworkEvent(EventData* data);
 
 private:
 	struct ProcessInfo {
