@@ -21,6 +21,8 @@
 #define IDI_STOP                        215
 #define IDI_THREAD                      216
 #define IDI_TOOLS                       217
+#define IDD_STACK                       218
+#define IDC_LIST                        1000
 #define ID_WINDOW_CLOSE                 32772
 #define ID_WINDOW_CLOSE_ALL             32773
 #define ID_OPTIONS_ALWAYSONTOP          32775
@@ -29,14 +31,16 @@
 #define ID_VIEW_COLUMNS                 32778
 #define ID_MONITOR_CL                   32779
 #define ID_MONITOR_CLEAR                32780
+#define ID_EVENT_PROPERTIES             32781
+#define ID_EVENT_CALLSTACK              32782
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        218
-#define _APS_NEXT_COMMAND_VALUE         32781
-#define _APS_NEXT_CONTROL_VALUE         1000
+#define _APS_NEXT_RESOURCE_VALUE        220
+#define _APS_NEXT_COMMAND_VALUE         32783
+#define _APS_NEXT_CONTROL_VALUE         1001
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

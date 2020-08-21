@@ -5,20 +5,23 @@
 #include <string>
 #include <unordered_map>
 #include <functional>
+#include <set>
 #include <memory>
 #include <wil\resource.h>
 
 class EventData;
+class FilterBase;
 
 using EventCallback = std::function<void(std::shared_ptr<EventData>)>;
 
 class TraceManager final {
 public:
+	TraceManager();
 	~TraceManager();
 
-	bool AddKernelEventTypes(KernelEventTypes types);
-	bool RemoveKernelEventTypes(KernelEventTypes types);
-	bool SetKernelEventTypes(KernelEventTypes types);
+	bool AddKernelEventTypes(std::initializer_list<KernelEventTypes> types);
+	//bool RemoveKernelEventTypes(KernelEventTypes types);
+	bool SetKernelEventTypes(std::initializer_list<KernelEventTypes> types);
 
 	bool Start(EventCallback callback);
 	bool Stop();
@@ -26,6 +29,13 @@ public:
 
 	std::wstring GetProcessImageById(DWORD pid) const;
 	static std::wstring GetDosNameFromNtName(PCWSTR name);
+
+	void AddFilter(std::shared_ptr<FilterBase> filter);
+	bool RemoveFilterAt(int index);
+	void RemoveAllFilters();
+	int GetFilterCount() const;
+	bool SwapFilters(int i1, int i2);
+	std::shared_ptr<FilterBase> GetFilter(int index) const;
 
 private:
 	std::wstring GetkernelEventName(EVENT_RECORD* rec) const;
@@ -51,10 +61,13 @@ private:
 	EVENT_TRACE_LOGFILE _traceLog = { 0 };
 	wil::unique_handle _hProcessThread;
 	EventCallback _callback;
-	KernelEventTypes _kernelEventTypes{ KernelEventTypes::None };
+	std::set<KernelEventTypes> _kernelEventTypes;
 	mutable std::shared_mutex _processesLock;
 	std::unordered_map<DWORD, std::wstring> _processes;
 	mutable std::unordered_map<ULONGLONG, std::wstring> _kernelEventNames;
 	std::vector<DWORD> _cleanupPids;
+	std::shared_ptr<EventData> _lastEvent;
+	std::vector<std::shared_ptr<FilterBase>> _filters;
+	bool _isTraceProcesses{ true };
 };
 

@@ -161,6 +161,8 @@
     <ClInclude Include="FilterBase.h" />
     <ClInclude Include="KernelEvents.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="ProcessIdFilter.h" />
+    <ClInclude Include="ProcessNameFilter.h" />
     <ClInclude Include="TraceManager.h" />
   </ItemGroup>
   <ItemGroup>
@@ -173,6 +175,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="ProcessIdFilter.cpp" />
+    <ClCompile Include="ProcessNameFilter.cpp" />
     <ClCompile Include="TraceManager.cpp" />
   </ItemGroup>
   <ItemGroup>

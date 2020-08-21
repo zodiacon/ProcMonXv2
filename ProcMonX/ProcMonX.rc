@@ -71,6 +71,11 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
     END
+    POPUP "&Event"
+    BEGIN
+        MENUITEM "&Properties...",              ID_EVENT_PROPERTIES
+        MENUITEM "&Call Stack...",              ID_EVENT_CALLSTACK
+    END
     POPUP "&Monitor"
     BEGIN
         MENUITEM "&Start",                      ID_MONITOR_START
@@ -151,6 +156,15 @@ BEGIN
     ICON            IDR_MAINFRAME,IDC_STATIC,6,6,20,20
 END
 
+IDD_STACK DIALOGEX 0, 0, 207, 224
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Stack"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    PUSHBUTTON      "Close",IDCANCEL,78,203,50,14
+    LISTBOX         IDC_LIST,6,6,192,192,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP,WS_EX_RIGHT
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -166,6 +180,14 @@ BEGIN
         RIGHTMARGIN, 180
         TOPMARGIN, 7
         BOTTOMMARGIN, 95
+    END
+
+    IDD_STACK, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 200
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 217
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -239,6 +261,11 @@ END
 //
 
 IDD_ABOUTBOX AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_STACK AFX_DIALOG_LAYOUT
 BEGIN
     0
 END

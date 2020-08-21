@@ -6,8 +6,8 @@ const std::vector<KernelEventCategory> KernelEvents{
 		{
 			{ L"Start", 1 },
 			{ L"Stop", 2 },
-			{ L"DC Start", 3 },
-			{ L"DC End", 4 },
+			//{ L"DC Start", 3 },
+			//{ L"DC End", 4 },
 			{ L"Defunct", 39 },
 			{ L"Perf Counter", 32 },
 			{ L"Perf Counter Rundown", 33 },
@@ -18,8 +18,8 @@ const std::vector<KernelEventCategory> KernelEvents{
 		{
 			{ L"Start", 1 },
 			{ L"Stop", 2 },
-			{ L"DC Start", 3 },
-			{ L"DC End", 4 },
+			//{ L"DC Start", 3 },
+			//{ L"DC End", 4 },
 		}
 	},
 
@@ -27,8 +27,8 @@ const std::vector<KernelEventCategory> KernelEvents{
 		{
 			{ L"Load", 10 },
 			{ L"Unload", 2 },
-			{ L"DC Start", 3 },
-			{ L"DC End", 4 },
+			//{ L"DC Start", 3 },
+			//{ L"DC End", 4 },
 		}
 	},
 

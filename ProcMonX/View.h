@@ -36,6 +36,7 @@ public:
 		MESSAGE_HANDLER(WM_CREATE, OnCreate)
 		MESSAGE_HANDLER(WM_TIMER, OnTimer)
 		COMMAND_ID_HANDLER(ID_MONITOR_CLEAR, OnClear)
+		COMMAND_ID_HANDLER(ID_EVENT_CALLSTACK, OnCallStack)
 		CHAIN_MSG_MAP(CVirtualListView<CView>)
 		CHAIN_MSG_MAP(CCustomDraw<CView>)
 		CHAIN_MSG_MAP(CViewBase<CView>)
@@ -49,6 +50,7 @@ public:
 	LRESULT OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnTimer(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnClear(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnCallStack(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 
 private:
 	CListViewCtrl m_List;

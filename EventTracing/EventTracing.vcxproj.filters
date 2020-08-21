@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Filters">
+      <UniqueIdentifier>{db0595a6-3bd2-4c4f-9b77-6d8a0798777a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -30,6 +33,12 @@
     <ClInclude Include="FilterBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ProcessIdFilter.h">
+      <Filter>Filters</Filter>
+    </ClInclude>
+    <ClInclude Include="ProcessNameFilter.h">
+      <Filter>Filters</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -46,6 +55,12 @@
     </ClCompile>
     <ClCompile Include="FilterBase.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ProcessIdFilter.cpp">
+      <Filter>Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="ProcessNameFilter.cpp">
+      <Filter>Filters</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

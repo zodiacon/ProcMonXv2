@@ -4,30 +4,50 @@
 #include "EventData.h"
 #include <assert.h>
 #include <VersionHelpers.h>
+#include <algorithm>
+#include "FilterBase.h"
+#include "ProcessIdFilter.h"
 
 #pragma comment(lib, "tdh")
+
+static bool EnablePrivilege(PCWSTR privilege) {
+	HANDLE hToken;
+	if (!::OpenProcessToken(::GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &hToken))
+		return false;
+
+	TOKEN_PRIVILEGES tp;
+	tp.PrivilegeCount = 1;
+	tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+	if (!::LookupPrivilegeValue(nullptr, privilege, &tp.Privileges[0].Luid))
+		return false;
+
+	BOOL success = ::AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(tp), nullptr, nullptr);
+	::CloseHandle(hToken);
+
+	return success && ::GetLastError() == ERROR_SUCCESS;
+}
+
+TraceManager::TraceManager() {
+	EnablePrivilege(SE_SYSTEM_PROFILE_NAME);
+	_filters.reserve(8);
+
+	auto pf = std::make_shared<ProcessIdFilter>(17860, FilterAction::Include);
+	AddFilter(pf);
+}
 
 TraceManager::~TraceManager() {
 	Stop();
 }
 
-bool TraceManager::AddKernelEventTypes(KernelEventTypes types) {
+bool TraceManager::AddKernelEventTypes(std::initializer_list<KernelEventTypes> types) {
 	if (IsRunning())
 		return false;
 
-	_kernelEventTypes |= types;
+	_kernelEventTypes.insert(types);
 	return true;
 }
 
-bool TraceManager::RemoveKernelEventTypes(KernelEventTypes types) {
-	if (IsRunning())
-		return false;
-
-	_kernelEventTypes &= ~types;
-	return true;
-}
-
-bool TraceManager::SetKernelEventTypes(KernelEventTypes types) {
+bool TraceManager::SetKernelEventTypes(std::initializer_list<KernelEventTypes> types) {
 	if (IsRunning())
 		return false;
 
@@ -50,11 +70,13 @@ bool TraceManager::Start(EventCallback cb) {
 	auto size = sizeof(EVENT_TRACE_PROPERTIES) + sizeof(KERNEL_LOGGER_NAME);
 	_propertiesBuffer = std::make_unique<BYTE[]>(size);
 	bool isWin8Plus = ::IsWindows8OrGreater();
+	ULONG error;
+
 	for (;;) {
 		::memset(_propertiesBuffer.get(), 0, size);
 
 		_properties = reinterpret_cast<EVENT_TRACE_PROPERTIES*>(_propertiesBuffer.get());
-		_properties->EnableFlags = (ULONG)(_kernelEventTypes | KernelEventTypes::Process);
+		_properties->EnableFlags = (ULONG)KernelEventTypes::Process;
 		_properties->Wnode.BufferSize = (ULONG)size;
 		_properties->Wnode.Guid = isWin8Plus ? dummyGuid : SystemTraceControlGuid;
 		_properties->Wnode.Flags = WNODE_FLAG_TRACED_GUID;
@@ -63,7 +85,7 @@ bool TraceManager::Start(EventCallback cb) {
 		_properties->LogFileMode = EVENT_TRACE_REAL_TIME_MODE | EVENT_TRACE_NO_PER_PROCESSOR_BUFFERING | EVENT_TRACE_SYSTEM_LOGGER_MODE;
 		_properties->LoggerNameOffset = sizeof(EVENT_TRACE_PROPERTIES);
 
-		auto error = ::StartTrace(&_handle, sessionName, _properties);
+		error = ::StartTrace(&_handle, sessionName, _properties);
 		if (error == ERROR_ALREADY_EXISTS) {
 			error = ::ControlTrace(_hTrace, KERNEL_LOGGER_NAME, _properties, EVENT_TRACE_CONTROL_STOP);
 			if (error != ERROR_SUCCESS)
@@ -72,17 +94,38 @@ bool TraceManager::Start(EventCallback cb) {
 		}
 		break;
 	}
+	if (error != ERROR_SUCCESS)
+		return false;
 
-	//if (error != ERROR_SUCCESS)
-	//	return false;
-
+	// set up call stack info (temporary)
 	CLASSIC_EVENT_ID events[2] = { 0 };
 	events[0].EventGuid = ProcessGuid;
-	events[0].Type = 0;
-	events[1].EventGuid = ImageLoadGuid;
-	events[1].Type = 0xff;
+	events[0].Type = 1;
+	events[1].EventGuid = ProcessGuid;
+	events[1].Type = 11;
 
-	::TraceSetInformation(_handle, TraceStackTracingInfo, events, sizeof(events));
+	error = ::TraceSetInformation(_handle, TraceStackTracingInfo, events, sizeof(events));
+	assert(error == ERROR_SUCCESS);
+
+	typedef struct _PERFINFO_GROUPMASK {
+		ULONG Masks[8];
+	} PERFINFO_GROUPMASK;
+
+	PERFINFO_GROUPMASK gm;
+	error = ::TraceQueryInformation(_handle, TraceSystemTraceEnableFlagsInfo, &gm, sizeof(gm), nullptr);
+	if (error != ERROR_SUCCESS) {
+		Stop();
+		return false;
+	}
+
+	for(auto type : _kernelEventTypes) {
+		gm.Masks[((uint64_t)type) >> 32] |= (ULONG)type;
+	}
+	error = ::TraceSetInformation(_handle, TraceSystemTraceEnableFlagsInfo, &gm, sizeof(gm));
+	if (error != ERROR_SUCCESS) {
+		Stop();
+		return false;
+	}
 
 	_traceLog.Context = this;
 	_traceLog.LoggerName = (PWSTR)KERNEL_LOGGER_NAME;
@@ -148,6 +191,28 @@ void TraceManager::EnumProcesses() {
 	}
 }
 
+void TraceManager::RemoveAllFilters() {
+	_filters.clear();
+}
+
+int TraceManager::GetFilterCount() const {
+	return (int)_filters.size();
+}
+
+bool TraceManager::SwapFilters(int i1, int i2) {
+	if (i1 < 0 || i2 < 0 || i1 >= _filters.size() || i2 >= _filters.size() || i1 == i2)
+		return false;
+
+	std::swap(_filters[i1], _filters[i2]);
+	return true;
+}
+
+std::shared_ptr<FilterBase> TraceManager::GetFilter(int index) const {
+	if (index < 0 || index >= _filters.size())
+		return nullptr;
+	return _filters[index];
+}
+
 bool TraceManager::ParseProcessStartStop(EventData* data) {
 	if (data->GetEventName().substr(0, 8) != L"Process/")
 		return false;
@@ -185,20 +250,44 @@ void TraceManager::OnEventRecord(PEVENT_RECORD rec) {
 	auto eventName = GetkernelEventName(rec);
 	auto data = std::make_shared<EventData>(rec, GetProcessImageById(pid), eventName);
 
-	if (rec->EventHeader.ProviderId == StackWalkGuid)
-		DebugBreak();
+	// evaluate filters
+	FilterContext context = { data.get() };
+	auto result = FilterAction::Include;
+	for (auto& filter : _filters) {
+		if (!filter->IsEnabled())
+			continue;
+		auto action = filter->Eval(context);
+		if (action == FilterAction::Exclude)
+			return;
+
+		if (action == FilterAction::Include) {
+			result = FilterAction::Include;
+			break;
+		}
+	}
+	if (result != FilterAction::Include)
+		return;
+
+	if (rec->EventHeader.ProviderId == StackWalkGuid) {
+		if (_lastEvent) {
+			_lastEvent->SetStackEventData(data);
+			// force copying properties
+			data->GetProperties();
+			_lastEvent.reset();
+		}
+		return;
+	}
 
 	bool processEvent = ParseProcessStartStop(data.get());
-	if (rec->ExtendedData)
-		DebugBreak();
 
 	if (!processEvent) {
 		std::wstring_view cat(data->GetEventName().c_str(), 6);
 		if (cat == L"TcpIp/" || cat == L"UdpIp/")
 			ParseNetworkEvent(data.get());
 	}
+	_lastEvent = data;
 
-	if (_callback && (!processEvent || ((_kernelEventTypes & KernelEventTypes::Process) == KernelEventTypes::Process)))
+	if (_callback && (!processEvent || _isTraceProcesses))
 		_callback(data);
 }
 
@@ -243,9 +332,20 @@ void TraceManager::AddProcessName(DWORD pid, std::wstring name) {
 	_processes.insert({ pid, std::move(name) });
 }
 
+void TraceManager::AddFilter(std::shared_ptr<FilterBase> filter) {
+	_filters.push_back(std::move(filter));
+}
+
 bool TraceManager::RemoveProcessName(DWORD pid) {
 	std::lock_guard locker(_processesLock);
 	return _processes.erase(pid);
+}
+
+bool TraceManager::RemoveFilterAt(int index) {
+	if (index < 0 || index >= _filters.size())
+		return false;
+	_filters.erase(_filters.begin() + index);
+	return true;
 }
 
 std::wstring TraceManager::GetDosNameFromNtName(PCWSTR name) {

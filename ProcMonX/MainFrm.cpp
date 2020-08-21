@@ -133,8 +133,8 @@ LRESULT CMainFrame::OnWindowActivate(WORD /*wNotifyCode*/, WORD wID, HWND /*hWnd
 }
 
 LRESULT CMainFrame::OnMonitorStart(WORD, WORD, HWND, BOOL&) {
-	m_tm.SetKernelEventTypes(KernelEventTypes::Process | KernelEventTypes::Network 
-		| KernelEventTypes::DebugPrint | KernelEventTypes::Debug | KernelEventTypes::Job | KernelEventTypes::ALPC | KernelEventTypes::ProcessCounters);
+	m_tm.SetKernelEventTypes({ KernelEventTypes::Process, KernelEventTypes::DebugPrint,
+		KernelEventTypes::Debug, KernelEventTypes::Job, KernelEventTypes::Thread, KernelEventTypes::ALPC });
 	for (auto& view : m_EventViews)
 		view->StartMonitoring(true);
 	m_tm.Start([&](auto data) {

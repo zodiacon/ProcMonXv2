@@ -8,27 +8,34 @@ struct EventProperty {
 	friend class EventData;
 
 	EventProperty(EVENT_PROPERTY_INFO& info);
-	~EventProperty();
 
 	std::wstring Name;
-	BYTE* Data;
-	ULONG Length;
 	EVENT_PROPERTY_INFO& Info;
+	ULONG GetLength() const {
+		return (ULONG)Data.size();
+	}
 
 	template<typename T>
 	T GetValue() const {
 		static_assert(std::is_pod<T>() && !std::is_pointer<T>());
-		assert(sizeof(T) == Length);
-		return *(T*)Data;
+		assert(sizeof(T) == Data.size());
+		return *(T*)Data.data();
+	}
+
+	BYTE* GetData() {
+		return Data.data();
+	}
+
+	const BYTE* GetData() const {
+		return Data.data();
 	}
 
 	PCWSTR GetUnicodeString() const;
 	PCSTR GetAnsiString() const;
 
 private:
-	void Allocate(ULONG size);
-	bool _allocated{ false };
-
+	std::vector<BYTE> Data;
+	void* Allocate(ULONG size);
 };
 
 class EventData {
@@ -48,10 +55,11 @@ public:
 
 	const std::vector<EventProperty>& GetProperties() const;
 	const EventProperty* GetProperty(PCWSTR name) const;
-
+	const EventData* GetStackEventData() const;
 	std::wstring FormatProperty(const EventProperty& prop) const;
 
 protected:
+	void SetStackEventData(std::shared_ptr<EventData> data);
 	void SetProcessName(std::wstring name);
 
 private:
@@ -63,6 +71,7 @@ private:
 	PEVENT_RECORD _record;
 	mutable std::vector<EventProperty> _properties;
 	std::wstring _details;
+	std::shared_ptr<EventData> _stackData;
 	DWORD _cpu;
 };
 

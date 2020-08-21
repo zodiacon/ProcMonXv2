@@ -45,6 +45,9 @@
     <ClCompile Include="TraceData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CallStackDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainFrm.h">
@@ -78,6 +81,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TraceData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CallStackDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

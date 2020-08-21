@@ -7,6 +7,7 @@
 #include "View.h"
 #include "TraceManager.h"
 #include "SortHelper.h"
+#include "CallStackDlg.h"
 
 CView::CView(IMainFrame* frame) : CViewBase(frame) {
 }
@@ -23,12 +24,13 @@ void CView::AddEvent(std::shared_ptr<EventData> data) {
 				auto value = data->FormatProperty(prop);
 				if (!value.empty()) {
 					if (value.size() > 150)
-						value = value.substr(0, 149) + L"...";
+						value = value.substr(0, 148) + L"...";
 					details += prop.Name + L": " + value + L"; ";
 				}
 			}
 		}
 	}
+
 	data->SetDetails(details);
 	{
 		std::lock_guard lock(m_EventsLock);
@@ -49,10 +51,10 @@ CString CView::GetColumnText(HWND, int row, int col) const {
 		{
 			auto ts = item->GetTimeStamp();
 			text.Format(L".%06d", (ts / 10) % 1000000);
+			if (item->GetStackEventData())
+				text += L" (Stack)";
 			return CTime(*(FILETIME*)&ts).Format(L"%x %X") + text;
 		}
-		case 1:
-			return item->GetEventName().c_str();
 
 		case 2:
 		{
@@ -61,11 +63,10 @@ CString CView::GetColumnText(HWND, int row, int col) const {
 				text.Format(L"%u (0x%X)", pid, pid);
 			break;
 		}
-		case 3: return item->GetProcessId() == (DWORD)-1 ? L"" : GetFrame()->GetTraceManager().GetProcessImageById(item->GetProcessId()).c_str();
 		case 4:
 		{
 			auto tid = item->GetThreadId();
-			if (tid != (DWORD)-1)
+			if (tid != (DWORD)-1 && tid != 0)
 				text.Format(L"%u (0x%X)", tid, tid);
 			break;
 		}
@@ -76,8 +77,11 @@ CString CView::GetColumnText(HWND, int row, int col) const {
 }
 
 PCWSTR CView::GetColumnTextPointer(HWND, int row, int col) const {
+	auto item = m_Events[row].get();
 	switch (col) {
-		case 6: return  m_Events[row]->GetDetails().c_str();
+		case 1: return item->GetEventName().c_str();
+		case 3: return item->GetProcessName().c_str();
+		case 6: return item->GetDetails().c_str();
 	}
 	return nullptr;
 }
@@ -127,7 +131,7 @@ void CView::OnFinalMessage(HWND /*hWnd*/) {
 LRESULT CView::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/) {
 	m_hWndClient = m_List.Create(*this, rcDefault, nullptr,
 		WS_VISIBLE | WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS |
-		LVS_REPORT | LVS_SHOWSELALWAYS | LVS_OWNERDATA);
+		LVS_REPORT | LVS_SHOWSELALWAYS | LVS_OWNERDATA | LVS_SINGLESEL);
 	m_List.SetExtendedListViewStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP | LVS_EX_LABELTIP | LVS_EX_DOUBLEBUFFER);
 
 	auto cm = GetColumnManager(m_List);
@@ -162,8 +166,19 @@ LRESULT CView::OnTimer(UINT, WPARAM id, LPARAM, BOOL&) {
 
 LRESULT CView::OnClear(WORD, WORD, HWND, BOOL&) {
 	std::lock_guard lock(m_EventsLock);
+	m_List.SetItemCount(0);
 	m_Events.clear();
 	m_TempEvents.clear();
-	m_List.SetItemCount(0);
+	return 0;
+}
+
+LRESULT CView::OnCallStack(WORD, WORD, HWND, BOOL&) {
+	auto selected = m_List.GetSelectedIndex();
+	if (selected < 0)
+		return 0;
+
+	CCallStackDlg dlg(m_Events[selected].get());
+	dlg.DoModal();
+
 	return 0;
 }

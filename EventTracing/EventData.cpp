@@ -7,22 +7,17 @@
 EventProperty::EventProperty(EVENT_PROPERTY_INFO& info) : Info(info) {
 }
 
-EventProperty::~EventProperty() {
-	if (_allocated)
-		::free(Data);
-}
-
-void EventProperty::Allocate(ULONG size) {
-	Data = (BYTE*)malloc(size);
-	_allocated = true;
+void* EventProperty::Allocate(ULONG size) {
+	Data.resize(size);
+	return Data.data();
 }
 
 PCWSTR EventProperty::GetUnicodeString() const {
-	return (PCWSTR)Data;
+	return (PCWSTR)Data.data();
 }
 
 PCSTR EventProperty::GetAnsiString() const {
-	return (PCSTR)Data;
+	return (PCSTR)Data.data();
 }
 
 // EventData
@@ -94,11 +89,14 @@ const std::vector<EventProperty>& EventData::GetProperties() const {
 				//				::TdhGetProperty(_record, 0, nullptr, 1, &desc, len, property.Data);				
 			}
 		}
-		property.Length = len;
-		property.Data = data;
-		data += len;
-		userDataLength -= (USHORT)len;
-
+		if (len) {
+			auto d = property.Allocate(len);
+			if (d) {
+				::memcpy(d, data, len);
+			}
+			data += len;
+			userDataLength -= (USHORT)len;
+		}
 		_properties.push_back(std::move(property));
 	}
 
@@ -110,6 +108,10 @@ const EventProperty* EventData::GetProperty(PCWSTR name) const {
 		if (prop.Name == name)
 			return &prop;
 	return nullptr;
+}
+
+const EventData* EventData::GetStackEventData() const {
+	return _stackData.get();
 }
 
 void EventData::SetDetails(std::wstring details) {
@@ -140,12 +142,16 @@ std::wstring EventData::FormatProperty(const EventProperty& property) const {
 
 	USHORT consumed;
 	auto status = ::TdhFormatProperty(_info, eventMap, (_header.Flags & EVENT_HEADER_FLAG_32_BIT_HEADER) ? 4 : 8,
-		prop.nonStructType.InType, prop.nonStructType.OutType, len, (USHORT)property.Length, property.Data,
+		prop.nonStructType.InType, prop.nonStructType.OutType, len, (USHORT)property.GetLength(), (PBYTE)property.GetData(),
 		&size, buffer, &consumed);
 	if (status == STATUS_SUCCESS)
 		return std::wstring(buffer);
 
 	return L"";
+}
+
+void EventData::SetStackEventData(std::shared_ptr<EventData> data) {
+	_stackData = std::move(data);
 }
 
 void EventData::SetProcessName(std::wstring name) {
