@@ -25,7 +25,7 @@ HANDLE g_hEvent;
 
 int main(int argc, const char* argv[]) {
 	TraceManager tm;
-	tm.AddKernelEventTypes({ KernelEventTypes::ImageLoad | KernelEventTypes::Process });
+	tm.AddKernelEventTypes({ KernelEventTypes::ImageLoad, KernelEventTypes::Process });
 
 	g_pMgr = &tm;
 	g_hEvent = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);

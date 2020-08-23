@@ -1,0 +1,81 @@
+#include "pch.h"
+#include "IniFile.h"
+#include <sstream>
+
+IniFile::IniFile(PCWSTR path) : _path(path) {
+}
+
+CString IniFile::ReadString(PCWSTR section, PCWSTR name, PCWSTR defaultValue) {
+	CString result;
+	auto count = ::GetPrivateProfileString(section, name, defaultValue, result.GetBufferSetLength(128), 128, _path);
+	return result;
+}
+
+int IniFile::ReadInt(PCWSTR section, PCWSTR name, int defaultValue) {
+	return ::GetPrivateProfileInt(section, name, defaultValue, _path);
+}
+
+COLORREF IniFile::ReadColor(PCWSTR section, PCWSTR name, COLORREF defaultValue) {
+	auto text = ReadString(section, name);
+	if (text.IsEmpty())
+		return defaultValue;
+
+	if (text.Left(2) == L"0x")
+		return ParseHexColor(text.Mid(2));
+
+	if (text.Find(L','))
+		return ParseDecColor(text);
+
+	return ParseHexColor(text);
+}
+
+std::vector<CString> IniFile::ReadSection(PCWSTR section) {
+	WCHAR buffer[1 << 10];
+	std::vector<CString> names;
+	if (0 == ::GetPrivateProfileSection(section, buffer, _countof(buffer), _path))
+		return names;
+
+	names.reserve(8);
+	for (auto p = buffer; *p; ) {
+		names.push_back(p);
+		p += names.back().GetLength() + 1;
+	}
+	return names;
+}
+
+bool IniFile::WriteString(PCWSTR section, PCWSTR name, PCWSTR value) {
+	return ::WritePrivateProfileString(section, name, value, _path);
+}
+
+bool IniFile::WriteInt(PCWSTR section, PCWSTR name, int value, bool hex) {
+	CString text;
+	text.Format(hex ? L"0x%X" : L"%d", value);
+	return WriteString(section, name, text);
+}
+
+COLORREF IniFile::ParseHexColor(const CString& hex) {
+	std::wstringstream ss;
+	DWORD color;
+	ss << std::hex << hex;
+	ss >> color;
+	return color;
+}
+
+COLORREF IniFile::ParseDecColor(const CString& text) {
+	int start = 0;
+	COLORREF color = 0;
+	auto str = text.Tokenize(L",", start);
+	if (str.IsEmpty())
+		return CLR_INVALID;
+	color |= _wtoi(str);
+	str = text.Tokenize(L",", start);
+	if (str.IsEmpty())
+		return CLR_INVALID;
+	color |= _wtoi(str) << 8;
+	str = text.Tokenize(L",", start);
+	if (str.IsEmpty())
+		return CLR_INVALID;
+	color |= _wtoi(str) << 16;
+
+	return color;
+}

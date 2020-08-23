@@ -22,25 +22,51 @@
 #define IDI_THREAD                      216
 #define IDI_TOOLS                       217
 #define IDD_STACK                       218
+#define IDI_EVENT                       220
+#define IDI_SAVE                        221
+#define IDI_SAVE_AS                     222
+#define IDD_EVENTS                      224
+#define IDI_EVENT2                      226
+#define IDI_PROPERTIES                  228
+#define IDI_STACK                       229
+#define IDI_GENERIC                     230
+#define IDI_GEAR                        231
+#define IDI_FILE                        233
+#define IDI_HANDLE                      234
+#define IDI_OBJECT                      235
+#define IDI_DISK                        238
+#define IDI_HEAP                        240
+#define IDI_ICON2                       241
+#define IDI_HEAP2                       241
 #define IDC_LIST                        1000
+#define IDC_TREE                        1002
+#define IDC_SAVE                        1003
+#define IDC_LOAD                        1004
+#define IDC_RESET                       1005
+#define IDC_DEFAULTS                    1006
+#define IDC_EXPAND                      1007
+#define IDC_COLLAPSE                    1008
 #define ID_WINDOW_CLOSE                 32772
 #define ID_WINDOW_CLOSE_ALL             32773
 #define ID_OPTIONS_ALWAYSONTOP          32775
 #define ID_MONITOR_START                32776
 #define ID_MONITOR_STOP                 32777
 #define ID_VIEW_COLUMNS                 32778
-#define ID_MONITOR_CL                   32779
 #define ID_MONITOR_CLEAR                32780
 #define ID_EVENT_PROPERTIES             32781
 #define ID_EVENT_CALLSTACK              32782
+#define ID_MONITOR_CONFIGUREEVENTS      32783
+#define ID_MONITOR_FILTERS              32784
+#define ID_OPTIONS_SYMBOLS              32785
+#define ID_FILE_NEWTAB                  32786
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        220
-#define _APS_NEXT_COMMAND_VALUE         32783
-#define _APS_NEXT_CONTROL_VALUE         1001
+#define _APS_NEXT_RESOURCE_VALUE        242
+#define _APS_NEXT_COMMAND_VALUE         32787
+#define _APS_NEXT_CONTROL_VALUE         1009
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

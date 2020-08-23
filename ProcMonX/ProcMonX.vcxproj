@@ -210,8 +210,11 @@
   <ItemGroup>
     <ClCompile Include="AboutDlg.cpp" />
     <ClCompile Include="CallStackDlg.cpp" />
+    <ClCompile Include="EventConfiguration.cpp" />
+    <ClCompile Include="EventsDlg.cpp" />
     <ClCompile Include="ClipboardHelper.cpp" />
     <ClCompile Include="ColumnManager.cpp" />
+    <ClCompile Include="IniFile.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="ProcMonX.cpp" />
     <ClCompile Include="pch.cpp">
@@ -227,8 +230,11 @@
   <ItemGroup>
     <ClInclude Include="AboutDlg.h" />
     <ClInclude Include="CallStackDlg.h" />
+    <ClInclude Include="EventConfiguration.h" />
+    <ClInclude Include="EventsDlg.h" />
     <ClInclude Include="ClipboardHelper.h" />
     <ClInclude Include="ColumnManager.h" />
+    <ClInclude Include="IniFile.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="pch.h" />
@@ -244,19 +250,33 @@
   <ItemGroup>
     <Image Include="res\cancel.ico" />
     <Image Include="res\Driver.ico" />
+    <Image Include="res\event.ico" />
+    <Image Include="res\event2.ico" />
+    <Image Include="res\event3.ico" />
+    <Image Include="res\file.ico" />
     <Image Include="res\filter-add.ico" />
     <Image Include="res\filter-delete.ico" />
     <Image Include="res\filter.ico" />
     <Image Include="res\find.ico" />
+    <Image Include="res\gear.ico" />
+    <Image Include="res\handle.ico" />
+    <Image Include="res\heap.ico" />
+    <Image Include="res\heap2.ico" />
     <Image Include="res\memory.ico" />
     <Image Include="res\Modules.ico" />
     <Image Include="res\network.ico" />
+    <Image Include="res\object.ico" />
     <Image Include="res\ok.ico" />
     <Image Include="res\Play.ico" />
     <Image Include="res\processes.ico" />
     <Image Include="res\ProcMonX.ico" />
+    <Image Include="res\properties.ico" />
     <Image Include="res\registry.ico" />
+    <Image Include="res\save.ico" />
+    <Image Include="res\save_as.ico" />
+    <Image Include="res\stack.ico" />
     <Image Include="res\Stop.ico" />
+    <Image Include="res\storage.ico" />
     <Image Include="res\threads.ico" />
     <Image Include="res\tools.ico" />
   </ItemGroup>

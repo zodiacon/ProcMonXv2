@@ -15,6 +15,7 @@
 #include <atlapp.h>
 #include <atlstr.h>
 #include <atltime.h>
+#include <atlsplit.h>
 
 extern CAppModule _Module;
 
@@ -31,6 +32,7 @@ extern CAppModule _Module;
 #include <memory>
 #include <string>
 #include <algorithm>
+#include <unordered_map>
 
 #include <tdh.h>
 #include <evntcons.h>

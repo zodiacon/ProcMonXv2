@@ -8,7 +8,10 @@
 #include "MainFrm.h"
 #include "EventData.h"
 
-#define WINDOW_MENU_POSITION	5
+const int WINDOW_MENU_POSITION = 6;
+
+CMainFrame::CMainFrame() {
+}
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg) {
 	if (CFrameWindowImpl<CMainFrame>::PreTranslateMessage(pMsg))
@@ -40,6 +43,7 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 	CToolBarCtrl tb;
 	auto hWndToolBar = tb.Create(m_hWnd, nullptr, nullptr, ATL_SIMPLE_TOOLBAR_PANE_STYLE, 0, ATL_IDW_TOOLBAR);
 	InitToolBar(tb);
+	m_ToolBar.Attach(hWndToolBar);
 
 	CreateSimpleReBar(ATL_SIMPLE_REBAR_NOBORDER_STYLE);
 	AddSimpleReBarBand(hWndCmdBar);
@@ -51,11 +55,19 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 	CreateSimpleStatusBar();
 	UIAddStatusBar(m_hWndStatusBar);
 
+	m_view.m_bTabCloseButton = false;
 	m_hWndClient = m_view.Create(m_hWnd, rcDefault, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, WS_EX_CLIENTEDGE);
 	UISetCheck(ID_VIEW_STATUS_BAR, 1);
 
 	CMenuHandle menuMain = m_CmdBar.GetMenu();
 	m_view.SetWindowMenu(menuMain.GetSubMenu(WINDOW_MENU_POSITION));
+
+	CImageList images;
+	images.Create(16, 16, ILC_COLOR32, 4, 4);
+	UINT icons[] = { IDI_EVENT, IDI_EVENT2 };
+	for (auto icon : icons)
+		images.AddIcon(AtlLoadIconImage(icon, 0, 16, 16));
+	m_view.SetImageList(images);
 
 	// register object for message filtering and idle updates
 	CMessageLoop* pLoop = _Module.GetMessageLoop();
@@ -89,8 +101,8 @@ LRESULT CMainFrame::OnFileExit(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCt
 LRESULT CMainFrame::OnFileNew(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
 	CView* pView = new CView(this);
 	pView->Create(m_view, rcDefault, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 0);
-	m_view.AddPage(pView->m_hWnd, _T("Events"));
-	m_EventViews.insert(pView);
+	m_view.AddPage(pView->m_hWnd, _T("Events"), 0, pView);
+	m_pCurrentView = pView;
 
 	return 0;
 }
@@ -133,13 +145,11 @@ LRESULT CMainFrame::OnWindowActivate(WORD /*wNotifyCode*/, WORD wID, HWND /*hWnd
 }
 
 LRESULT CMainFrame::OnMonitorStart(WORD, WORD, HWND, BOOL&) {
-	m_tm.SetKernelEventTypes({ KernelEventTypes::Process, KernelEventTypes::DebugPrint,
-		KernelEventTypes::Debug, KernelEventTypes::Job, KernelEventTypes::Thread, KernelEventTypes::ALPC });
-	for (auto& view : m_EventViews)
-		view->StartMonitoring(true);
+	m_pCurrentView->StartMonitoring(m_tm, true);
+	m_view.SetPageImage(m_view.GetActivePage(), 1);
+	m_pMonitorView = m_pCurrentView;
 	m_tm.Start([&](auto data) {
-		for (auto& view : m_EventViews)
-			view->AddEvent(data);
+		m_pCurrentView->AddEvent(data);
 		});
 
 	UIEnable(ID_MONITOR_STOP, TRUE);
@@ -150,8 +160,9 @@ LRESULT CMainFrame::OnMonitorStart(WORD, WORD, HWND, BOOL&) {
 
 LRESULT CMainFrame::OnMonitorStop(WORD, WORD, HWND, BOOL&) {
 	m_tm.Stop();
-	for (auto& view : m_EventViews)
-		view->StartMonitoring(false);
+	m_view.SetPageImage(m_view.PageIndexFromHwnd(m_pMonitorView->m_hWnd), 0);
+	m_pCurrentView->StartMonitoring(m_tm, false);
+	m_pMonitorView = nullptr;
 
 	UIEnable(ID_MONITOR_STOP, FALSE);
 	UIEnable(ID_MONITOR_START, TRUE);
@@ -168,8 +179,25 @@ LRESULT CMainFrame::OnForwardToActiveTab(WORD, WORD wID, HWND, BOOL&) {
 	return 0;
 }
 
-BOOL CMainFrame::TrackPopupMenu(HMENU hMenu, HWND hWnd, POINT* pt, UINT flags) {
+LRESULT CMainFrame::OnTabActivated(int, LPNMHDR hdr, BOOL&) {
+	int page = (int)hdr->idFrom;
+	if (page < 0) {
+		m_pCurrentView = nullptr;
+	}
+	else {
+		m_pCurrentView = (CView*)m_view.GetPageData(page);
+	}
+
 	return 0;
+}
+
+BOOL CMainFrame::TrackPopupMenu(HMENU hMenu, HWND hWnd, POINT* pt, UINT flags) {
+	POINT cursorPos;
+	if (pt == nullptr) {
+		::GetCursorPos(&cursorPos);
+		pt = &cursorPos;
+	}
+	return m_CmdBar.TrackPopupMenu(hMenu, flags, pt->x, pt->y);
 }
 
 CFont& CMainFrame::GetMonoFont() {
@@ -178,7 +206,6 @@ CFont& CMainFrame::GetMonoFont() {
 }
 
 void CMainFrame::ViewDestroyed(void* view) {
-	m_EventViews.erase((CView*)view);
 }
 
 TraceManager& CMainFrame::GetTraceManager() {
@@ -192,7 +219,12 @@ void CMainFrame::InitCommandBar() {
 		{ ID_MONITOR_START, IDI_PLAY },
 		{ ID_MONITOR_STOP, IDI_STOP },
 		{ ID_MONITOR_CLEAR, IDI_CANCEL },
-		//		{ ID_FILE_OPEN, IDI_OPEN },
+		{ ID_MONITOR_CONFIGUREEVENTS, IDI_TOOLS },
+		{ ID_MONITOR_FILTERS, IDI_FILTER },
+		{ ID_EVENT_CALLSTACK, IDI_STACK },
+		{ ID_EVENT_PROPERTIES, IDI_PROPERTIES },
+		{ ID_FILE_SAVE, IDI_SAVE },
+		{ ID_FILE_SAVE_AS, IDI_SAVE_AS },
 	};
 	for (auto& cmd : cmds)
 		m_CmdBar.AddIcon(AtlLoadIcon(cmd.icon), cmd.id);
@@ -213,7 +245,12 @@ void CMainFrame::InitToolBar(CToolBarCtrl& tb, int size) {
 		{ 0 },
 		{ ID_MONITOR_CLEAR, IDI_CANCEL },
 		{ 0 },
-		{ ID_VIEW_REFRESH, IDI_FILTER },
+		{ ID_MONITOR_CONFIGUREEVENTS, IDI_TOOLS },
+		{ ID_MONITOR_FILTERS, IDI_FILTER },
+		{ 0 },
+		{ ID_EVENT_CALLSTACK, IDI_STACK },
+		{ ID_EVENT_PROPERTIES, IDI_PROPERTIES },
+
 	};
 	for (auto& b : buttons) {
 		if (b.id == 0)

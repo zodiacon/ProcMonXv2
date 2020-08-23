@@ -95,6 +95,8 @@ const std::vector<EventProperty>& EventData::GetProperties() const {
 				::memcpy(d, data, len);
 			}
 			data += len;
+			if (userDataLength < len)
+				break;
 			userDataLength -= (USHORT)len;
 		}
 		_properties.push_back(std::move(property));
@@ -148,6 +150,11 @@ std::wstring EventData::FormatProperty(const EventProperty& property) const {
 		return std::wstring(buffer);
 
 	return L"";
+}
+
+uint64_t EventData::GetEventKey() const {
+	auto& desc = _header.EventDescriptor;
+	return _header.ProviderId.Data1 ^ desc.Opcode;
 }
 
 void EventData::SetStackEventData(std::shared_ptr<EventData> data) {

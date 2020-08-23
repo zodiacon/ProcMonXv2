@@ -4,10 +4,8 @@
 const std::vector<KernelEventCategory> KernelEvents{
 	{ L"Process", KernelEventTypes::Process, &ProcessGuid,
 		{
-			{ L"Start", 1 },
-			{ L"Stop", 2 },
-			//{ L"DC Start", 3 },
-			//{ L"DC End", 4 },
+			{ L"Create", 1 },
+			{ L"Delete", 2 },
 			{ L"Defunct", 39 },
 			{ L"Perf Counter", 32 },
 			{ L"Perf Counter Rundown", 33 },
@@ -16,10 +14,9 @@ const std::vector<KernelEventCategory> KernelEvents{
 
 	{ L"Thread", KernelEventTypes::Thread, &ThreadGuid,
 		{
-			{ L"Start", 1 },
-			{ L"Stop", 2 },
-			//{ L"DC Start", 3 },
-			//{ L"DC End", 4 },
+			{ L"Create", 1 },
+			{ L"Delete", 2 },
+			{ L"Set Name", 72 },
 		}
 	},
 
@@ -27,8 +24,9 @@ const std::vector<KernelEventCategory> KernelEvents{
 		{
 			{ L"Load", 10 },
 			{ L"Unload", 2 },
-			//{ L"DC Start", 3 },
-			//{ L"DC End", 4 },
+			{ L"Relocation", 0x20 },
+			{ L"Kernel Base", 0x21 },
+			{ L"Hypercall Page", 0x22 },
 		}
 	},
 
@@ -84,7 +82,7 @@ const std::vector<KernelEventCategory> KernelEvents{
 		}
 	},
 
-	{ L"TCP/IP", KernelEventTypes::Network, &TcpIpGuid,
+	{ L"Network", KernelEventTypes::Network, &TcpIpGuid,
 		{
 			{ L"TCP Send IPv4", EVENT_TRACE_TYPE_SEND },
 			{ L"TCP Receive IPv4", EVENT_TRACE_TYPE_RECEIVE },
@@ -114,8 +112,58 @@ const std::vector<KernelEventCategory> KernelEvents{
 		}
 	},
 
+	{ L"Handles", KernelEventTypes::PerfHandles, &ObjectGuid,
+		{
+			{ L"Create Handle", 32 },
+			{ L"Close Handle", 33 },
+			{ L"Duplicate Handle", 34 },
+		}
+	},
+
+	{ L"Objects", KernelEventTypes::PerfObjects, &ObjectGuid,
+		{
+			{ L"Create Object", 48 },
+			{ L"Delete Object", 49 },
+			{ L"Reference Object", 50 },
+			{ L"Dereference Object", 51 },
+		}
+	},
+
+	{ L"Pool", KernelEventTypes::PerfPool, &PoolGuid,
+		{
+			{ L"Pool Alloc", 0x20 },
+			{ L"Pool Session Alloc", 0x21 },
+			{ L"Pool Free", 0x22 },
+			{ L"Pool (Session) Free", 0x23 },
+			{ L"Add Pool Page", 0x24 },
+			{ L"Add Session Pool Page", 0x25 },
+			{ L"Big Pool Page", 0x26 },
+			{ L"Big Session Pool Page", 0x27 },
+		}
+	},
+
+	{ L"Disk I/O", KernelEventTypes::DiskIO, &DiskIoGuid,
+		{
+			{ L"Read", 10 },
+			{ L"Write", 11 },
+			{ L"Read Init", 12 },
+			{ L"Write Init", 13 },
+			{ L"Flush Init", 15 },
+			{ L"Flush Buffers", 14 },
+			{ L"Major Function Call", 34 },
+			{ L"Major Function Return", 35 },
+		}
+	},
+
 };
 
-const std::vector<KernelEventCategory>& KernelEventCategory::GetAllCategories(KernelEventTypes type) {
+const std::vector<KernelEventCategory>& KernelEventCategory::GetAllCategories() {
 	return KernelEvents;
+}
+
+const KernelEventCategory* KernelEventCategory::GetCategory(PCWSTR name) {
+	for (auto& cat : GetAllCategories())
+		if (cat.Name == name)
+			return &cat;
+	return nullptr;
 }

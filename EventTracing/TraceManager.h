@@ -22,6 +22,7 @@ public:
 	bool AddKernelEventTypes(std::initializer_list<KernelEventTypes> types);
 	//bool RemoveKernelEventTypes(KernelEventTypes types);
 	bool SetKernelEventTypes(std::initializer_list<KernelEventTypes> types);
+	bool SetKernelEventStacks(std::initializer_list<std::wstring> categories);
 
 	bool Start(EventCallback callback);
 	bool Stop();
@@ -34,6 +35,8 @@ public:
 	bool RemoveFilterAt(int index);
 	void RemoveAllFilters();
 	int GetFilterCount() const;
+	int64_t GetFilteredEventsCount() const;
+
 	bool SwapFilters(int i1, int i2);
 	std::shared_ptr<FilterBase> GetFilter(int index) const;
 
@@ -45,7 +48,7 @@ private:
 	bool ParseProcessStartStop(EventData* data);
 	void OnEventRecord(PEVENT_RECORD rec);
 	DWORD Run();
-	void ParseNetworkEvent(EventData* data);
+	void HandleNoProcessId(EventData* data);
 
 private:
 	struct ProcessInfo {
@@ -62,12 +65,14 @@ private:
 	wil::unique_handle _hProcessThread;
 	EventCallback _callback;
 	std::set<KernelEventTypes> _kernelEventTypes;
+	std::set<std::wstring> _kernelEventStacks;
 	mutable std::shared_mutex _processesLock;
 	std::unordered_map<DWORD, std::wstring> _processes;
 	mutable std::unordered_map<ULONGLONG, std::wstring> _kernelEventNames;
 	std::vector<DWORD> _cleanupPids;
 	std::shared_ptr<EventData> _lastEvent;
 	std::vector<std::shared_ptr<FilterBase>> _filters;
+	std::atomic<int64_t> _filteredEvents{ 0 };
 	bool _isTraceProcesses{ true };
 };
 

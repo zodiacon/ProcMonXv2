@@ -31,8 +31,8 @@ TraceManager::TraceManager() {
 	EnablePrivilege(SE_SYSTEM_PROFILE_NAME);
 	_filters.reserve(8);
 
-	auto pf = std::make_shared<ProcessIdFilter>(17860, FilterAction::Include);
-	AddFilter(pf);
+	//auto pf = std::make_shared<ProcessIdFilter>(17860, FilterAction::Include);
+	//AddFilter(pf);
 }
 
 TraceManager::~TraceManager() {
@@ -55,6 +55,14 @@ bool TraceManager::SetKernelEventTypes(std::initializer_list<KernelEventTypes> t
 	return true;
 }
 
+bool TraceManager::SetKernelEventStacks(std::initializer_list<std::wstring> categories) {
+	if (IsRunning())
+		return false;
+
+	_kernelEventStacks = categories;
+	return true;
+}
+
 bool TraceManager::Start(EventCallback cb) {
 	if (_handle || _hTrace)
 		return true;
@@ -62,6 +70,7 @@ bool TraceManager::Start(EventCallback cb) {
 	auto sessionName = KERNEL_LOGGER_NAME;
 
 	_callback = cb;
+	_filteredEvents = 0;
 
 	// {6990501B-4484-4EF0-8793-84159B8D4728}
 	static const GUID dummyGuid =
@@ -97,16 +106,6 @@ bool TraceManager::Start(EventCallback cb) {
 	if (error != ERROR_SUCCESS)
 		return false;
 
-	// set up call stack info (temporary)
-	CLASSIC_EVENT_ID events[2] = { 0 };
-	events[0].EventGuid = ProcessGuid;
-	events[0].Type = 1;
-	events[1].EventGuid = ProcessGuid;
-	events[1].Type = 11;
-
-	error = ::TraceSetInformation(_handle, TraceStackTracingInfo, events, sizeof(events));
-	assert(error == ERROR_SUCCESS);
-
 	typedef struct _PERFINFO_GROUPMASK {
 		ULONG Masks[8];
 	} PERFINFO_GROUPMASK;
@@ -126,6 +125,22 @@ bool TraceManager::Start(EventCallback cb) {
 		Stop();
 		return false;
 	}
+
+	std::vector<CLASSIC_EVENT_ID> stacks;
+	stacks.reserve(32);
+	for (auto& name : _kernelEventStacks) {
+		auto cat = KernelEventCategory::GetCategory(name.c_str());
+		assert(cat);
+		for (auto& evt : cat->Events) {
+			CLASSIC_EVENT_ID id{};
+			id.EventGuid = *cat->Guid;
+			id.Type = evt.Opcode;
+			stacks.push_back(id);
+		}
+	}
+
+	error = ::TraceSetInformation(_handle, TraceStackTracingInfo, stacks.data(), (ULONG)stacks.size() * sizeof(CLASSIC_EVENT_ID));
+	assert(error == ERROR_SUCCESS);
 
 	_traceLog.Context = this;
 	_traceLog.LoggerName = (PWSTR)KERNEL_LOGGER_NAME;
@@ -257,16 +272,20 @@ void TraceManager::OnEventRecord(PEVENT_RECORD rec) {
 		if (!filter->IsEnabled())
 			continue;
 		auto action = filter->Eval(context);
-		if (action == FilterAction::Exclude)
+		if (action == FilterAction::Exclude) {
+			_filteredEvents++;
 			return;
+		}
 
 		if (action == FilterAction::Include) {
 			result = FilterAction::Include;
 			break;
 		}
 	}
-	if (result != FilterAction::Include)
+	if (result != FilterAction::Include) {
+		_filteredEvents++;
 		return;
+	}
 
 	if (rec->EventHeader.ProviderId == StackWalkGuid) {
 		if (_lastEvent) {
@@ -280,10 +299,8 @@ void TraceManager::OnEventRecord(PEVENT_RECORD rec) {
 
 	bool processEvent = ParseProcessStartStop(data.get());
 
-	if (!processEvent) {
-		std::wstring_view cat(data->GetEventName().c_str(), 6);
-		if (cat == L"TcpIp/" || cat == L"UdpIp/")
-			ParseNetworkEvent(data.get());
+	if (!processEvent && data->GetProcessId() == 0 || data->GetProcessId() == (DWORD)-1) {
+		HandleNoProcessId(data.get());
 	}
 	_lastEvent = data;
 
@@ -299,7 +316,21 @@ DWORD TraceManager::Run() {
 	return error;
 }
 
-void TraceManager::ParseNetworkEvent(EventData* data) {
+int64_t TraceManager::GetFilteredEventsCount() const {
+	return _filteredEvents;
+}
+
+void TraceManager::HandleNoProcessId(EventData* data) {
+	DWORD tid = 0;
+	if (data->GetThreadId() == 0 || data->GetThreadId() == (DWORD)-1) {
+		auto prop = data->GetProperty(L"ThreadId");
+		if(!prop)
+			prop = data->GetProperty(L"TThreadId");
+		if (prop) {
+			tid = prop->GetValue<DWORD>();
+			data->_header.ThreadId = tid;
+		}
+	}
 	auto prop = data->GetProperty(L"PID");
 	if(prop == nullptr)
 		prop = data->GetProperty(L"ProcessId");
@@ -308,15 +339,25 @@ void TraceManager::ParseNetworkEvent(EventData* data) {
 		data->_header.ProcessId = pid;
 		data->SetProcessName(GetProcessImageById(pid));
 	}
+	else if (tid) {
+		wil::unique_handle hThread(::OpenThread(THREAD_QUERY_LIMITED_INFORMATION, FALSE, tid));
+		if (hThread) {
+			auto pid = ::GetProcessIdOfThread(hThread.get());
+			if (pid) {
+				data->_header.ProcessId = pid;
+				data->SetProcessName(GetProcessImageById(pid));
+			}
+		}
+	}
 }
 
 std::wstring TraceManager::GetkernelEventName(EVENT_RECORD* rec) const {
 	auto& desc = rec->EventHeader.EventDescriptor;
-	auto key = desc.Task | (desc.Opcode << 16) | (desc.Version << 24);
+	auto key = rec->EventHeader.ProviderId.Data1 ^ desc.Opcode;
 	if (auto it = _kernelEventNames.find(key); it != _kernelEventNames.end())
 		return it->second;
 
-	BYTE buffer[1 << 10];
+	BYTE buffer[1 << 11];
 	ULONG size = sizeof(buffer);
 	auto info = reinterpret_cast<PTRACE_EVENT_INFO>(buffer);
 	if (::TdhGetEventInformation(rec, 0, nullptr, info, &size) == STATUS_SUCCESS) {

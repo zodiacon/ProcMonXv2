@@ -13,6 +13,8 @@ LRESULT CCallStackDlg::OnInitDialog(UINT, WPARAM, LPARAM, BOOL&) {
 
 	auto stack = m_pData->GetStackEventData();
 	ATLASSERT(stack);
+	if (stack == nullptr)
+		return 0;
 
 	CString num;
 	for (int i = 1; i <= 192; i++) {

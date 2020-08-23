@@ -53,6 +53,7 @@ IDR_MAINFRAME MENU
 BEGIN
     POPUP "&File"
     BEGIN
+        MENUITEM "&New Tab\tCtrl+N",            ID_FILE_NEW
         MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
         MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
         MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
@@ -82,10 +83,14 @@ BEGIN
         MENUITEM "S&top",                       ID_MONITOR_STOP
         MENUITEM SEPARATOR
         MENUITEM "&Clear",                      ID_MONITOR_CLEAR
+        MENUITEM SEPARATOR
+        MENUITEM "Configure &Events...",        ID_MONITOR_CONFIGUREEVENTS
+        MENUITEM "&Filters...",                 ID_MONITOR_FILTERS
     END
     POPUP "&Options"
     BEGIN
         MENUITEM "&Always On Top",              ID_OPTIONS_ALWAYSONTOP
+        MENUITEM "&Symbols...",                 ID_OPTIONS_SYMBOLS
     END
     POPUP "&Tab"
     BEGIN
@@ -110,7 +115,7 @@ IDR_MAINFRAME           ICON                    "res\\ProcMonX.ico"
 
 IDI_CANCEL              ICON                    "res\\cancel.ico"
 
-IDI_DRIVER              ICON                    "res\\Driver.ico"
+IDI_DRIVER              ICON                    "C:\\Dev\\ProcMonX\\ProcMonX\\res\\Driver.ico"
 
 IDI_FILTER              ICON                    "res\\filter.ico"
 
@@ -140,6 +145,34 @@ IDI_THREAD              ICON                    "res\\threads.ico"
 
 IDI_TOOLS               ICON                    "res\\tools.ico"
 
+IDI_EVENT               ICON                    "res\\event.ico"
+
+IDI_SAVE                ICON                    "res\\save.ico"
+
+IDI_SAVE_AS             ICON                    "res\\save_as.ico"
+
+IDI_EVENT2              ICON                    "res\\event2.ico"
+
+IDI_PROPERTIES          ICON                    "res\\properties.ico"
+
+IDI_STACK               ICON                    "res\\stack.ico"
+
+IDI_GENERIC             ICON                    "res\\event3.ico"
+
+IDI_GEAR                ICON                    "res\\gear.ico"
+
+IDI_FILE                ICON                    "res\\file.ico"
+
+IDI_HANDLE              ICON                    "C:\\Dev\\ProcMonX\\ProcMonX\\res\\handle.ico"
+
+IDI_OBJECT              ICON                    "C:\\Dev\\ProcMonX\\ProcMonX\\res\\object.ico"
+
+IDI_DISK                ICON                    "C:\\Dev\\ProcMonX\\ProcMonX\\res\\storage.ico"
+
+IDI_HEAP                ICON                    "res\\heap.ico"
+
+IDI_HEAP2               ICON                    "res\\heap2.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -165,6 +198,22 @@ BEGIN
     LISTBOX         IDC_LIST,6,6,192,192,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP,WS_EX_RIGHT
 END
 
+IDD_EVENTS DIALOGEX 0, 0, 255, 290
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Configure Events"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,69,269,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,135,269,50,14
+    CONTROL         "",IDC_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | WS_BORDER | WS_HSCROLL | WS_TABSTOP,6,6,186,252
+    PUSHBUTTON      "Save...",IDC_SAVE,198,56,50,14
+    PUSHBUTTON      "&Load...",IDC_LOAD,198,75,50,14
+    PUSHBUTTON      "&Reset",IDC_RESET,198,110,50,14
+    PUSHBUTTON      "Defaults",IDC_DEFAULTS,198,128,50,14
+    PUSHBUTTON      "Expand All",IDC_EXPAND,198,12,50,14
+    PUSHBUTTON      "Collapse All",IDC_COLLAPSE,198,32,50,14
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -188,6 +237,14 @@ BEGIN
         RIGHTMARGIN, 200
         TOPMARGIN, 7
         BOTTOMMARGIN, 217
+    END
+
+    IDD_EVENTS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 248
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 283
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -270,6 +327,11 @@ BEGIN
     0
 END
 
+IDD_EVENTS AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -278,7 +340,7 @@ END
 
 STRINGTABLE
 BEGIN
-    IDR_MAINFRAME           "Process Monitor X"
+    IDR_MAINFRAME           "Process Monitor X v2.0 Alpha"
     IDS_TITLE               "Process Monitor X"
 END
 

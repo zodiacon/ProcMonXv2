@@ -16,6 +16,9 @@
     <Filter Include="Resource Files\Icons">
       <UniqueIdentifier>{e141c0fe-a444-4856-9d99-18deb69f19fd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Dialogs">
+      <UniqueIdentifier>{8e8e7e99-9f9b-4b60-8ca1-f418a91a67f6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ProcMonX.cpp">
@@ -25,9 +28,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="View.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AboutDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp">
@@ -46,6 +46,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CallStackDlg.cpp">
+      <Filter>Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="AboutDlg.cpp">
+      <Filter>Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="EventsDlg.cpp">
+      <Filter>Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="EventConfiguration.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IniFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -54,9 +66,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="View.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AboutDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
@@ -83,7 +92,19 @@
     <ClInclude Include="TraceData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="EventsDlg.h">
+      <Filter>Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="AboutDlg.h">
+      <Filter>Dialogs</Filter>
+    </ClInclude>
     <ClInclude Include="CallStackDlg.h">
+      <Filter>Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="EventConfiguration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IniFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -142,6 +163,48 @@
       <Filter>Resource Files\Icons</Filter>
     </Image>
     <Image Include="res\tools.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\event.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\save.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\save_as.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\event2.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\properties.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\stack.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\event3.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\file.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\gear.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\handle.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\heap.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\heap2.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\object.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\storage.ico">
       <Filter>Resource Files\Icons</Filter>
     </Image>
   </ItemGroup>

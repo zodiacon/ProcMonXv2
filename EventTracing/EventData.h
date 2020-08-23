@@ -57,6 +57,7 @@ public:
 	const EventProperty* GetProperty(PCWSTR name) const;
 	const EventData* GetStackEventData() const;
 	std::wstring FormatProperty(const EventProperty& prop) const;
+	uint64_t GetEventKey() const;
 
 protected:
 	void SetStackEventData(std::shared_ptr<EventData> data);

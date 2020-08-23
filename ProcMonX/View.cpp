@@ -8,6 +8,7 @@
 #include "TraceManager.h"
 #include "SortHelper.h"
 #include "CallStackDlg.h"
+#include "EventsDlg.h"
 
 CView::CView(IMainFrame* frame) : CViewBase(frame) {
 }
@@ -38,7 +39,23 @@ void CView::AddEvent(std::shared_ptr<EventData> data) {
 	}
 }
 
-void CView::StartMonitoring(bool start) {
+void CView::StartMonitoring(TraceManager& tm, bool start) {
+	if (start) {
+		std::vector<KernelEventTypes> types;
+		std::vector<std::wstring> categories;
+		for (auto& cat : m_EventsConfig.GetCategories()) {
+			auto c = KernelEventCategory::GetCategory(cat.Name.c_str());
+			ATLASSERT(c);
+			types.push_back(c->EnableFlag);
+			categories.push_back(c->Name);
+		}
+		std::initializer_list<KernelEventTypes> events(types.data(), types.data() + types.size());
+		tm.SetKernelEventTypes(events);
+		tm.SetKernelEventStacks(std::initializer_list<std::wstring>(categories.data(), categories.data() + categories.size()));
+	}
+	else {
+		m_IsDraining = true;
+	}
 	m_IsMonitoring = start;
 }
 
@@ -55,7 +72,12 @@ CString CView::GetColumnText(HWND, int row, int col) const {
 				text += L" (Stack)";
 			return CTime(*(FILETIME*)&ts).Format(L"%x %X") + text;
 		}
-
+		case 1:
+		{
+			text.Format(L"%s (%d)", item->GetEventName().c_str(),
+				item->GetHeader().EventDescriptor.Opcode);
+			break;
+		}
 		case 2:
 		{
 			auto pid = item->GetProcessId();
@@ -71,17 +93,29 @@ CString CView::GetColumnText(HWND, int row, int col) const {
 			break;
 		}
 		case 5: text.Format(L"%u", item->GetCPU()); break;
+		case 6: 
+			::StringFromGUID2(item->GetHeader().ProviderId, text.GetBufferSetLength(64), 64);
+			break;
 	}
 
 	return text;
 }
 
+int CView::GetRowImage(int row) const {
+	auto& evt = m_Events[row];
+	auto pos = evt->GetEventName().find(L'/');
+	if (pos != std::wstring::npos) {
+		if (auto it = s_IconsMap.find(evt->GetEventName().substr(0, pos)); it != s_IconsMap.end())
+			return it->second;
+	}
+	return 0;
+}
+
 PCWSTR CView::GetColumnTextPointer(HWND, int row, int col) const {
 	auto item = m_Events[row].get();
 	switch (col) {
-		case 1: return item->GetEventName().c_str();
 		case 3: return item->GetProcessName().c_str();
-		case 6: return item->GetDetails().c_str();
+		case 7: return item->GetDetails().c_str();
 	}
 	return nullptr;
 }
@@ -101,7 +135,7 @@ std::wstring CView::ProcessSpecialEvent(EventData* data) {
 }
 
 bool CView::IsSortable(int col) const {
-	return !m_IsMonitoring && col != 6;
+	return !m_IsMonitoring && col != 7;
 }
 
 void CView::DoSort(const SortInfo* si) {
@@ -131,8 +165,38 @@ void CView::OnFinalMessage(HWND /*hWnd*/) {
 LRESULT CView::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/) {
 	m_hWndClient = m_List.Create(*this, rcDefault, nullptr,
 		WS_VISIBLE | WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS |
-		LVS_REPORT | LVS_SHOWSELALWAYS | LVS_OWNERDATA | LVS_SINGLESEL);
+		LVS_REPORT | LVS_SHOWSELALWAYS | LVS_OWNERDATA | LVS_SINGLESEL | LVS_SHAREIMAGELISTS);
 	m_List.SetExtendedListViewStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP | LVS_EX_LABELTIP | LVS_EX_DOUBLEBUFFER);
+
+	if (s_Images == nullptr) {
+		s_Images.Create(16, 16, ILC_COLOR32, 8, 8);
+		struct {
+			int icon;
+			PCWSTR type;
+		} icons[] = {
+			{ IDI_GENERIC, nullptr },
+			{ IDI_GEAR, L"Process" },
+			{ IDI_THREAD, L"Thread" },
+			{ IDI_DLL, L"Image" },
+			{ IDI_NETWORK, L"TcpIp" },
+			{ IDI_NETWORK, L"UdpIp" },
+			{ IDI_REGISTRY, L"Registry" },
+			{ IDI_FILE, L"FileIo" },
+			{ IDI_HANDLE, L"Object" },
+			{ IDI_DISK, L"DiskIo" },
+			{ IDI_MEMORY, L"Memory" },
+			{ IDI_HEAP, L"Pool" },
+		};
+		int index = 0;
+		for (auto entry : icons) {
+			s_Images.AddIcon(AtlLoadIconImage(entry.icon, 0, 16, 16));
+			if (entry.type)
+				s_IconsMap.insert({ entry.type, index });
+			index++;
+		}
+	}
+
+	m_List.SetImageList(s_Images, LVSIL_SMALL);
 
 	auto cm = GetColumnManager(m_List);
 	cm->AddColumn(L"Time", LVCFMT_LEFT, 150);
@@ -141,6 +205,7 @@ LRESULT CView::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOO
 	cm->AddColumn(L"Process Name", LVCFMT_LEFT, 150);
 	cm->AddColumn(L"TID", LVCFMT_RIGHT, 100, ColumnFlags::Numeric | ColumnFlags::Visible);
 	cm->AddColumn(L"CPU", LVCFMT_CENTER, 45, ColumnFlags::Numeric);
+	cm->AddColumn(L"Provider", LVCFMT_CENTER, 180, ColumnFlags::Numeric);
 	cm->AddColumn(L"Details", LVCFMT_LEFT, 700);
 
 	cm->UpdateColumns();
@@ -152,12 +217,22 @@ LRESULT CView::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOO
 	return 0;
 }
 
+LRESULT CView::OnForwardMsg(UINT, WPARAM, LPARAM lp, BOOL& handled) {
+	auto msg = (MSG*)lp;
+	LRESULT result;
+	handled = ProcessWindowMessage(msg->hwnd, msg->message, msg->wParam, msg->lParam, result, 1);
+	return result;
+}
+
 LRESULT CView::OnTimer(UINT, WPARAM id, LPARAM, BOOL&) {
-	if (id == 1 && !m_TempEvents.empty()) {
-		{
+	if (id == 1) {
+		if(!m_TempEvents.empty()) {
 			std::lock_guard lock(m_EventsLock);
 			m_Events.insert(m_Events.end(), m_TempEvents.begin(), m_TempEvents.end());
 			m_TempEvents.clear();
+		}
+		else if (!m_IsMonitoring) {
+			m_IsDraining = false;
 		}
 		UpdateList(m_List, static_cast<int>(m_Events.size()));
 	}
@@ -180,5 +255,20 @@ LRESULT CView::OnCallStack(WORD, WORD, HWND, BOOL&) {
 	CCallStackDlg dlg(m_Events[selected].get());
 	dlg.DoModal();
 
+	return 0;
+}
+
+LRESULT CView::OnClose(UINT, WPARAM, LPARAM, BOOL& handled) {
+	if (m_IsMonitoring) {
+		AtlMessageBox(nullptr, L"Cannot close tab while monitoring is active", IDS_TITLE, MB_ICONWARNING);
+		handled = TRUE;
+	}
+	handled = FALSE;
+	return 0;
+}
+
+LRESULT CView::OnConfigureEvents(WORD, WORD, HWND, BOOL&) {
+	CEventsDlg dlg(m_EventsConfig);
+	dlg.DoModal();
 	return 0;
 }
