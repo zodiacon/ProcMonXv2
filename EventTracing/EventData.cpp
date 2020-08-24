@@ -75,7 +75,7 @@ const std::vector<EventProperty>& EventData::GetProperties() const {
 	auto userDataLength = _record->UserDataLength;
 	BYTE* data = (BYTE*)_record->UserData;
 
-	for (ULONG i = 0; i < _info->TopLevelPropertyCount; i++) {
+	for (ULONG i = 0; i < _info->TopLevelPropertyCount && userDataLength > 0; i++) {
 		auto& prop = _info->EventPropertyInfoArray[i];
 		EventProperty property(prop);
 		property.Name.assign((WCHAR*)((BYTE*)_info + prop.NameOffset));
@@ -84,10 +84,7 @@ const std::vector<EventProperty>& EventData::GetProperties() const {
 			PROPERTY_DATA_DESCRIPTOR desc;
 			desc.PropertyName = (ULONGLONG)property.Name.c_str();
 			desc.ArrayIndex = ULONG_MAX;
-			if (ERROR_SUCCESS == ::TdhGetPropertySize(_record, 0, nullptr, 1, &desc, &len)) {
-				//				property.Allocate(len);
-				//				::TdhGetProperty(_record, 0, nullptr, 1, &desc, len, property.Data);				
-			}
+			::TdhGetPropertySize(_record, 0, nullptr, 1, &desc, &len);
 		}
 		if (len) {
 			auto d = property.Allocate(len);

@@ -19,6 +19,9 @@
     <Filter Include="Dialogs">
       <UniqueIdentifier>{8e8e7e99-9f9b-4b60-8ca1-f418a91a67f6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Helpers">
+      <UniqueIdentifier>{d9d60b2a-7d71-4292-b243-34f5a98ab762}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ProcMonX.cpp">
@@ -31,9 +34,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ClipboardHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ColumnManager.cpp">
@@ -60,6 +60,18 @@
     <ClCompile Include="IniFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SymbolsHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SymbolManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ClipboardHelper.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="DialogHelper.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainFrm.h">
@@ -72,9 +84,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="pch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ClipboardHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ColumnManager.h">
@@ -106,6 +115,18 @@
     </ClInclude>
     <ClInclude Include="IniFile.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SymbolsHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SymbolManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DialogHelper.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ClipboardHelper.h">
+      <Filter>Helpers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -205,6 +226,15 @@
       <Filter>Resource Files\Icons</Filter>
     </Image>
     <Image Include="res\storage.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\letter-k.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\letter-u.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\clip_copy.ico">
       <Filter>Resource Files\Icons</Filter>
     </Image>
   </ItemGroup>

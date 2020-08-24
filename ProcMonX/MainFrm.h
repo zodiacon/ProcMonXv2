@@ -51,6 +51,7 @@ public:
 private:
 	void InitCommandBar();
 	void InitToolBar(CToolBarCtrl&, int size = 24);
+	static LONG WINAPI UnhandledExceptionFilter(EXCEPTION_POINTERS* ExceptionInfo);
 
 // Handler prototypes (uncomment arguments if needed):
 //	LRESULT MessageHandler(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)

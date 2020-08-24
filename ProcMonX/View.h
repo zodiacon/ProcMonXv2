@@ -10,6 +10,7 @@
 #include "EventData.h"
 #include <shared_mutex>
 #include "EventConfiguration.h"
+#include "SymbolsHandler.h"
 
 class CView : 
 	public CViewBase<CView>,
@@ -25,6 +26,8 @@ public:
 	CString GetColumnText(HWND, int row, int col) const;
 	int GetRowImage(int row) const;
 	PCWSTR GetColumnTextPointer(HWND, int row, int col) const;
+	bool OnRightClickList(int index, POINT& pt);
+
 	std::wstring ProcessSpecialEvent(EventData* data);
 
 	bool IsSortable(int col) const;
@@ -42,6 +45,7 @@ public:
 		MESSAGE_HANDLER(WM_CLOSE, OnClose)
 		COMMAND_ID_HANDLER(ID_MONITOR_CONFIGUREEVENTS, OnConfigureEvents)
 		COMMAND_ID_HANDLER(ID_MONITOR_CLEAR, OnClear)
+		MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
 		CHAIN_MSG_MAP(CVirtualListView<CView>)
 		CHAIN_MSG_MAP(CCustomDraw<CView>)
 		CHAIN_MSG_MAP(CViewBase<CView>)
@@ -53,6 +57,7 @@ public:
 	//	LRESULT NotifyHandler(int /*idCtrl*/, LPNMHDR /*pnmh*/, BOOL& /*bHandled*/)
 
 	LRESULT OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
+	LRESULT OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnForwardMsg(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnTimer(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnClear(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);

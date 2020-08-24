@@ -103,6 +103,16 @@ BEGIN
     END
 END
 
+IDR_CONTEXT MENU
+BEGIN
+    POPUP "event"
+    BEGIN
+        MENUITEM "&Properties...",              ID_EVENT_PROPERTIES
+        MENUITEM SEPARATOR
+        MENUITEM "&Call Stack...",              ID_EVENT_CALLSTACK
+    END
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -173,6 +183,12 @@ IDI_HEAP                ICON                    "res\\heap.ico"
 
 IDI_HEAP2               ICON                    "res\\heap2.ico"
 
+IDI_K                   ICON                    "res\\letter-k.ico"
+
+IDI_U                   ICON                    "res\\letter-u.ico"
+
+IDI_COPY                ICON                    "res\\clip_copy.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -189,13 +205,18 @@ BEGIN
     ICON            IDR_MAINFRAME,IDC_STATIC,6,6,20,20
 END
 
-IDD_STACK DIALOGEX 0, 0, 207, 224
+IDD_STACK DIALOGEX 0, 0, 339, 278
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 CAPTION "Stack"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    PUSHBUTTON      "Close",IDCANCEL,78,203,50,14
-    LISTBOX         IDC_LIST,6,6,192,192,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP,WS_EX_RIGHT
+    CONTROL         "",IDC_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,6,42,324,228
+    LTEXT           "Process ID:",IDC_STATIC,8,6,38,8
+    LTEXT           "Thread ID:",IDC_STATIC,119,6,36,8
+    LTEXT           "Static",IDC_PROCESS,48,5,42,12,0,WS_EX_CLIENTEDGE | WS_EX_RIGHT
+    LTEXT           "Static",IDC_THREAD,157,5,42,12,0,WS_EX_CLIENTEDGE | WS_EX_RIGHT
+    PUSHBUTTON      "Copy",IDC_COPY,215,3,50,14
+    LTEXT           "Static",IDC_MESSAGE,6,24,174,8
 END
 
 IDD_EVENTS DIALOGEX 0, 0, 255, 290
@@ -234,9 +255,9 @@ BEGIN
     IDD_STACK, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 200
+        RIGHTMARGIN, 332
         TOPMARGIN, 7
-        BOTTOMMARGIN, 217
+        BOTTOMMARGIN, 271
     END
 
     IDD_EVENTS, DIALOG

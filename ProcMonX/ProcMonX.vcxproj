@@ -93,6 +93,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
     </Link>
     <ResourceCompile>
       <Culture>0x0409</Culture>
@@ -110,6 +111,10 @@
       <TypeLibraryName>$(IntDir)/ProcMonX.tlb</TypeLibraryName>
       <DllDataFileName />
     </Midl>
+    <Manifest>
+      <AdditionalManifestFiles>
+      </AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -127,6 +132,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
     </Link>
     <ResourceCompile>
       <Culture>0x0409</Culture>
@@ -143,6 +149,10 @@
       <TypeLibraryName>$(IntDir)/ProcMonX.tlb</TypeLibraryName>
       <DllDataFileName />
     </Midl>
+    <Manifest>
+      <AdditionalManifestFiles>
+      </AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -158,6 +168,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
+      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
     </Link>
     <ResourceCompile>
       <Culture>0x0409</Culture>
@@ -175,6 +186,10 @@
       <TypeLibraryName>$(IntDir)/ProcMonX.tlb</TypeLibraryName>
       <DllDataFileName />
     </Midl>
+    <Manifest>
+      <AdditionalManifestFiles>
+      </AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -190,6 +205,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
+      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
     </Link>
     <ResourceCompile>
       <Culture>0x0409</Culture>
@@ -206,10 +222,15 @@
       <TypeLibraryName>$(IntDir)/ProcMonX.tlb</TypeLibraryName>
       <DllDataFileName />
     </Midl>
+    <Manifest>
+      <AdditionalManifestFiles>
+      </AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AboutDlg.cpp" />
     <ClCompile Include="CallStackDlg.cpp" />
+    <ClCompile Include="DialogHelper.cpp" />
     <ClCompile Include="EventConfiguration.cpp" />
     <ClCompile Include="EventsDlg.cpp" />
     <ClCompile Include="ClipboardHelper.cpp" />
@@ -224,12 +245,15 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="SortHelper.cpp" />
+    <ClCompile Include="SymbolManager.cpp" />
+    <ClCompile Include="SymbolsHandler.cpp" />
     <ClCompile Include="TraceData.cpp" />
     <ClCompile Include="View.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AboutDlg.h" />
     <ClInclude Include="CallStackDlg.h" />
+    <ClInclude Include="DialogHelper.h" />
     <ClInclude Include="EventConfiguration.h" />
     <ClInclude Include="EventsDlg.h" />
     <ClInclude Include="ClipboardHelper.h" />
@@ -239,6 +263,8 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="SortHelper.h" />
+    <ClInclude Include="SymbolManager.h" />
+    <ClInclude Include="SymbolsHandler.h" />
     <ClInclude Include="TraceData.h" />
     <ClInclude Include="View.h" />
     <ClInclude Include="ViewBase.h" />
@@ -249,6 +275,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\cancel.ico" />
+    <Image Include="res\clip_copy.ico" />
     <Image Include="res\Driver.ico" />
     <Image Include="res\event.ico" />
     <Image Include="res\event2.ico" />
@@ -262,6 +289,8 @@
     <Image Include="res\handle.ico" />
     <Image Include="res\heap.ico" />
     <Image Include="res\heap2.ico" />
+    <Image Include="res\letter-k.ico" />
+    <Image Include="res\letter-u.ico" />
     <Image Include="res\memory.ico" />
     <Image Include="res\Modules.ico" />
     <Image Include="res\network.ico" />

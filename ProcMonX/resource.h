@@ -36,8 +36,12 @@
 #define IDI_OBJECT                      235
 #define IDI_DISK                        238
 #define IDI_HEAP                        240
-#define IDI_ICON2                       241
 #define IDI_HEAP2                       241
+#define IDI_K                           242
+#define IDI_U                           243
+#define IDI_COPY                        244
+#define IDR_MENU1                       245
+#define IDR_CONTEXT                     245
 #define IDC_LIST                        1000
 #define IDC_TREE                        1002
 #define IDC_SAVE                        1003
@@ -46,6 +50,10 @@
 #define IDC_DEFAULTS                    1006
 #define IDC_EXPAND                      1007
 #define IDC_COLLAPSE                    1008
+#define IDC_MESSAGE                     1009
+#define IDC_PROCESS                     1011
+#define IDC_THREAD                      1012
+#define IDC_COPY                        1013
 #define ID_WINDOW_CLOSE                 32772
 #define ID_WINDOW_CLOSE_ALL             32773
 #define ID_OPTIONS_ALWAYSONTOP          32775
@@ -64,9 +72,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        242
+#define _APS_NEXT_RESOURCE_VALUE        246
 #define _APS_NEXT_COMMAND_VALUE         32787
-#define _APS_NEXT_CONTROL_VALUE         1009
+#define _APS_NEXT_CONTROL_VALUE         1015
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

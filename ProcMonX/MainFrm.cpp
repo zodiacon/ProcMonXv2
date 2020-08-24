@@ -31,6 +31,8 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 	::SetPriorityClass(::GetCurrentProcess(), HIGH_PRIORITY_CLASS);
 	::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
 
+	::SetUnhandledExceptionFilter(UnhandledExceptionFilter);
+
 	HWND hWndCmdBar = m_CmdBar.Create(m_hWnd, rcDefault, nullptr, ATL_SIMPLE_CMDBAR_PANE_STYLE);
 	CMenuHandle hMenu = GetMenu();
 	UIAddMenu(hMenu);
@@ -83,6 +85,8 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 }
 
 LRESULT CMainFrame::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled) {
+	m_tm.Stop();
+
 	// unregister message filtering and idle updates
 	CMessageLoop* pLoop = _Module.GetMessageLoop();
 	ATLASSERT(pLoop != NULL);
@@ -260,5 +264,15 @@ void CMainFrame::InitToolBar(CToolBarCtrl& tb, int size) {
 			tb.AddButton(b.id, b.style, TBSTATE_ENABLED, image, nullptr, 0);
 		}
 	}
+}
+
+LONG __stdcall CMainFrame::UnhandledExceptionFilter(EXCEPTION_POINTERS* ei) {
+	if (EXCEPTION_ACCESS_VIOLATION == ei->ExceptionRecord->ExceptionCode) {
+		// probably the network related thread failing during symbol loading when terminated abruptly
+		::ExitThread(0);
+		return EXCEPTION_CONTINUE_EXECUTION;
+	}
+	
+	return EXCEPTION_EXECUTE_HANDLER;
 }
 

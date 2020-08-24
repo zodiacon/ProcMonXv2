@@ -16,6 +16,7 @@
 #include <atlstr.h>
 #include <atltime.h>
 #include <atlsplit.h>
+#include <Psapi.h>
 
 extern CAppModule _Module;
 

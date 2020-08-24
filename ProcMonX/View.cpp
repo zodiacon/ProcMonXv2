@@ -69,7 +69,7 @@ CString CView::GetColumnText(HWND, int row, int col) const {
 			auto ts = item->GetTimeStamp();
 			text.Format(L".%06d", (ts / 10) % 1000000);
 			if (item->GetStackEventData())
-				text += L" (Stack)";
+				text += L" *";
 			return CTime(*(FILETIME*)&ts).Format(L"%x %X") + text;
 		}
 		case 1:
@@ -118,6 +118,16 @@ PCWSTR CView::GetColumnTextPointer(HWND, int row, int col) const {
 		case 7: return item->GetDetails().c_str();
 	}
 	return nullptr;
+}
+
+bool CView::OnRightClickList(int index, POINT& pt) {
+	if (index >= 0) {
+		CMenu menu;
+		menu.LoadMenuW(IDR_CONTEXT);
+		GetFrame()->TrackPopupMenu(menu.GetSubMenu(0), *this, &pt);
+		return true;
+	}
+	return false;
 }
 
 std::wstring CView::ProcessSpecialEvent(EventData* data) {
@@ -199,7 +209,7 @@ LRESULT CView::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOO
 	m_List.SetImageList(s_Images, LVSIL_SMALL);
 
 	auto cm = GetColumnManager(m_List);
-	cm->AddColumn(L"Time", LVCFMT_LEFT, 150);
+	cm->AddColumn(L"Time", LVCFMT_LEFT, 180);
 	cm->AddColumn(L"Event", LVCFMT_LEFT, 160);
 	cm->AddColumn(L"PID", LVCFMT_RIGHT, 100, ColumnFlags::Numeric | ColumnFlags::Visible);
 	cm->AddColumn(L"Process Name", LVCFMT_LEFT, 150);
@@ -214,6 +224,12 @@ LRESULT CView::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOO
 	m_Events.reserve(4096);
 	SetTimer(1, 1000, nullptr);
 
+	return 0;
+}
+
+LRESULT CView::OnDestroy(UINT, WPARAM, LPARAM, BOOL& handled) {
+	KillTimer(1);
+	handled = FALSE;
 	return 0;
 }
 
@@ -252,7 +268,13 @@ LRESULT CView::OnCallStack(WORD, WORD, HWND, BOOL&) {
 	if (selected < 0)
 		return 0;
 
-	CCallStackDlg dlg(m_Events[selected].get());
+	auto data = m_Events[selected].get();
+	if (data->GetStackEventData() == nullptr) {
+		AtlMessageBox(*this, L"Call stack not available for this event", IDS_TITLE, MB_ICONEXCLAMATION);
+		return 0;
+	}
+
+	CCallStackDlg dlg(data);
 	dlg.DoModal();
 
 	return 0;

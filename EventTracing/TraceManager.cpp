@@ -28,11 +28,9 @@ static bool EnablePrivilege(PCWSTR privilege) {
 }
 
 TraceManager::TraceManager() {
+	EnablePrivilege(SE_DEBUG_NAME);
 	EnablePrivilege(SE_SYSTEM_PROFILE_NAME);
 	_filters.reserve(8);
-
-	//auto pf = std::make_shared<ProcessIdFilter>(17860, FilterAction::Include);
-	//AddFilter(pf);
 }
 
 TraceManager::~TraceManager() {
