@@ -34,8 +34,8 @@ enum class KernelEventTypes : uint64_t {
 
 	Dispatcher =		EVENT_TRACE_FLAG_DISPATCHER,
 	VirtualAlloc =		EVENT_TRACE_FLAG_VIRTUAL_ALLOC,
-
 	VAMap =				EVENT_TRACE_FLAG_VAMAP,
+	VirtualMemory =		VirtualAlloc | VAMap,
 	NoSysConfig =		EVENT_TRACE_FLAG_NO_SYSCONFIG,
 
 	Job =				EVENT_TRACE_FLAG_JOB,
@@ -240,6 +240,39 @@ DEFINE_GUID( /* 3AC66736-CC59-4cff-8115-8DF50E39816B */
 	0xcc59,
 	0x4cff,
 	0x81, 0x15, 0x8d, 0xf5, 0xe, 0x39, 0x81, 0x6b
+);
+
+DEFINE_GUID( /* 13976D09-A327-438c-950B-7F03192815C7  */
+	DbgPrintGuid,
+	0x13976d09,
+	0xa327,
+	0x438c,
+	0x95, 0xb, 0x7f, 0x3, 0x19, 0x28, 0x15, 0xc7
+);
+
+DEFINE_GUID( /* D56CA431-61BF-4904-A621-00E0381E4DDE */
+	DriverVerifierGuid,
+	0xd56ca431,
+	0x61bf,
+	0x4904,
+	0xa6, 0x21, 0x0, 0xe0, 0x38, 0x1e, 0x4d, 0xde
+);
+
+
+DEFINE_GUID( /* E21D2142-DF90-4d93-BBD9-30E63D5A4AD6 */
+	NtdllTraceGuid,
+	0xe21d2142,
+	0xdf90,
+	0x4d93,
+	0xbb, 0xd9, 0x30, 0xe6, 0x3d, 0x5a, 0x4a, 0xd6
+);
+
+DEFINE_GUID( /* d3de60b2-a663-45d5-9826-a0a5949d2cb0 */
+	LoadMUIDllGuid,
+	0xd3de60b2,
+	0xa663,
+	0x45d5,
+	0x98, 0x26, 0xa0, 0xa5, 0x94, 0x9d, 0x2c, 0xb0
 );
 
 struct KernelEvent {

@@ -232,6 +232,7 @@
     <ClCompile Include="CallStackDlg.cpp" />
     <ClCompile Include="DialogHelper.cpp" />
     <ClCompile Include="EventConfiguration.cpp" />
+    <ClCompile Include="EventPropertiesDlg.cpp" />
     <ClCompile Include="EventsDlg.cpp" />
     <ClCompile Include="ClipboardHelper.cpp" />
     <ClCompile Include="ColumnManager.cpp" />
@@ -255,6 +256,7 @@
     <ClInclude Include="CallStackDlg.h" />
     <ClInclude Include="DialogHelper.h" />
     <ClInclude Include="EventConfiguration.h" />
+    <ClInclude Include="EventPropertiesDlg.h" />
     <ClInclude Include="EventsDlg.h" />
     <ClInclude Include="ClipboardHelper.h" />
     <ClInclude Include="ColumnManager.h" />

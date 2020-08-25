@@ -40,8 +40,8 @@
 #define IDI_K                           242
 #define IDI_U                           243
 #define IDI_COPY                        244
-#define IDR_MENU1                       245
 #define IDR_CONTEXT                     245
+#define IDD_EVENT_PROPS                 246
 #define IDC_LIST                        1000
 #define IDC_TREE                        1002
 #define IDC_SAVE                        1003
@@ -67,14 +67,15 @@
 #define ID_MONITOR_FILTERS              32784
 #define ID_OPTIONS_SYMBOLS              32785
 #define ID_FILE_NEWTAB                  32786
+#define ID_VIEW_AUTOSCROLL              32787
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        246
-#define _APS_NEXT_COMMAND_VALUE         32787
-#define _APS_NEXT_CONTROL_VALUE         1015
+#define _APS_NEXT_RESOURCE_VALUE        248
+#define _APS_NEXT_COMMAND_VALUE         32788
+#define _APS_NEXT_CONTROL_VALUE         1016
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

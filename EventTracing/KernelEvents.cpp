@@ -155,6 +155,25 @@ const std::vector<KernelEventCategory> KernelEvents{
 		}
 	},
 
+	{ L"Virtual Memory", KernelEventTypes::VirtualMemory, &PageFaultGuid,
+		{
+			{ L"Virtual Alloc", 98 },
+			{ L"Virtual Free", 99 },
+		}
+	},
+
+	{ L"Page Fault", KernelEventTypes::PageFaults, &PageFaultGuid,
+		{
+			{ L"Hard Fault", 0x20 },
+			{ L"Transition Fault", 10 },
+			{ L"Demand Zero Fault", 11 },
+			{ L"Copy on Write", 12 },
+			{ L"Guard Page Fault", 13 },
+			{ L"Hard Page Fault", 14 },
+			{ L"Image Load Backed", 105 },
+		}
+	},
+
 };
 
 const std::vector<KernelEventCategory>& KernelEventCategory::GetAllCategories() {

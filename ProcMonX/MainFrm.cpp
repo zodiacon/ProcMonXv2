@@ -84,9 +84,14 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 	return 0;
 }
 
-LRESULT CMainFrame::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled) {
-	m_tm.Stop();
+LRESULT CMainFrame::OnClose(UINT, WPARAM, LPARAM, BOOL& handled) {
+	if (m_tm.IsRunning())
+		m_tm.Stop();
+	
+	return DefWindowProc();
+}
 
+LRESULT CMainFrame::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled) {
 	// unregister message filtering and idle updates
 	CMessageLoop* pLoop = _Module.GetMessageLoop();
 	ATLASSERT(pLoop != NULL);
@@ -127,8 +132,13 @@ LRESULT CMainFrame::OnAppAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCt
 
 LRESULT CMainFrame::OnWindowClose(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
 	int nActivePage = m_view.GetActivePage();
-	if (nActivePage != -1)
+	if (nActivePage != -1) {
+		if (m_pMonitorView->m_hWnd == m_view.GetPageHWND(nActivePage)) {
+			AtlMessageBox(*this, L"Monitoring in progress. Stop monitoring before closing this tab", IDS_TITLE, MB_ICONWARNING);
+			return 0;
+		}
 		m_view.RemovePage(nActivePage);
+	}
 	else
 		::MessageBeep((UINT)-1);
 
@@ -229,6 +239,7 @@ void CMainFrame::InitCommandBar() {
 		{ ID_EVENT_PROPERTIES, IDI_PROPERTIES },
 		{ ID_FILE_SAVE, IDI_SAVE },
 		{ ID_FILE_SAVE_AS, IDI_SAVE_AS },
+		{ ID_EDIT_COPY, IDI_COPY },
 	};
 	for (auto& cmd : cmds)
 		m_CmdBar.AddIcon(AtlLoadIcon(cmd.icon), cmd.id);

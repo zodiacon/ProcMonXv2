@@ -22,29 +22,30 @@ PCSTR EventProperty::GetAnsiString() const {
 
 // EventData
 
-EventData::EventData(PEVENT_RECORD rec, std::wstring processName, std::wstring eventName) : _record(rec),
-	_processName(std::move(processName)), _eventName(std::move(eventName)) {
-	_header = rec->EventHeader;
-	_cpu = rec->BufferContext.ProcessorNumber;
+EventData::EventData(PEVENT_RECORD rec, std::wstring processName, const std::wstring& eventName, uint32_t index) : _record(rec),
+	_processName(std::move(processName)), _eventName(std::move(eventName)), _index(index) {
+	auto& header = rec->EventHeader;
+	_headerFlags = header.Flags;
+	_processId = header.ProcessId;
+	_threadId = header.ThreadId;
+	_providerId = header.ProviderId;
+	_timeStamp = header.TimeStamp.QuadPart;
+	_eventDescriptor = header.EventDescriptor;
 
 	// parse event specific data
 
 	ULONG size = 0;
-	auto error = ::TdhGetEventInformation(rec, 0, nullptr, _info, &size);
+	auto error = ::TdhGetEventInformation(rec, 0, nullptr, nullptr, &size);
 	if (error == ERROR_INSUFFICIENT_BUFFER) {
 		_buffer = std::make_unique<BYTE[]>(size);
-		_info = reinterpret_cast<PTRACE_EVENT_INFO>(_buffer.get());
-		error = ::TdhGetEventInformation(rec, 0, nullptr, _info, &size);
+		auto info = reinterpret_cast<PTRACE_EVENT_INFO>(_buffer.get());
+		error = ::TdhGetEventInformation(rec, 0, nullptr, info, &size);
 	}
 	::SetLastError(error);
 }
 
 DWORD EventData::GetProcessId() const {
-	return _header.ProcessId;
-}
-
-const EVENT_HEADER& EventData::GetHeader() const {
-	return _header;
+	return _processId;
 }
 
 const std::wstring& EventData::GetProcessName() const {
@@ -56,29 +57,34 @@ const std::wstring& EventData::GetEventName() const {
 }
 
 DWORD EventData::GetThreadId() const {
-	return _header.ThreadId;
+	return _threadId;
 }
 
-DWORD EventData::GetCPU() const {
-	return _cpu;
+ULONGLONG EventData::GetTimeStamp() const {
+	return _timeStamp;
 }
 
-LONGLONG EventData::GetTimeStamp() const {
-	return _header.TimeStamp.QuadPart;
+const GUID& EventData::GetProviderId() const {
+	return _providerId;
+}
+
+const EVENT_DESCRIPTOR& EventData::GetEventDescriptor() const {
+	return _eventDescriptor;
 }
 
 const std::vector<EventProperty>& EventData::GetProperties() const {
-	if (!_properties.empty() || _info == nullptr)
+	if (!_properties.empty() || _buffer == nullptr)
 		return _properties;
 
-	_properties.reserve(_info->TopLevelPropertyCount);
+	auto info = reinterpret_cast<PTRACE_EVENT_INFO>(_buffer.get());
+	_properties.reserve(info->TopLevelPropertyCount);
 	auto userDataLength = _record->UserDataLength;
-	BYTE* data = (BYTE*)_record->UserData;
+	auto data = (BYTE*)_record->UserData;
 
-	for (ULONG i = 0; i < _info->TopLevelPropertyCount && userDataLength > 0; i++) {
-		auto& prop = _info->EventPropertyInfoArray[i];
+	for (ULONG i = 0; i < info->TopLevelPropertyCount && userDataLength > 0; i++) {
+		auto& prop = info->EventPropertyInfoArray[i];
 		EventProperty property(prop);
-		property.Name.assign((WCHAR*)((BYTE*)_info + prop.NameOffset));
+		property.Name.assign((WCHAR*)((BYTE*)info + prop.NameOffset));
 		ULONG len = prop.length;
 		if (len == 0) {
 			PROPERTY_DATA_DESCRIPTOR desc;
@@ -98,7 +104,6 @@ const std::vector<EventProperty>& EventData::GetProperties() const {
 		}
 		_properties.push_back(std::move(property));
 	}
-
 	return _properties;
 }
 
@@ -113,12 +118,8 @@ const EventData* EventData::GetStackEventData() const {
 	return _stackData.get();
 }
 
-void EventData::SetDetails(std::wstring details) {
-	_details = std::move(details);
-}
-
-const std::wstring& EventData::GetDetails() const {
-	return _details;
+uint32_t EventData::GetIndex() const {
+	return _index;
 }
 
 std::wstring EventData::FormatProperty(const EventProperty& property) const {
@@ -126,8 +127,9 @@ std::wstring EventData::FormatProperty(const EventProperty& property) const {
 	EVENT_MAP_INFO* eventMap = nullptr;
 	auto& prop = property.Info;
 	WCHAR buffer[1024];
+	auto info = reinterpret_cast<PTRACE_EVENT_INFO>(_buffer.get());
 	if (prop.nonStructType.MapNameOffset) {
-		auto mapName = (PWSTR)((PBYTE)_info + prop.nonStructType.MapNameOffset);
+		auto mapName = (PWSTR)((PBYTE)info + prop.nonStructType.MapNameOffset);
 		eventMap = reinterpret_cast<EVENT_MAP_INFO*>(buffer);
 		size = sizeof(buffer);
 		::TdhGetEventMapInformation(_record, mapName, eventMap, &size);
@@ -140,7 +142,7 @@ std::wstring EventData::FormatProperty(const EventProperty& property) const {
 		len = sizeof(IN6_ADDR);
 
 	USHORT consumed;
-	auto status = ::TdhFormatProperty(_info, eventMap, (_header.Flags & EVENT_HEADER_FLAG_32_BIT_HEADER) ? 4 : 8,
+	auto status = ::TdhFormatProperty(info, eventMap, (_headerFlags & EVENT_HEADER_FLAG_32_BIT_HEADER) ? 4 : 8,
 		prop.nonStructType.InType, prop.nonStructType.OutType, len, (USHORT)property.GetLength(), (PBYTE)property.GetData(),
 		&size, buffer, &consumed);
 	if (status == STATUS_SUCCESS)
@@ -150,8 +152,7 @@ std::wstring EventData::FormatProperty(const EventProperty& property) const {
 }
 
 uint64_t EventData::GetEventKey() const {
-	auto& desc = _header.EventDescriptor;
-	return _header.ProviderId.Data1 ^ desc.Opcode;
+	return _providerId.Data1 ^ _eventDescriptor.Opcode;
 }
 
 void EventData::SetStackEventData(std::shared_ptr<EventData> data) {

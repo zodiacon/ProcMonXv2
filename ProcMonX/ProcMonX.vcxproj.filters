@@ -72,6 +72,9 @@
     <ClCompile Include="DialogHelper.cpp">
       <Filter>Helpers</Filter>
     </ClCompile>
+    <ClCompile Include="EventPropertiesDlg.cpp">
+      <Filter>Dialogs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainFrm.h">
@@ -127,6 +130,9 @@
     </ClInclude>
     <ClInclude Include="ClipboardHelper.h">
       <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="EventPropertiesDlg.h">
+      <Filter>Dialogs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

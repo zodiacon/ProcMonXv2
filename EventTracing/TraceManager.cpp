@@ -115,7 +115,7 @@ bool TraceManager::Start(EventCallback cb) {
 		return false;
 	}
 
-	for(auto type : _kernelEventTypes) {
+	for (auto type : _kernelEventTypes) {
 		gm.Masks[((uint64_t)type) >> 32] |= (ULONG)type;
 	}
 	error = ::TraceSetInformation(_handle, TraceSystemTraceEnableFlagsInfo, &gm, sizeof(gm));
@@ -160,15 +160,16 @@ bool TraceManager::Start(EventCallback cb) {
 }
 
 bool TraceManager::Stop() {
-	if (_hTrace) {
-		::CloseTrace(_hTrace);
-		_hTrace = 0;
-	}
 	if (_handle) {
 		::ControlTrace(_hTrace, KERNEL_LOGGER_NAME, _properties, EVENT_TRACE_CONTROL_STOP);
 		_handle = 0;
 	}
-	::WaitForSingleObject(_hProcessThread.get(), 3000);
+	if (_hTrace) {
+		::CloseTrace(_hTrace);
+		_hTrace = 0;
+	}
+	if (WAIT_TIMEOUT == ::WaitForSingleObject(_hProcessThread.get(), 3000))
+		::TerminateThread(_hProcessThread.get(), 1);
 	_hProcessThread.reset();
 
 	return true;
@@ -230,9 +231,7 @@ bool TraceManager::ParseProcessStartStop(EventData* data) {
 	if (data->GetEventName().substr(0, 8) != L"Process/")
 		return false;
 
-	auto& header = data->GetHeader();
-
-	switch (header.EventDescriptor.Opcode) {
+	switch (data->GetEventDescriptor().Opcode) {
 		case 1:		// process created
 		{
 			auto prop = data->GetProperty(L"ImageFileName");
@@ -250,7 +249,7 @@ bool TraceManager::ParseProcessStartStop(EventData* data) {
 		}
 
 		case 2:		// process end
-			RemoveProcessName(header.ProcessId);
+			RemoveProcessName(data->GetProcessId());
 			break;
 
 	}
@@ -258,10 +257,17 @@ bool TraceManager::ParseProcessStartStop(EventData* data) {
 	return true;
 }
 
+void TraceManager::ResetIndex(uint32_t index) {
+	_index = index;
+}
+
 void TraceManager::OnEventRecord(PEVENT_RECORD rec) {
+	if (_handle == 0)
+		return;
+
 	auto pid = rec->EventHeader.ProcessId;
-	auto eventName = GetkernelEventName(rec);
-	auto data = std::make_shared<EventData>(rec, GetProcessImageById(pid), eventName);
+	auto& eventName = GetkernelEventName(rec);
+	auto data = std::make_shared<EventData>(rec, GetProcessImageById(pid), eventName, ++_index);
 
 	// evaluate filters
 	FilterContext context = { data.get() };
@@ -271,8 +277,8 @@ void TraceManager::OnEventRecord(PEVENT_RECORD rec) {
 			continue;
 		auto action = filter->Eval(context);
 		if (action == FilterAction::Exclude) {
-			_filteredEvents++;
-			return;
+			result = action;
+			break;
 		}
 
 		if (action == FilterAction::Include) {
@@ -282,16 +288,23 @@ void TraceManager::OnEventRecord(PEVENT_RECORD rec) {
 	}
 	if (result != FilterAction::Include) {
 		_filteredEvents++;
+		_lastExcluded = data;
 		return;
 	}
 
+	// force copying properties
+	data->GetProperties();
+
 	if (rec->EventHeader.ProviderId == StackWalkGuid) {
+		_index--;
 		if (_lastEvent) {
+			if (_lastEvent->GetThreadId() != data->GetProperty(L"StackThread")->GetValue<DWORD>())
+				return;
+
 			_lastEvent->SetStackEventData(data);
-			// force copying properties
-			data->GetProperties();
 			_lastEvent.reset();
 		}
+		_lastExcluded = nullptr;
 		return;
 	}
 
@@ -322,19 +335,19 @@ void TraceManager::HandleNoProcessId(EventData* data) {
 	DWORD tid = 0;
 	if (data->GetThreadId() == 0 || data->GetThreadId() == (DWORD)-1) {
 		auto prop = data->GetProperty(L"ThreadId");
-		if(!prop)
+		if (!prop)
 			prop = data->GetProperty(L"TThreadId");
 		if (prop) {
 			tid = prop->GetValue<DWORD>();
-			data->_header.ThreadId = tid;
+			data->_threadId = tid;
 		}
 	}
 	auto prop = data->GetProperty(L"PID");
-	if(prop == nullptr)
+	if (prop == nullptr)
 		prop = data->GetProperty(L"ProcessId");
 	if (prop) {
 		auto pid = prop->GetValue<DWORD>();
-		data->_header.ProcessId = pid;
+		data->_processId = pid;
 		data->SetProcessName(GetProcessImageById(pid));
 	}
 	else if (tid) {
@@ -342,14 +355,15 @@ void TraceManager::HandleNoProcessId(EventData* data) {
 		if (hThread) {
 			auto pid = ::GetProcessIdOfThread(hThread.get());
 			if (pid) {
-				data->_header.ProcessId = pid;
+				data->_processId = pid;
 				data->SetProcessName(GetProcessImageById(pid));
 			}
 		}
 	}
 }
 
-std::wstring TraceManager::GetkernelEventName(EVENT_RECORD* rec) const {
+const std::wstring& TraceManager::GetkernelEventName(EVENT_RECORD* rec) const {
+	static const std::wstring empty;
 	auto& desc = rec->EventHeader.EventDescriptor;
 	auto key = rec->EventHeader.ProviderId.Data1 ^ desc.Opcode;
 	if (auto it = _kernelEventNames.find(key); it != _kernelEventNames.end())
@@ -359,11 +373,11 @@ std::wstring TraceManager::GetkernelEventName(EVENT_RECORD* rec) const {
 	ULONG size = sizeof(buffer);
 	auto info = reinterpret_cast<PTRACE_EVENT_INFO>(buffer);
 	if (::TdhGetEventInformation(rec, 0, nullptr, info, &size) == STATUS_SUCCESS) {
-		auto name = std::wstring((PCWSTR)((PBYTE)info + info->TaskNameOffset)) + L"/" + std::wstring((PCWSTR)((PBYTE)info + info->OpcodeNameOffset));
+		const auto name = std::wstring((PCWSTR)((PBYTE)info + info->TaskNameOffset)) + L"/" + std::wstring((PCWSTR)((PBYTE)info + info->OpcodeNameOffset));
 		_kernelEventNames.insert({ key, name });
-		return name;
+		return _kernelEventNames[key];
 	}
-	return L"";
+	return empty;
 }
 
 void TraceManager::AddProcessName(DWORD pid, std::wstring name) {

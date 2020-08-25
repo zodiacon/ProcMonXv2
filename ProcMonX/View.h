@@ -28,8 +28,6 @@ public:
 	PCWSTR GetColumnTextPointer(HWND, int row, int col) const;
 	bool OnRightClickList(int index, POINT& pt);
 
-	std::wstring ProcessSpecialEvent(EventData* data);
-
 	bool IsSortable(int col) const;
 	void DoSort(const SortInfo* si);
 
@@ -45,11 +43,17 @@ public:
 		MESSAGE_HANDLER(WM_CLOSE, OnClose)
 		COMMAND_ID_HANDLER(ID_MONITOR_CONFIGUREEVENTS, OnConfigureEvents)
 		COMMAND_ID_HANDLER(ID_MONITOR_CLEAR, OnClear)
+		COMMAND_ID_HANDLER(ID_VIEW_AUTOSCROLL, OnAutoScroll)
 		MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
+		COMMAND_ID_HANDLER(ID_EVENT_PROPERTIES, OnEventProperties)
 		CHAIN_MSG_MAP(CVirtualListView<CView>)
 		CHAIN_MSG_MAP(CCustomDraw<CView>)
 		CHAIN_MSG_MAP(CViewBase<CView>)
 	END_MSG_MAP()
+
+private:
+	std::wstring ProcessSpecialEvent(EventData* data) const;
+	std::wstring GetEventDetails(EventData* data) const;
 
 	// Handler prototypes (uncomment arguments if needed):
 	//	LRESULT MessageHandler(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
@@ -62,8 +66,10 @@ public:
 	LRESULT OnTimer(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnClear(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnCallStack(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnEventProperties(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnConfigureEvents(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnAutoScroll(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 
 private:
 	CListViewCtrl m_List;
@@ -75,4 +81,5 @@ private:
 	EventsConfig m_EventsConfig;
 	bool m_IsMonitoring{ false };
 	bool m_IsDraining{ false };
+	bool m_AutoScroll{ false };
 };

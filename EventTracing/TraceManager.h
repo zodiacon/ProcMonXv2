@@ -27,6 +27,7 @@ public:
 	bool Start(EventCallback callback);
 	bool Stop();
 	bool IsRunning() const;
+	void ResetIndex(uint32_t index = 0);
 
 	std::wstring GetProcessImageById(DWORD pid) const;
 	static std::wstring GetDosNameFromNtName(PCWSTR name);
@@ -41,7 +42,7 @@ public:
 	std::shared_ptr<FilterBase> GetFilter(int index) const;
 
 private:
-	std::wstring GetkernelEventName(EVENT_RECORD* rec) const;
+	const std::wstring& GetkernelEventName(EVENT_RECORD* rec) const;
 	void AddProcessName(DWORD pid, std::wstring name);
 	bool RemoveProcessName(DWORD pid);
 	void EnumProcesses();
@@ -71,6 +72,8 @@ private:
 	mutable std::unordered_map<ULONGLONG, std::wstring> _kernelEventNames;
 	std::vector<DWORD> _cleanupPids;
 	std::shared_ptr<EventData> _lastEvent;
+	std::shared_ptr<EventData> _lastExcluded;
+	uint32_t _index{ 0 };
 	std::vector<std::shared_ptr<FilterBase>> _filters;
 	std::atomic<int64_t> _filteredEvents{ 0 };
 	bool _isTraceProcesses{ true };

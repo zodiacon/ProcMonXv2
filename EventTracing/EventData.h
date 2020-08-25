@@ -41,17 +41,16 @@ private:
 class EventData {
 	friend class TraceManager;
 public:
-	EventData(PEVENT_RECORD rec, std::wstring processName, std::wstring eventName);
+	EventData(PEVENT_RECORD rec, std::wstring processName, const std::wstring& eventName, uint32_t index);
 
 	DWORD GetProcessId() const;
-	const EVENT_HEADER& GetHeader() const;
+	DWORD GetThreadId() const;
+	ULONGLONG GetTimeStamp() const;
+	const GUID& GetProviderId() const;
+	const EVENT_DESCRIPTOR& GetEventDescriptor() const;
 	const std::wstring& GetProcessName() const;
 	const std::wstring& GetEventName() const;
-	DWORD GetThreadId() const;
-	DWORD GetCPU() const;
-	LONGLONG GetTimeStamp() const;
-	void SetDetails(std::wstring details);
-	const std::wstring& GetDetails() const;
+	uint32_t GetIndex() const;
 
 	const std::vector<EventProperty>& GetProperties() const;
 	const EventProperty* GetProperty(PCWSTR name) const;
@@ -64,15 +63,18 @@ protected:
 	void SetProcessName(std::wstring name);
 
 private:
-	EVENT_HEADER _header;
+	ULONG _threadId, _processId;
+	EVENT_DESCRIPTOR _eventDescriptor;
+	ULONGLONG _timeStamp;
+	ULONG _kernelTime, _userTime;
+	GUID _providerId;
 	std::wstring _processName;
-	std::wstring _eventName;
-	std::unique_ptr<BYTE[]> _buffer;
-	PTRACE_EVENT_INFO _info{ nullptr };
+	USHORT _headerFlags;
+	const std::wstring& _eventName;
+	mutable std::unique_ptr<BYTE[]> _buffer;
 	PEVENT_RECORD _record;
 	mutable std::vector<EventProperty> _properties;
-	std::wstring _details;
+	uint32_t _index;
 	std::shared_ptr<EventData> _stackData;
-	DWORD _cpu;
 };
 

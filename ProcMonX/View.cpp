@@ -9,6 +9,8 @@
 #include "SortHelper.h"
 #include "CallStackDlg.h"
 #include "EventsDlg.h"
+#include "EventPropertiesDlg.h"
+#include "ProcessIdFilter.h"
 
 CView::CView(IMainFrame* frame) : CViewBase(frame) {
 }
@@ -17,22 +19,7 @@ void CView::AddEvent(std::shared_ptr<EventData> data) {
 	if (data->GetEventName().empty())
 		return;
 
-	auto details = ProcessSpecialEvent(data.get());
-	if (details.empty()) {
-
-		for (auto& prop : data->GetProperties()) {
-			if (prop.Name.substr(0, 8) != L"Reserved" && prop.Name.substr(0, 4) != L"TTID") {
-				auto value = data->FormatProperty(prop);
-				if (!value.empty()) {
-					if (value.size() > 150)
-						value = value.substr(0, 148) + L"...";
-					details += prop.Name + L": " + value + L"; ";
-				}
-			}
-		}
-	}
-
-	data->SetDetails(details);
+	//data->SetDetails(details);
 	{
 		std::lock_guard lock(m_EventsLock);
 		m_TempEvents.push_back(data);
@@ -52,6 +39,9 @@ void CView::StartMonitoring(TraceManager& tm, bool start) {
 		std::initializer_list<KernelEventTypes> events(types.data(), types.data() + types.size());
 		tm.SetKernelEventTypes(events);
 		tm.SetKernelEventStacks(std::initializer_list<std::wstring>(categories.data(), categories.data() + categories.size()));
+		auto selfFilter = std::make_shared<ProcessIdFilter>(::GetCurrentProcessId(), FilterAction::Exclude);
+		tm.RemoveAllFilters();
+		tm.AddFilter(selfFilter);
 	}
 	else {
 		m_IsDraining = true;
@@ -65,37 +55,44 @@ CString CView::GetColumnText(HWND, int row, int col) const {
 
 	switch (col) {
 		case 0:
+			text.Format(L"%7u", item->GetIndex());
+			if (item->GetStackEventData())
+				text += L" *";
+			break;
+
+		case 1:
 		{
 			auto ts = item->GetTimeStamp();
 			text.Format(L".%06d", (ts / 10) % 1000000);
-			if (item->GetStackEventData())
-				text += L" *";
 			return CTime(*(FILETIME*)&ts).Format(L"%x %X") + text;
 		}
-		case 1:
+		case 2:
 		{
 			text.Format(L"%s (%d)", item->GetEventName().c_str(),
-				item->GetHeader().EventDescriptor.Opcode);
+				item->GetEventDescriptor().Opcode);
 			break;
 		}
-		case 2:
+		case 3:
 		{
 			auto pid = item->GetProcessId();
 			if (pid != (DWORD)-1)
 				text.Format(L"%u (0x%X)", pid, pid);
 			break;
 		}
-		case 4:
+		case 5:
 		{
 			auto tid = item->GetThreadId();
 			if (tid != (DWORD)-1 && tid != 0)
 				text.Format(L"%u (0x%X)", tid, tid);
 			break;
 		}
-		case 5: text.Format(L"%u", item->GetCPU()); break;
-		case 6: 
-			::StringFromGUID2(item->GetHeader().ProviderId, text.GetBufferSetLength(64), 64);
+		case 6: text.Format(L"%d", (int)item->GetEventDescriptor().Opcode);
+		case 7: 
+			::StringFromGUID2(item->GetProviderId(), text.GetBufferSetLength(64), 64);
 			break;
+
+		case 8:
+			return GetEventDetails(item).c_str();
 	}
 
 	return text;
@@ -114,8 +111,8 @@ int CView::GetRowImage(int row) const {
 PCWSTR CView::GetColumnTextPointer(HWND, int row, int col) const {
 	auto item = m_Events[row].get();
 	switch (col) {
-		case 3: return item->GetProcessName().c_str();
-		case 7: return item->GetDetails().c_str();
+		case 4: return item->GetProcessName().c_str();
+//		case 8: return item->GetDetails().c_str();
 	}
 	return nullptr;
 }
@@ -130,7 +127,7 @@ bool CView::OnRightClickList(int index, POINT& pt) {
 	return false;
 }
 
-std::wstring CView::ProcessSpecialEvent(EventData* data) {
+std::wstring CView::ProcessSpecialEvent(EventData* data) const {
 	std::wstring details;
 	CString text;
 	auto& name = data->GetEventName();
@@ -144,19 +141,37 @@ std::wstring CView::ProcessSpecialEvent(EventData* data) {
 	return details;
 }
 
+std::wstring CView::GetEventDetails(EventData* data) const {
+	auto details = ProcessSpecialEvent(data);
+	if (details.empty()) {
+		for (auto& prop : data->GetProperties()) {
+			if (prop.Name.substr(0, 8) != L"Reserved" && prop.Name.substr(0, 4) != L"TTID") {
+				auto value = data->FormatProperty(prop);
+				if (!value.empty()) {
+					if (value.size() > 102)
+						value = value.substr(0, 100) + L"...";
+					details += prop.Name + L": " + value + L"; ";
+				}
+			}
+		}
+	}
+	return details;
+}
+
 bool CView::IsSortable(int col) const {
-	return !m_IsMonitoring && col != 7;
+	return !m_IsMonitoring && col != 8;
 }
 
 void CView::DoSort(const SortInfo* si) {
 	std::sort(m_Events.begin(), m_Events.end(), [&](auto& i1, auto& i2) {
 		switch (si->SortColumn) {
-			case 0: return SortHelper::SortNumbers(i1->GetTimeStamp(), i2->GetTimeStamp(), si->SortAscending);
-			case 1: return SortHelper::SortStrings(i1->GetEventName(), i2->GetEventName(), si->SortAscending);
-			case 2: return SortHelper::SortNumbers(i1->GetProcessId(), i2->GetProcessId(), si->SortAscending);
-			case 3: return SortHelper::SortStrings(i1->GetProcessName(), i2->GetProcessName(), si->SortAscending);
-			case 4: return SortHelper::SortNumbers(i1->GetThreadId(), i2->GetThreadId(), si->SortAscending);
-			case 5: return SortHelper::SortNumbers(i1->GetCPU(), i2->GetCPU(), si->SortAscending);
+			case 0: return SortHelper::SortNumbers(i1->GetIndex(), i2->GetIndex(), si->SortAscending);
+			case 1: return SortHelper::SortNumbers(i1->GetTimeStamp(), i2->GetTimeStamp(), si->SortAscending);
+			case 2: return SortHelper::SortStrings(i1->GetEventName(), i2->GetEventName(), si->SortAscending);
+			case 3: return SortHelper::SortNumbers(i1->GetProcessId(), i2->GetProcessId(), si->SortAscending);
+			case 4: return SortHelper::SortStrings(i1->GetProcessName(), i2->GetProcessName(), si->SortAscending);
+			case 5: return SortHelper::SortNumbers(i1->GetThreadId(), i2->GetThreadId(), si->SortAscending);
+			case 6: return SortHelper::SortNumbers(i1->GetEventDescriptor().Opcode, i2->GetEventDescriptor().Opcode, si->SortAscending);
 		}
 		return false;
 		});
@@ -194,7 +209,7 @@ LRESULT CView::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOO
 			{ IDI_FILE, L"FileIo" },
 			{ IDI_HANDLE, L"Object" },
 			{ IDI_DISK, L"DiskIo" },
-			{ IDI_MEMORY, L"Memory" },
+			{ IDI_MEMORY, L"PageFault" },
 			{ IDI_HEAP, L"Pool" },
 		};
 		int index = 0;
@@ -209,12 +224,13 @@ LRESULT CView::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOO
 	m_List.SetImageList(s_Images, LVSIL_SMALL);
 
 	auto cm = GetColumnManager(m_List);
-	cm->AddColumn(L"Time", LVCFMT_LEFT, 180);
+	cm->AddColumn(L"#", 0, 80);
+	cm->AddColumn(L"Time", LVCFMT_RIGHT, 180);
 	cm->AddColumn(L"Event", LVCFMT_LEFT, 160);
 	cm->AddColumn(L"PID", LVCFMT_RIGHT, 100, ColumnFlags::Numeric | ColumnFlags::Visible);
 	cm->AddColumn(L"Process Name", LVCFMT_LEFT, 150);
 	cm->AddColumn(L"TID", LVCFMT_RIGHT, 100, ColumnFlags::Numeric | ColumnFlags::Visible);
-	cm->AddColumn(L"CPU", LVCFMT_CENTER, 45, ColumnFlags::Numeric);
+	cm->AddColumn(L"Opcode", LVCFMT_CENTER, 45, ColumnFlags::Numeric);
 	cm->AddColumn(L"Provider", LVCFMT_CENTER, 180, ColumnFlags::Numeric);
 	cm->AddColumn(L"Details", LVCFMT_LEFT, 700);
 
@@ -251,6 +267,8 @@ LRESULT CView::OnTimer(UINT, WPARAM id, LPARAM, BOOL&) {
 			m_IsDraining = false;
 		}
 		UpdateList(m_List, static_cast<int>(m_Events.size()));
+		if (m_AutoScroll)
+			m_List.EnsureVisible(m_List.GetItemCount() - 1, FALSE);
 	}
 	return 0;
 }
@@ -280,6 +298,18 @@ LRESULT CView::OnCallStack(WORD, WORD, HWND, BOOL&) {
 	return 0;
 }
 
+LRESULT CView::OnEventProperties(WORD, WORD, HWND, BOOL&) {
+	auto selected = m_List.GetSelectedIndex();
+	if (selected < 0)
+		return 0;
+
+	auto data = m_Events[selected].get();
+	CEventPropertiesDlg dlg(data);
+	dlg.DoModal();
+
+	return 0;
+}
+
 LRESULT CView::OnClose(UINT, WPARAM, LPARAM, BOOL& handled) {
 	if (m_IsMonitoring) {
 		AtlMessageBox(nullptr, L"Cannot close tab while monitoring is active", IDS_TITLE, MB_ICONWARNING);
@@ -292,5 +322,10 @@ LRESULT CView::OnClose(UINT, WPARAM, LPARAM, BOOL& handled) {
 LRESULT CView::OnConfigureEvents(WORD, WORD, HWND, BOOL&) {
 	CEventsDlg dlg(m_EventsConfig);
 	dlg.DoModal();
+	return 0;
+}
+
+LRESULT CView::OnAutoScroll(WORD, WORD, HWND, BOOL&) {
+	m_AutoScroll = !m_AutoScroll;
 	return 0;
 }

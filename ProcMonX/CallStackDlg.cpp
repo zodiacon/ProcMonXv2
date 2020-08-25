@@ -51,12 +51,18 @@ LRESULT CCallStackDlg::OnInitDialog(UINT, WPARAM, LPARAM, BOOL&) {
 
 	DialogHelper::AddIconToButton(this, IDC_COPY, IDI_COPY);
 
+	CString num;
+	num.Format(L"Call Stack (Event #%u)", m_pData->GetIndex());
+	SetWindowText(num);
+
 	DlgResize_Init(true);
 
 	auto stack = m_pData->GetStackEventData();
 	ATLASSERT(stack);
-	if (stack == nullptr)
+	if (stack == nullptr) {
+		EndDialog(IDCANCEL);
 		return 0;
+	}
 
 	auto& symbols = SymbolManager::Get();
 	auto pid = stack->GetProperty(L"StackProcess")->GetValue<DWORD>();
@@ -77,7 +83,6 @@ LRESULT CCallStackDlg::OnInitDialog(UINT, WPARAM, LPARAM, BOOL&) {
 
 	SetDlgItemText(IDC_MESSAGE, L"Loading symbols...");
 
-	CString num;
 	for (int i = 1; i <= 192; i++) {
 		num.Format(L"Stack%d", i);
 		auto prop = stack->GetProperty(num);

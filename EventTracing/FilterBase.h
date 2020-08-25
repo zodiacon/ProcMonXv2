@@ -30,7 +30,7 @@ public:
 
 private:
 	FilterAction _action;
-	inline static FilterAction _defaultAction = FilterAction::Exclude;
+	inline static FilterAction _defaultAction = FilterAction::None;
 	std::wstring _name;
 	bool _enabled{ true };
 };
