@@ -26,12 +26,16 @@ public:
 	CString GetColumnText(HWND, int row, int col) const;
 	int GetRowImage(int row) const;
 	PCWSTR GetColumnTextPointer(HWND, int row, int col) const;
-	bool OnRightClickList(int index, POINT& pt);
+	bool OnRightClickList(int row, int col, POINT& pt);
+	bool OnDoubleClickList(int row, int col, POINT& pt);
 
 	bool IsSortable(int col) const;
 	void DoSort(const SortInfo* si);
 
 	BOOL PreTranslateMessage(MSG* pMsg);
+
+	static CImageList GetEventImageList();
+	static int GetImageFromEventName(PCWSTR name);
 
 	virtual void OnFinalMessage(HWND /*hWnd*/);
 
@@ -73,9 +77,10 @@ private:
 
 private:
 	CListViewCtrl m_List;
-	inline static CImageListManaged s_Images;
-	std::unordered_map<std::wstring, int> s_IconsMap;
+	inline static CImageList s_Images;
+	inline static std::unordered_map<std::wstring, int> s_IconsMap;
 	std::vector<std::shared_ptr<EventData>> m_Events;
+	std::vector<std::shared_ptr<EventData>> m_OrgEvents;
 	std::vector<std::shared_ptr<EventData>> m_TempEvents;
 	std::mutex m_EventsLock;
 	EventsConfig m_EventsConfig;

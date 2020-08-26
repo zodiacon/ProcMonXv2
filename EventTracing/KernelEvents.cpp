@@ -174,6 +174,12 @@ const std::vector<KernelEventCategory> KernelEvents{
 		}
 	},
 
+	{ L"Debug", KernelEventTypes::DebugPrint, &GUID_NULL,
+		{
+			{ L"Debug Print", 0x20 },
+		}
+	},
+
 };
 
 const std::vector<KernelEventCategory>& KernelEventCategory::GetAllCategories() {

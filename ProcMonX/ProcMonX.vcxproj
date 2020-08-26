@@ -278,6 +278,8 @@
   <ItemGroup>
     <Image Include="res\cancel.ico" />
     <Image Include="res\clip_copy.ico" />
+    <Image Include="res\dll-add.ico" />
+    <Image Include="res\dll-delete.ico" />
     <Image Include="res\Driver.ico" />
     <Image Include="res\event.ico" />
     <Image Include="res\event2.ico" />
@@ -299,6 +301,8 @@
     <Image Include="res\object.ico" />
     <Image Include="res\ok.ico" />
     <Image Include="res\Play.ico" />
+    <Image Include="res\process-delete.ico" />
+    <Image Include="res\process-new.ico" />
     <Image Include="res\processes.ico" />
     <Image Include="res\ProcMonX.ico" />
     <Image Include="res\properties.ico" />
@@ -308,6 +312,8 @@
     <Image Include="res\stack.ico" />
     <Image Include="res\Stop.ico" />
     <Image Include="res\storage.ico" />
+    <Image Include="res\threads-delete.ico" />
+    <Image Include="res\threads-new.ico" />
     <Image Include="res\threads.ico" />
     <Image Include="res\tools.ico" />
   </ItemGroup>

@@ -63,14 +63,8 @@ CString CView::GetColumnText(HWND, int row, int col) const {
 		case 1:
 		{
 			auto ts = item->GetTimeStamp();
-			text.Format(L".%06d", (ts / 10) % 1000000);
+			text.Format(L".%06u", (ts / 10) % 1000000);
 			return CTime(*(FILETIME*)&ts).Format(L"%x %X") + text;
-		}
-		case 2:
-		{
-			text.Format(L"%s (%d)", item->GetEventName().c_str(),
-				item->GetEventDescriptor().Opcode);
-			break;
 		}
 		case 3:
 		{
@@ -100,6 +94,9 @@ CString CView::GetColumnText(HWND, int row, int col) const {
 
 int CView::GetRowImage(int row) const {
 	auto& evt = m_Events[row];
+	if (auto it = s_IconsMap.find(evt->GetEventName()); it != s_IconsMap.end())
+		return it->second;
+
 	auto pos = evt->GetEventName().find(L'/');
 	if (pos != std::wstring::npos) {
 		if (auto it = s_IconsMap.find(evt->GetEventName().substr(0, pos)); it != s_IconsMap.end())
@@ -111,13 +108,14 @@ int CView::GetRowImage(int row) const {
 PCWSTR CView::GetColumnTextPointer(HWND, int row, int col) const {
 	auto item = m_Events[row].get();
 	switch (col) {
+		case 2:return item->GetEventName().c_str();
 		case 4: return item->GetProcessName().c_str();
 //		case 8: return item->GetDetails().c_str();
 	}
 	return nullptr;
 }
 
-bool CView::OnRightClickList(int index, POINT& pt) {
+bool CView::OnRightClickList(int index, int col, POINT& pt) {
 	if (index >= 0) {
 		CMenu menu;
 		menu.LoadMenuW(IDR_CONTEXT);
@@ -125,6 +123,11 @@ bool CView::OnRightClickList(int index, POINT& pt) {
 		return true;
 	}
 	return false;
+}
+
+bool CView::OnDoubleClickList(int row, int col, POINT& pt) {
+	SendMessage(WM_COMMAND, ID_EVENT_PROPERTIES);
+	return true;
 }
 
 std::wstring CView::ProcessSpecialEvent(EventData* data) const {
@@ -182,6 +185,22 @@ BOOL CView::PreTranslateMessage(MSG* pMsg) {
 	return FALSE;
 }
 
+CImageList CView::GetEventImageList() {
+	return s_Images;
+}
+
+int CView::GetImageFromEventName(PCWSTR name) {
+	if (auto it = s_IconsMap.find(name); it != s_IconsMap.end())
+		return it->second;
+
+	auto pos = ::wcschr(name, L'/');
+	if (pos) {
+		if (auto it = s_IconsMap.find(std::wstring(name, pos)); it != s_IconsMap.end())
+			return it->second;
+	}
+	return 0;
+}
+
 void CView::OnFinalMessage(HWND /*hWnd*/) {
 	GetFrame()->ViewDestroyed(this);
 	delete this;
@@ -200,16 +219,31 @@ LRESULT CView::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOO
 			PCWSTR type;
 		} icons[] = {
 			{ IDI_GENERIC, nullptr },
+			{ IDI_HEAP2, L"PageFault/VirtualAlloc" },
+			{ IDI_HEAP2, L"Virtual Memory" },
 			{ IDI_GEAR, L"Process" },
+			{ IDI_PROCESS_NEW, L"Process/Start" },
+			{ IDI_PROCESS_DELETE, L"Process/Terminate" },
+			{ IDI_PROCESS_DELETE, L"Process/End" },
 			{ IDI_THREAD, L"Thread" },
+			{ IDI_THREAD_NEW, L"Thread/Start" },
+			{ IDI_THREAD_DELETE, L"Thread/End" },
 			{ IDI_DLL, L"Image" },
+			{ IDI_DLL_LOAD, L"Image/Load" },
+			{ IDI_DLL_UNLOAD, L"Image/UnLoad" },
+			{ IDI_NETWORK, L"Network" },
 			{ IDI_NETWORK, L"TcpIp" },
 			{ IDI_NETWORK, L"UdpIp" },
 			{ IDI_REGISTRY, L"Registry" },
 			{ IDI_FILE, L"FileIo" },
+			{ IDI_FILE, L"File" },
 			{ IDI_HANDLE, L"Object" },
+			{ IDI_HANDLE, L"Objects" },
+			{ IDI_OBJECT, L"Handles" },
 			{ IDI_DISK, L"DiskIo" },
+			{ IDI_DISK, L"Disk I/O" },
 			{ IDI_MEMORY, L"PageFault" },
+			{ IDI_MEMORY, L"Page Fault" },
 			{ IDI_HEAP, L"Pool" },
 		};
 		int index = 0;
@@ -261,6 +295,7 @@ LRESULT CView::OnTimer(UINT, WPARAM id, LPARAM, BOOL&) {
 		if(!m_TempEvents.empty()) {
 			std::lock_guard lock(m_EventsLock);
 			m_Events.insert(m_Events.end(), m_TempEvents.begin(), m_TempEvents.end());
+			m_OrgEvents.insert(m_OrgEvents.end(), m_TempEvents.begin(), m_TempEvents.end());
 			m_TempEvents.clear();
 		}
 		else if (!m_IsMonitoring) {
@@ -274,10 +309,12 @@ LRESULT CView::OnTimer(UINT, WPARAM id, LPARAM, BOOL&) {
 }
 
 LRESULT CView::OnClear(WORD, WORD, HWND, BOOL&) {
-	std::lock_guard lock(m_EventsLock);
+	CWaitCursor wait;
 	m_List.SetItemCount(0);
+	std::lock_guard lock(m_EventsLock);
 	m_Events.clear();
 	m_TempEvents.clear();
+	m_OrgEvents.clear();
 	return 0;
 }
 
@@ -321,7 +358,24 @@ LRESULT CView::OnClose(UINT, WPARAM, LPARAM, BOOL& handled) {
 
 LRESULT CView::OnConfigureEvents(WORD, WORD, HWND, BOOL&) {
 	CEventsDlg dlg(m_EventsConfig);
-	dlg.DoModal();
+	if (dlg.DoModal() == IDOK) {
+		if (m_IsMonitoring) {
+			// update trace manager
+			auto& tm = GetFrame()->GetTraceManager();
+			std::vector<KernelEventTypes> types;
+			std::vector<std::wstring> categories;
+			for (auto& cat : m_EventsConfig.GetCategories()) {
+				auto c = KernelEventCategory::GetCategory(cat.Name.c_str());
+				ATLASSERT(c);
+				types.push_back(c->EnableFlag);
+				categories.push_back(c->Name);
+			}
+			std::initializer_list<KernelEventTypes> events(types.data(), types.data() + types.size());
+			tm.SetKernelEventTypes(events);
+			tm.SetKernelEventStacks(std::initializer_list<std::wstring>(categories.data(), categories.data() + categories.size()));
+			tm.UpdateEventConfig();
+		}
+	}
 	return 0;
 }
 

@@ -18,6 +18,8 @@ class TraceManager final {
 public:
 	TraceManager();
 	~TraceManager();
+	TraceManager(const TraceManager&) = delete;
+	TraceManager& operator=(const TraceManager&) = delete;
 
 	bool AddKernelEventTypes(std::initializer_list<KernelEventTypes> types);
 	//bool RemoveKernelEventTypes(KernelEventTypes types);
@@ -28,6 +30,7 @@ public:
 	bool Stop();
 	bool IsRunning() const;
 	void ResetIndex(uint32_t index = 0);
+	int UpdateEventConfig();
 
 	std::wstring GetProcessImageById(DWORD pid) const;
 	static std::wstring GetDosNameFromNtName(PCWSTR name);

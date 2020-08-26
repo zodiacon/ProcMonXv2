@@ -2,6 +2,7 @@
 #include "EventConfiguration.h"
 #include "EventsDlg.h"
 #include "KernelEvents.h"
+#include "View.h"
 
 CEventsDlg::CEventsDlg(EventsConfig& config) : m_Config(config) {
 }
@@ -10,11 +11,13 @@ constexpr WCHAR SaveLoadIniFilter[] = L"ini files (*.ini)\0*.ini\0All Files\0*.*
 
 void CEventsDlg::BuildEventsTree(const EventsConfig& config) {
 	for (auto& category : KernelEventCategory::GetAllCategories()) {
-		auto item = m_Tree.InsertItem(category.Name.c_str(), TVI_ROOT, TVI_LAST);
+		int image = CView::GetImageFromEventName(category.Name.c_str());
+		auto item = m_Tree.InsertItem(category.Name.c_str(), image, image, TVI_ROOT, TVI_LAST);
 		item.SetData((DWORD_PTR)&category);
 		auto cat = config.GetCategory(category.Name.c_str());
 		for (auto& evt : category.Events) {
-			auto child = item.InsertAfter(evt.Name.c_str(), TVI_LAST, 0);
+			image = CView::GetImageFromEventName(evt.Name.c_str());
+			auto child = item.InsertAfter(evt.Name.c_str(), TVI_LAST, image);
 			child.SetData((DWORD_PTR)&evt);
 			if(cat && cat->Contains(evt.Opcode))
 				m_Tree.SetCheckState(child, TRUE);
@@ -42,10 +45,22 @@ LRESULT CEventsDlg::OnInitDialog(UINT, WPARAM, LPARAM, BOOL&) {
 
 	m_Tree.ModifyStyle(0, TVS_CHECKBOXES);
 	ATLASSERT(m_Tree.GetStyle() & TVS_CHECKBOXES);
-	m_Tree.SetExtendedStyle(TVS_EX_DIMMEDCHECKBOXES | TVS_EX_DOUBLEBUFFER, TVS_EX_DIMMEDCHECKBOXES | TVS_EX_DOUBLEBUFFER);
+	m_Tree.SetExtendedStyle(TVS_EX_DIMMEDCHECKBOXES | TVS_EX_DOUBLEBUFFER, TVS_EX_DIMMEDCHECKBOXES);
+
+	auto images = CView::GetEventImageList();
+	m_Tree.SetImageList(images, TVSIL_NORMAL);
+	m_Tree.SetItemHeight(20);
+	m_Tree.SetIndent(4);
 
 	BuildEventsTree(m_Config);
 	m_Init = false;
+
+	return 0;
+}
+
+LRESULT CEventsDlg::OnDestroy(UINT, WPARAM, LPARAM, BOOL& handled) {
+	handled = FALSE;
+	m_Tree.SetImageList(nullptr, TVSIL_NORMAL);
 
 	return 0;
 }

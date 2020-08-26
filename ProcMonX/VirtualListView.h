@@ -15,12 +15,14 @@ struct CVirtualListView {
 		NOTIFY_CODE_HANDLER(LVN_ODFINDITEM, OnFindItem)
 		NOTIFY_CODE_HANDLER(LVN_GETDISPINFO, OnGetDispInfo)
 		NOTIFY_CODE_HANDLER(NM_RCLICK, OnRightClick)
+		NOTIFY_CODE_HANDLER(NM_DBLCLK, OnDoubleClick)
 		//NOTIFY_CODE_HANDLER(LVN_ITEMCHANGED, OnItemChanged)
 		ALT_MSG_MAP(1)
 		REFLECTED_NOTIFY_CODE_HANDLER(LVN_GETDISPINFO, OnGetDispInfo)
 		REFLECTED_NOTIFY_CODE_HANDLER(LVN_COLUMNCLICK, OnColumnClick)
 		REFLECTED_NOTIFY_CODE_HANDLER(LVN_ODFINDITEM, OnFindItem)
 		REFLECTED_NOTIFY_CODE_HANDLER(NM_RCLICK, OnRightClick)
+		REFLECTED_NOTIFY_CODE_HANDLER(NM_DBLCLK, OnDoubleClick)
 		//REFLECTED_NOTIFY_CODE_HANDLER(LVN_ITEMCHANGED, OnItemChanged)
 	END_MSG_MAP()
 
@@ -96,6 +98,19 @@ protected:
 		return cm ? cm->GetRealColumn(column) : column;
 	}
 
+	LRESULT OnDoubleClick(int, LPNMHDR hdr, BOOL& handled) {
+		CListViewCtrl lv(hdr->hwndFrom);
+		POINT pt;
+		::GetCursorPos(&pt);
+		POINT pt2(pt);
+		LVHITTESTINFO info{};
+		info.pt = pt;
+		lv.SubItemHitTest(&info);
+		auto pT = static_cast<T*>(this);
+		handled = pT->OnDoubleClickList(info.iItem, info.iSubItem, pt2);
+		return 0;
+	}
+
 	LRESULT OnRightClick(int, LPNMHDR hdr, BOOL& handled) {
 		CListViewCtrl lv(hdr->hwndFrom);
 		POINT pt;
@@ -111,8 +126,10 @@ protected:
 			handled = pT->OnRightClickHeader(index, pt2);
 		}
 		else {
-			index = lv.GetSelectedIndex();
-			handled = pT->OnRightClickList(index, pt2);
+			LVHITTESTINFO info{};
+			info.pt = pt;
+			lv.SubItemHitTest(&info);
+			handled = pT->OnRightClickList(info.iItem, info.iSubItem, pt2);
 		}
 		return 0;
 	}
@@ -121,7 +138,11 @@ protected:
 		return false;
 	}
 
-	bool OnRightClickList(int index, POINT& pt) {
+	bool OnRightClickList(int row, int col, POINT& pt) {
+		return false;
+	}
+
+	bool OnDoubleClickList(int row, int col, POINT& pt) {
 		return false;
 	}
 

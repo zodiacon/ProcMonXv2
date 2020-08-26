@@ -43,6 +43,9 @@ class EventData {
 public:
 	EventData(PEVENT_RECORD rec, std::wstring processName, const std::wstring& eventName, uint32_t index);
 
+	void* operator new(size_t size);
+	void operator delete(void* p);
+
 	DWORD GetProcessId() const;
 	DWORD GetThreadId() const;
 	ULONGLONG GetTimeStamp() const;
@@ -63,6 +66,9 @@ protected:
 	void SetProcessName(std::wstring name);
 
 private:
+	inline static HANDLE s_hHeap = nullptr;
+	inline static uint32_t s_Count = 0;
+
 	ULONG _threadId, _processId;
 	EVENT_DESCRIPTOR _eventDescriptor;
 	ULONGLONG _timeStamp;

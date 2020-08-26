@@ -22,6 +22,7 @@ public:
 		COMMAND_ID_HANDLER(IDC_COLLAPSE, OnCollapseAll)
 		COMMAND_ID_HANDLER(IDOK, OnCloseCmd)
 		COMMAND_ID_HANDLER(IDCANCEL, OnCloseCmd)
+		MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
 		CHAIN_MSG_MAP(CDialogResize<CEventsDlg>)
 	END_MSG_MAP()
 
@@ -42,6 +43,7 @@ private:
 	bool BuildConfigFromTree(EventsConfig& config);
 
 	LRESULT OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
+	LRESULT OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnGetMinMaxInfo(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnCloseCmd(WORD /*wNotifyCode*/, WORD id, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnTreeItemChanged(int /*idCtrl*/, LPNMHDR hdr, BOOL& /*bHandled*/);

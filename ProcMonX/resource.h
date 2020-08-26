@@ -42,6 +42,13 @@
 #define IDI_COPY                        244
 #define IDR_CONTEXT                     245
 #define IDD_EVENT_PROPS                 246
+#define IDI_PROCESS_DELETE              248
+#define IDI_PROCESS_NEW                 249
+#define IDI_DLL_LOAD                    250
+#define IDI_DLL_UNLOAD                  251
+#define IDI_THREAD_DELETE               252
+#define IDI_ICON4                       253
+#define IDI_THREAD_NEW                  253
 #define IDC_LIST                        1000
 #define IDC_TREE                        1002
 #define IDC_SAVE                        1003
@@ -73,7 +80,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        248
+#define _APS_NEXT_RESOURCE_VALUE        254
 #define _APS_NEXT_COMMAND_VALUE         32788
 #define _APS_NEXT_CONTROL_VALUE         1016
 #define _APS_NEXT_SYMED_VALUE           101

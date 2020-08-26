@@ -44,6 +44,20 @@ EventData::EventData(PEVENT_RECORD rec, std::wstring processName, const std::wst
 	::SetLastError(error);
 }
 
+void* EventData::operator new(size_t size) {
+	if (s_Count++ == 0) {
+		s_hHeap = ::HeapCreate(HEAP_NO_SERIALIZE, 1 << 24, 0);
+		assert(s_hHeap);
+	}
+	return ::HeapAlloc(s_hHeap, 0, size);
+}
+
+void EventData::operator delete(void* p) {
+	::HeapFree(s_hHeap, 0, p);
+	if (--s_Count == 0)
+		::HeapDestroy(s_hHeap);
+}
+
 DWORD EventData::GetProcessId() const {
 	return _processId;
 }
@@ -103,6 +117,9 @@ const std::vector<EventProperty>& EventData::GetProperties() const {
 			userDataLength -= (USHORT)len;
 		}
 		_properties.push_back(std::move(property));
+	}
+	if (_properties.empty()) {
+		_buffer.release();
 	}
 	return _properties;
 }

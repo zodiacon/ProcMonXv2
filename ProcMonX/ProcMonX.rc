@@ -191,6 +191,18 @@ IDI_U                   ICON                    "res\\letter-u.ico"
 
 IDI_COPY                ICON                    "res\\clip_copy.ico"
 
+IDI_PROCESS_DELETE      ICON                    "res\\process-delete.ico"
+
+IDI_PROCESS_NEW         ICON                    "res\\process-new.ico"
+
+IDI_DLL_LOAD            ICON                    "res\\dll-add.ico"
+
+IDI_DLL_UNLOAD          ICON                    "res\\dll-delete.ico"
+
+IDI_THREAD_DELETE       ICON                    "res\\threads-delete.ico"
+
+IDI_THREAD_NEW          ICON                    "res\\threads-new.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -237,13 +249,13 @@ BEGIN
     PUSHBUTTON      "Collapse All",IDC_COLLAPSE,198,32,50,14
 END
 
-IDD_EVENT_PROPS DIALOGEX 0, 0, 309, 224
+IDD_EVENT_PROPS DIALOGEX 0, 0, 369, 272
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 CAPTION "Event Properties"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     PUSHBUTTON      "Copy",IDC_COPY,6,6,50,14
-    CONTROL         "",IDC_LIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,6,24,294,192
+    CONTROL         "",IDC_LIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,6,24,354,240
 END
 
 
@@ -282,9 +294,9 @@ BEGIN
     IDD_EVENT_PROPS, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 302
+        RIGHTMARGIN, 362
         TOPMARGIN, 7
-        BOTTOMMARGIN, 217
+        BOTTOMMARGIN, 265
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -321,7 +333,7 @@ END
 
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION 1,0,0,1
- PRODUCTVERSION 1,0,0,1
+ PRODUCTVERSION 2,0,0,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -334,15 +346,15 @@ VS_VERSION_INFO VERSIONINFO
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
-        BLOCK "040904B0"
+        BLOCK "040904b0"
         BEGIN
-            VALUE "FileDescription", "ProcMonX Module"
+            VALUE "FileDescription", "Process Monitor X v2"
             VALUE "FileVersion", "1, 0, 0, 1"
-            VALUE "InternalName", "ProcMonX"
-            VALUE "LegalCopyright", "Copyright 2020"
+            VALUE "InternalName", "ProcMonXv2"
+            VALUE "LegalCopyright", "(C)2020 Pavel Yosifovich"
             VALUE "OriginalFilename", "ProcMonX.exe"
-            VALUE "ProductName", "ProcMonX Module"
-            VALUE "ProductVersion", "1, 0, 0, 1"
+            VALUE "ProductName", "Process Monitor X v2"
+            VALUE "ProductVersion", "2.0.0.1"
         END
     END
     BLOCK "VarFileInfo"

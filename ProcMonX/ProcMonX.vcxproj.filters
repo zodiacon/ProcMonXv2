@@ -243,6 +243,24 @@
     <Image Include="res\clip_copy.ico">
       <Filter>Resource Files\Icons</Filter>
     </Image>
+    <Image Include="res\dll-add.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\dll-delete.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\process-delete.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\process-new.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\threads-delete.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\threads-new.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

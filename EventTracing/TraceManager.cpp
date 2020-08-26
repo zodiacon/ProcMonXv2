@@ -38,25 +38,16 @@ TraceManager::~TraceManager() {
 }
 
 bool TraceManager::AddKernelEventTypes(std::initializer_list<KernelEventTypes> types) {
-	if (IsRunning())
-		return false;
-
 	_kernelEventTypes.insert(types);
 	return true;
 }
 
 bool TraceManager::SetKernelEventTypes(std::initializer_list<KernelEventTypes> types) {
-	if (IsRunning())
-		return false;
-
 	_kernelEventTypes = types;
 	return true;
 }
 
 bool TraceManager::SetKernelEventStacks(std::initializer_list<std::wstring> categories) {
-	if (IsRunning())
-		return false;
-
 	_kernelEventStacks = categories;
 	return true;
 }
@@ -104,41 +95,11 @@ bool TraceManager::Start(EventCallback cb) {
 	if (error != ERROR_SUCCESS)
 		return false;
 
-	typedef struct _PERFINFO_GROUPMASK {
-		ULONG Masks[8];
-	} PERFINFO_GROUPMASK;
-
-	PERFINFO_GROUPMASK gm;
-	error = ::TraceQueryInformation(_handle, TraceSystemTraceEnableFlagsInfo, &gm, sizeof(gm), nullptr);
+	error = UpdateEventConfig();
 	if (error != ERROR_SUCCESS) {
 		Stop();
 		return false;
 	}
-
-	for (auto type : _kernelEventTypes) {
-		gm.Masks[((uint64_t)type) >> 32] |= (ULONG)type;
-	}
-	error = ::TraceSetInformation(_handle, TraceSystemTraceEnableFlagsInfo, &gm, sizeof(gm));
-	if (error != ERROR_SUCCESS) {
-		Stop();
-		return false;
-	}
-
-	std::vector<CLASSIC_EVENT_ID> stacks;
-	stacks.reserve(32);
-	for (auto& name : _kernelEventStacks) {
-		auto cat = KernelEventCategory::GetCategory(name.c_str());
-		assert(cat);
-		for (auto& evt : cat->Events) {
-			CLASSIC_EVENT_ID id{};
-			id.EventGuid = *cat->Guid;
-			id.Type = evt.Opcode;
-			stacks.push_back(id);
-		}
-	}
-
-	error = ::TraceSetInformation(_handle, TraceStackTracingInfo, stacks.data(), (ULONG)stacks.size() * sizeof(CLASSIC_EVENT_ID));
-	assert(error == ERROR_SUCCESS);
 
 	_traceLog.Context = this;
 	_traceLog.LoggerName = (PWSTR)KERNEL_LOGGER_NAME;
@@ -261,13 +222,46 @@ void TraceManager::ResetIndex(uint32_t index) {
 	_index = index;
 }
 
+int TraceManager::UpdateEventConfig() {
+	typedef struct _PERFINFO_GROUPMASK {
+		ULONG Masks[8];
+	} PERFINFO_GROUPMASK;
+
+	PERFINFO_GROUPMASK gm{};
+	gm.Masks[0] = EVENT_TRACE_FLAG_PROCESS;
+	for (auto type : _kernelEventTypes) {
+		gm.Masks[((uint64_t)type) >> 32] |= (ULONG)type;
+	}
+	auto error = ::TraceSetInformation(_handle, TraceSystemTraceEnableFlagsInfo, &gm, sizeof(gm));
+	if (error != ERROR_SUCCESS)
+		return error;
+
+	std::vector<CLASSIC_EVENT_ID> stacks;
+	stacks.reserve(32);
+	for (auto& name : _kernelEventStacks) {
+		auto cat = KernelEventCategory::GetCategory(name.c_str());
+		assert(cat);
+		for (auto& evt : cat->Events) {
+			CLASSIC_EVENT_ID id{};
+			id.EventGuid = *cat->Guid;
+			id.Type = evt.Opcode;
+			stacks.push_back(id);
+		}
+	}
+
+	error = ::TraceSetInformation(_handle, TraceStackTracingInfo, stacks.data(), (ULONG)stacks.size() * sizeof(CLASSIC_EVENT_ID));
+	return error;
+}
+
 void TraceManager::OnEventRecord(PEVENT_RECORD rec) {
 	if (_handle == 0)
 		return;
 
 	auto pid = rec->EventHeader.ProcessId;
 	auto& eventName = GetkernelEventName(rec);
-	auto data = std::make_shared<EventData>(rec, GetProcessImageById(pid), eventName, ++_index);
+	// use the separate heap
+	std::shared_ptr<EventData> data(new EventData(rec, GetProcessImageById(pid), eventName, ++_index));
+	//auto data = std::make_shared<EventData>(rec, GetProcessImageById(pid), eventName, ++_index);
 
 	// evaluate filters
 	FilterContext context = { data.get() };

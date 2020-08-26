@@ -3,6 +3,7 @@
 #include "EventData.h"
 #include "DialogHelper.h"
 #include "SortHelper.h"
+#include "ClipboardHelper.h"
 
 CEventPropertiesDlg::CEventPropertiesDlg(EventData* data) : m_pData(data) {
 }
@@ -31,14 +32,14 @@ LRESULT CEventPropertiesDlg::OnInitDialog(UINT, WPARAM, LPARAM, BOOL&) {
 	SetWindowText(text);
 
 	m_List.InsertColumn(0, L"Name", LVCFMT_LEFT, 120);
-	m_List.InsertColumn(1, L"Value", LVCFMT_LEFT, 200);
+	m_List.InsertColumn(1, L"Value", LVCFMT_LEFT, 300);
 
 	auto ts = m_pData->GetTimeStamp();
 	text.Format(L".%06u", (ts / 10) % 1000000);
 
 	InsertItem(L"Time Stamp", CTime(*(FILETIME*)&ts).Format(L"%x %X") + text);
 	InsertItem(L"Event Name", m_pData->GetEventName().c_str());
-	::StringFromGUID2(m_pData->GetProviderId(), text.GetBufferSetLength(64), 64);
+	::StringFromGUID2(m_pData->GetProviderId(), (PWSTR)text.GetBufferSetLength(64), 64);
 	InsertItem(L"Provider Id", text);
 	text.Format(L"%d", m_pData->GetEventDescriptor().Opcode);
 	InsertItem(L"Opcode", text);
@@ -70,6 +71,15 @@ LRESULT CEventPropertiesDlg::OnCloseCmd(WORD, WORD wID, HWND, BOOL&) {
 }
 
 LRESULT CEventPropertiesDlg::OnCopy(WORD, WORD wID, HWND, BOOL&) {
+	CString text, item;
+	for (int i = 0; i < m_List.GetItemCount(); i++) {
+		for (int c = 0; c < 2; c++) {
+			m_List.GetItemText(i, c, item);
+			text += item += L",";
+		}
+		text = text.Left(text.GetLength() - 1) + L"\n";
+	}
+	ClipboardHelper::CopyText(*this, text);
 	return 0;
 }
 

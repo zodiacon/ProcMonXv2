@@ -84,7 +84,23 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 	return 0;
 }
 
-LRESULT CMainFrame::OnClose(UINT, WPARAM, LPARAM, BOOL& handled) {
+LRESULT CMainFrame::OnTimer(UINT, WPARAM id, LPARAM, BOOL&) {
+	if (id == 1 && m_pMonitorView) {
+		KillTimer(1);
+		MEMORYSTATUSEX ms = { sizeof(ms) };
+		::GlobalMemoryStatusEx(&ms);
+		if (ms.dwMemoryLoad > 94 && m_pMonitorView) {
+			if (AtlMessageBox(*this, L"Physical memory is low. Continue monitoring?", 
+				IDS_TITLE, MB_OKCANCEL | MB_DEFBUTTON2 | MB_ICONWARNING | MB_SETFOREGROUND | MB_SYSTEMMODAL) == IDCANCEL) {
+				PostMessage(WM_COMMAND, ID_MONITOR_STOP);
+			}
+		}
+	}
+
+	return 0;
+}
+
+LRESULT CMainFrame::OnClose(UINT, WPARAM, LPARAM, BOOL&) {
 	if (m_tm.IsRunning())
 		m_tm.Stop();
 	
@@ -108,7 +124,7 @@ LRESULT CMainFrame::OnFileExit(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCt
 }
 
 LRESULT CMainFrame::OnFileNew(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
-	CView* pView = new CView(this);
+	auto pView = new CView(this);
 	pView->Create(m_view, rcDefault, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 0);
 	m_view.AddPage(pView->m_hWnd, _T("Events"), 0, pView);
 	m_pCurrentView = pView;
@@ -133,7 +149,7 @@ LRESULT CMainFrame::OnAppAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCt
 LRESULT CMainFrame::OnWindowClose(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
 	int nActivePage = m_view.GetActivePage();
 	if (nActivePage != -1) {
-		if (m_pMonitorView->m_hWnd == m_view.GetPageHWND(nActivePage)) {
+		if (m_pMonitorView && m_pMonitorView->m_hWnd == m_view.GetPageHWND(nActivePage)) {
 			AtlMessageBox(*this, L"Monitoring in progress. Stop monitoring before closing this tab", IDS_TITLE, MB_ICONWARNING);
 			return 0;
 		}
@@ -168,16 +184,19 @@ LRESULT CMainFrame::OnMonitorStart(WORD, WORD, HWND, BOOL&) {
 
 	UIEnable(ID_MONITOR_STOP, TRUE);
 	UIEnable(ID_MONITOR_START, FALSE);
+	SetTimer(1, 5000, nullptr);
 
 	return 0;
 }
 
 LRESULT CMainFrame::OnMonitorStop(WORD, WORD, HWND, BOOL&) {
+	KillTimer(1);
 	m_tm.Stop();
-	m_view.SetPageImage(m_view.PageIndexFromHwnd(m_pMonitorView->m_hWnd), 0);
-	m_pCurrentView->StartMonitoring(m_tm, false);
-	m_pMonitorView = nullptr;
 
+	m_view.SetPageImage(m_view.PageIndexFromHwnd(m_pMonitorView->m_hWnd), 0);
+	m_pMonitorView->StartMonitoring(m_tm, false);
+	m_pMonitorView = nullptr;
+	
 	UIEnable(ID_MONITOR_STOP, FALSE);
 	UIEnable(ID_MONITOR_START, TRUE);
 
