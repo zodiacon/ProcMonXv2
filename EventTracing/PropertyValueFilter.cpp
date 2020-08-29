@@ -10,8 +10,8 @@ FilterAction PropertyValueFilter::Eval(FilterContext& context) const {
     auto action = FilterAction::None;
     for (auto& prop : context.Data->GetProperties()) {
         action = Compare(context.Data->FormatProperty(prop));
-        if (action != FilterAction::None)
-            break;
+        if (action == GetAction())
+            return action;
     }
     return action;
 }

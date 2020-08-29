@@ -84,6 +84,7 @@ private:
 	std::atomic<uint32_t> _filteredEvents{ 0 };
 	wil::unique_handle _hMemMap;
 	bool _isTraceProcesses{ true };
+	bool _dumpUnnamedEvents{ true };
 	std::atomic<bool> _isPaused{ false };
 };
 

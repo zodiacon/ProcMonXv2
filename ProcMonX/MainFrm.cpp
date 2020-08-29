@@ -187,6 +187,10 @@ LRESULT CMainFrame::OnWindowActivate(WORD /*wNotifyCode*/, WORD wID, HWND /*hWnd
 	return 0;
 }
 
+LRESULT CMainFrame::OnAlwaysOnTop(WORD, WORD, HWND, BOOL&) {
+	return LRESULT();
+}
+
 LRESULT CMainFrame::OnMonitorStart(WORD, WORD, HWND, BOOL&) {
 	m_pCurrentView->StartMonitoring(m_tm, true);
 	m_view.SetPageImage(m_view.GetActivePage(), 1);

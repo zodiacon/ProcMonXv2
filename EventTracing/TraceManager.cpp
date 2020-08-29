@@ -261,7 +261,9 @@ void TraceManager::OnEventRecord(PEVENT_RECORD rec) {
 	auto& eventName = GetkernelEventName(rec);
 	// use the separate heap
 	std::shared_ptr<EventData> data(new EventData(rec, GetProcessImageById(pid), eventName, ++_index));
-	//auto data = std::make_shared<EventData>(rec, GetProcessImageById(pid), eventName, ++_index);
+	if (::GetLastError() != ERROR_SUCCESS && _dumpUnnamedEvents) {
+		return;
+	}
 
 	// force copying properties
 	data->GetProperties();
@@ -368,7 +370,7 @@ const std::wstring& TraceManager::GetkernelEventName(EVENT_RECORD* rec) const {
 	if (auto it = _kernelEventNames.find(key); it != _kernelEventNames.end())
 		return it->second;
 
-	BYTE buffer[1 << 11];
+	static BYTE buffer[1 << 11];
 	ULONG size = sizeof(buffer);
 	auto info = reinterpret_cast<PTRACE_EVENT_INFO>(buffer);
 	if (::TdhGetEventInformation(rec, 0, nullptr, info, &size) == STATUS_SUCCESS) {

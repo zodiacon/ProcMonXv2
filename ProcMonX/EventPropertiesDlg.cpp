@@ -4,6 +4,7 @@
 #include "DialogHelper.h"
 #include "SortHelper.h"
 #include "ClipboardHelper.h"
+#include "CallStackDlg.h"
 
 CEventPropertiesDlg::CEventPropertiesDlg(EventData* data) : m_pData(data) {
 }
@@ -23,6 +24,8 @@ LRESULT CEventPropertiesDlg::OnInitDialog(UINT, WPARAM, LPARAM, BOOL&) {
 	DialogHelper::AdjustOKCancelButtons(this);
 	DialogHelper::SetDialogIcon(this, IDI_PROPERTIES);
 	DialogHelper::AddIconToButton(this, IDC_COPY, IDI_COPY);
+	DialogHelper::AddIconToButton(this, IDC_STACK, IDI_STACK);
+	GetDlgItem(IDC_STACK).EnableWindow(m_pData->GetStackEventData() != nullptr);
 
 	DlgResize_Init(true);
 
@@ -36,11 +39,12 @@ LRESULT CEventPropertiesDlg::OnInitDialog(UINT, WPARAM, LPARAM, BOOL&) {
 	auto ts = m_pData->GetTimeStamp();
 	text.Format(L".%06u", (ts / 10) % 1000000);
 
+	auto& desc = m_pData->GetEventDescriptor();
 	InsertItem(L"Time Stamp", CTime(*(FILETIME*)&ts).Format(L"%x %X") + text);
 	InsertItem(L"Event Name", m_pData->GetEventName().c_str());
 	::StringFromGUID2(m_pData->GetProviderId(), (PWSTR)text.GetBufferSetLength(64), 64);
 	InsertItem(L"Provider Id", text);
-	text.Format(L"%d", m_pData->GetEventDescriptor().Opcode);
+	text.Format(L"%d (0x%X)", desc.Opcode, desc.Opcode);
 	InsertItem(L"Opcode", text);
 
 	auto pid = m_pData->GetProcessId();
@@ -90,5 +94,11 @@ LRESULT CEventPropertiesDlg::OnColumnClick(int, LPNMHDR hdr, BOOL&) {
 			return SortHelper::SortStrings((PCWSTR)p1, (PCWSTR)p2, (bool)asc) ? -1 : 1;
 			}, (LPARAM)m_Ascending);
 	}
+	return 0;
+}
+
+LRESULT CEventPropertiesDlg::OnCallStack(WORD, WORD wID, HWND, BOOL&) {
+	CCallStackDlg dlg(m_pData);
+	dlg.DoModal();
 	return 0;
 }

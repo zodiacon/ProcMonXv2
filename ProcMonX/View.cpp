@@ -26,10 +26,6 @@ void CView::Activate(bool active) {
 }
 
 void CView::AddEvent(std::shared_ptr<EventData> data) {
-	if (data->GetEventName().empty())
-		return;
-
-	//data->SetDetails(details);
 	{
 		std::lock_guard lock(m_EventsLock);
 		m_TempEvents.push_back(data);

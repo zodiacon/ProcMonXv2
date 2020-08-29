@@ -226,6 +226,7 @@
   <ItemGroup>
     <ClCompile Include="AboutDlg.cpp" />
     <ClCompile Include="CallStackDlg.cpp" />
+    <ClCompile Include="CSVEventDataSerializer.cpp" />
     <ClCompile Include="DialogHelper.cpp" />
     <ClCompile Include="EventConfiguration.cpp" />
     <ClCompile Include="EventPropertiesDlg.cpp" />
@@ -253,8 +254,10 @@
   <ItemGroup>
     <ClInclude Include="AboutDlg.h" />
     <ClInclude Include="CallStackDlg.h" />
+    <ClInclude Include="CSVEventDataSerializer.h" />
     <ClInclude Include="DialogHelper.h" />
     <ClInclude Include="EventConfiguration.h" />
+    <ClInclude Include="IEventDataSerializer.h" />
     <ClInclude Include="EventPropertiesDlg.h" />
     <ClInclude Include="EventsDlg.h" />
     <ClInclude Include="ClipboardHelper.h" />

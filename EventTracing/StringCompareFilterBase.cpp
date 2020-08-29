@@ -28,9 +28,6 @@ FilterAction StringCompareFilterBase::Compare(const std::wstring& str) const {
 			::_wcslwr_s(str2.data(), str2.size() + 1);
 
 			auto substr = str2.find(text2) != std::wstring::npos;
-			if (substr) {
-				OutputDebugString(L"Equals!!!!!!!!!\n");
-			}
 			if (compare == CompareType::Contains && substr)
 				return GetAction();
 			if (compare == CompareType::NotContains && !substr)

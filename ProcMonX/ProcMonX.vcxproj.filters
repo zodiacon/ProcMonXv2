@@ -22,6 +22,9 @@
     <Filter Include="Helpers">
       <UniqueIdentifier>{d9d60b2a-7d71-4292-b243-34f5a98ab762}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Serializers">
+      <UniqueIdentifier>{c7365453-1340-4079-8cff-24256efbd73e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ProcMonX.cpp">
@@ -83,6 +86,9 @@
     </ClCompile>
     <ClCompile Include="FilterFactory.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CSVEventDataSerializer.cpp">
+      <Filter>Serializers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -151,6 +157,12 @@
     </ClInclude>
     <ClInclude Include="FilterFactory.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IEventDataSerializer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CSVEventDataSerializer.h">
+      <Filter>Serializers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
