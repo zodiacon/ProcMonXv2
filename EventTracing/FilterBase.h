@@ -2,6 +2,15 @@
 
 class EventData;
 
+enum class CompareType {
+	Equals,
+	NotEqual,
+	Contains,
+	NotContains,
+	GreaterThan,
+	LessThan,
+};
+
 struct FilterContext {
 	EventData* Data;
 };
@@ -14,22 +23,30 @@ enum class FilterAction {
 
 class FilterBase abstract {
 public:
-	FilterBase(PCWSTR name = L"", FilterAction action = FilterAction::None);
+	FilterBase(std::wstring name, CompareType compare, FilterAction action = FilterAction::None);
 	~FilterBase();
 
-	virtual FilterAction Eval(FilterContext& context) = 0;
+	virtual FilterAction Eval(FilterContext& context) const = 0;
 
-	void SetName(PCWSTR name);
 	const std::wstring& GetName() const;
 	void Enable(bool enable);
 	bool IsEnabled() const;
-	void SetAction(FilterAction action);
+
 	FilterAction GetAction() const;
+	void SetAction(FilterAction action);
+
+	CompareType GetCompareType() const;
+	void SetCompareType(CompareType compare);
+
 	static FilterAction GetDefaultAction();
 	static void SetDefaultAction(FilterAction action);
 
+	virtual bool InitFromParams(const std::wstring& params) = 0;
+	virtual std::wstring GetParams() = 0;
+
 private:
 	FilterAction _action;
+	CompareType _compare;
 	inline static FilterAction _defaultAction = FilterAction::None;
 	std::wstring _name;
 	bool _enabled{ true };

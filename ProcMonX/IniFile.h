@@ -8,9 +8,11 @@ public:
 	int ReadInt(PCWSTR section, PCWSTR name, int defaultValue = 0);
 	COLORREF ReadColor(PCWSTR section, PCWSTR name, COLORREF defaultValue = CLR_INVALID);
 	std::vector<CString> ReadSection(PCWSTR section);
+	bool ReadBool(PCWSTR section, PCWSTR name, bool defaultValue = false);
 
 	bool WriteString(PCWSTR section, PCWSTR name, PCWSTR value);
 	bool WriteInt(PCWSTR section, PCWSTR name, int value, bool hex = false);
+	bool WriteBool(PCWSTR section, PCWSTR name, bool value);
 
 protected:
 	COLORREF ParseHexColor(const CString& hex);

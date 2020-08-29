@@ -39,6 +39,12 @@
     <ClInclude Include="ProcessNameFilter.h">
       <Filter>Filters</Filter>
     </ClInclude>
+    <ClInclude Include="EventNameFilter.h">
+      <Filter>Filters</Filter>
+    </ClInclude>
+    <ClInclude Include="StringCompareFilterBase.h">
+      <Filter>Filters</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -60,6 +66,12 @@
       <Filter>Filters</Filter>
     </ClCompile>
     <ClCompile Include="ProcessNameFilter.cpp">
+      <Filter>Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="EventNameFilter.cpp">
+      <Filter>Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="StringCompareFilterBase.cpp">
       <Filter>Filters</Filter>
     </ClCompile>
   </ItemGroup>

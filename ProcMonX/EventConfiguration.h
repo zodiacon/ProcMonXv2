@@ -9,7 +9,7 @@ struct EventConfigCategory {
 	bool Contains(int opcode) const;
 };
 
-class EventsConfig {
+class EventsConfiguration {
 public:
 	void AddCategory(EventConfigCategory cat);
 	void Clear();

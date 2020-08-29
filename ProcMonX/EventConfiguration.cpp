@@ -3,29 +3,29 @@
 #include <wil\resource.h>
 #include "IniFile.h"
 
-void EventsConfig::AddCategory(EventConfigCategory cat) {
+void EventsConfiguration::AddCategory(EventConfigCategory cat) {
 	_categories.push_back(std::move(cat));
 }
 
-void EventsConfig::Clear() {
+void EventsConfiguration::Clear() {
 	_categories.clear();
 }
 
-const std::vector<EventConfigCategory>& EventsConfig::GetCategories() const {
+const std::vector<EventConfigCategory>& EventsConfiguration::GetCategories() const {
 	return _categories;
 }
 
-const EventConfigCategory* const EventsConfig::GetCategory(PCWSTR name) const {
+const EventConfigCategory* const EventsConfiguration::GetCategory(PCWSTR name) const {
 	auto it = std::find_if(_categories.begin(), _categories.end(), [&](auto& c) { return c.Name == name; });
 	return it == _categories.end() ? nullptr : &(*it);
 }
 
-EventConfigCategory* EventsConfig::GetCategory(PCWSTR name) {
+EventConfigCategory* EventsConfiguration::GetCategory(PCWSTR name) {
 	auto it = std::find_if(_categories.begin(), _categories.end(), [&](auto& c) { return c.Name == name; });
 	return it == _categories.end() ? nullptr : &(*it);
 }
 
-bool EventsConfig::Save(PCWSTR path) {
+bool EventsConfiguration::Save(PCWSTR path) {
 	::DeleteFile(path);
 	IniFile file(path);
 	
@@ -40,7 +40,7 @@ bool EventsConfig::Save(PCWSTR path) {
 	return true;
 }
 
-bool EventsConfig::Load(PCWSTR path, bool clean) {
+bool EventsConfiguration::Load(PCWSTR path, bool clean) {
 	IniFile file(path);
 	if (clean)
 		_categories.clear();

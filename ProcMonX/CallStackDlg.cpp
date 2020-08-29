@@ -46,9 +46,7 @@ DWORD CCallStackDlg::LoadSymbolsThread() {
 LRESULT CCallStackDlg::OnInitDialog(UINT, WPARAM, LPARAM, BOOL&) {
 	m_List.Attach(GetDlgItem(IDC_LIST));
 
-	SetIcon(AtlLoadIconImage(IDI_STACK, 0, 16, 16), FALSE);
-	SetIcon(AtlLoadIconImage(IDI_STACK, 0, 32, 32), TRUE);
-
+	DialogHelper::SetDialogIcon(this, IDI_STACK);
 	DialogHelper::AddIconToButton(this, IDC_COPY, IDI_COPY);
 
 	CString num;

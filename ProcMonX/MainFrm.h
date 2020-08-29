@@ -29,6 +29,9 @@ public:
 	CFont& GetMonoFont() override;
 	void ViewDestroyed(void*) override;
 	TraceManager& GetTraceManager() override;
+	BOOL SetPaneText(int index, PCWSTR text) override;
+	BOOL SetPaneIcon(int index, HICON hIcon) override;
+	CUpdateUIBase* GetUpdateUI() override;
 
 	BEGIN_MSG_MAP(CMainFrame)
 		MESSAGE_HANDLER(WM_TIMER, OnTimer)
@@ -40,6 +43,7 @@ public:
 		COMMAND_ID_HANDLER(ID_WINDOW_CLOSE_ALL, OnWindowCloseAll)
 		COMMAND_ID_HANDLER(ID_MONITOR_START, OnMonitorStart)
 		COMMAND_ID_HANDLER(ID_MONITOR_STOP, OnMonitorStop)
+		COMMAND_ID_HANDLER(ID_MONITOR_PAUSE, OnMonitorPause)
 		COMMAND_RANGE_HANDLER(ID_WINDOW_TABFIRST, ID_WINDOW_TABLAST, OnWindowActivate)
 		MESSAGE_HANDLER(WM_CREATE, OnCreate)
 		MESSAGE_HANDLER(WM_CLOSE, OnClose)
@@ -73,14 +77,17 @@ private:
 	LRESULT OnWindowActivate(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnMonitorStart(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnMonitorStop(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnMonitorPause(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnForwardToActiveTab(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnTabActivated(int /*idCtrl*/, LPNMHDR /*pnmh*/, BOOL& /*bHandled*/);
 
 private:
 	CCommandBarCtrl m_CmdBar;
+	CMultiPaneStatusBarCtrl m_StatusBar;
 	CTabView m_view;
 	CToolBarCtrl m_ToolBar;
 	TraceManager m_tm;
+	CIcon m_RunIcon, m_StopIcon, m_PauseIcon;
 	CView* m_pCurrentView{ nullptr };
 	CView* m_pMonitorView{ nullptr };
 };

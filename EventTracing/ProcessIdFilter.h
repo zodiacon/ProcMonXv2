@@ -3,14 +3,14 @@
 
 class ProcessIdFilter : public FilterBase {
 public:
-	using FilterBase::FilterBase;
-
-	ProcessIdFilter(DWORD pid, FilterAction action);
+	ProcessIdFilter(DWORD pid, CompareType compare, FilterAction action);
 	
 	void SetProcessId(DWORD pid);
 	
 	// Inherited via FilterBase
-	virtual FilterAction Eval(FilterContext& context) override;
+	virtual FilterAction Eval(FilterContext& context) const override;
+	virtual bool InitFromParams(const std::wstring& params) override;
+	virtual std::wstring GetParams() override;
 
 private:
 	DWORD _pid;

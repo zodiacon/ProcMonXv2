@@ -112,8 +112,7 @@
       <DllDataFileName />
     </Midl>
     <Manifest>
-      <AdditionalManifestFiles>
-      </AdditionalManifestFiles>
+      <AdditionalManifestFiles>manifest.xml</AdditionalManifestFiles>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -150,8 +149,7 @@
       <DllDataFileName />
     </Midl>
     <Manifest>
-      <AdditionalManifestFiles>
-      </AdditionalManifestFiles>
+      <AdditionalManifestFiles>manifest.xml</AdditionalManifestFiles>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -187,8 +185,7 @@
       <DllDataFileName />
     </Midl>
     <Manifest>
-      <AdditionalManifestFiles>
-      </AdditionalManifestFiles>
+      <AdditionalManifestFiles>manifest.xml</AdditionalManifestFiles>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -223,8 +220,7 @@
       <DllDataFileName />
     </Midl>
     <Manifest>
-      <AdditionalManifestFiles>
-      </AdditionalManifestFiles>
+      <AdditionalManifestFiles>manifest.xml</AdditionalManifestFiles>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -236,6 +232,9 @@
     <ClCompile Include="EventsDlg.cpp" />
     <ClCompile Include="ClipboardHelper.cpp" />
     <ClCompile Include="ColumnManager.cpp" />
+    <ClCompile Include="FilterConfiguration.cpp" />
+    <ClCompile Include="FilterFactory.cpp" />
+    <ClCompile Include="FiltersDlg.cpp" />
     <ClCompile Include="IniFile.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="ProcMonX.cpp" />
@@ -260,6 +259,9 @@
     <ClInclude Include="EventsDlg.h" />
     <ClInclude Include="ClipboardHelper.h" />
     <ClInclude Include="ColumnManager.h" />
+    <ClInclude Include="FilterConfiguration.h" />
+    <ClInclude Include="FilterFactory.h" />
+    <ClInclude Include="FiltersDlg.h" />
     <ClInclude Include="IniFile.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="resource.h" />
@@ -276,8 +278,12 @@
     <ResourceCompile Include="ProcMonX.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\add.ico" />
+    <Image Include="res\arrow_down_blue.ico" />
+    <Image Include="res\arrow_up_blue.ico" />
     <Image Include="res\cancel.ico" />
     <Image Include="res\clip_copy.ico" />
+    <Image Include="res\delete_button.ico" />
     <Image Include="res\dll-add.ico" />
     <Image Include="res\dll-delete.ico" />
     <Image Include="res\Driver.ico" />
@@ -287,8 +293,10 @@
     <Image Include="res\file.ico" />
     <Image Include="res\filter-add.ico" />
     <Image Include="res\filter-delete.ico" />
+    <Image Include="res\filter-edit.ico" />
     <Image Include="res\filter.ico" />
     <Image Include="res\find.ico" />
+    <Image Include="res\folder_open.ico" />
     <Image Include="res\gear.ico" />
     <Image Include="res\handle.ico" />
     <Image Include="res\heap.ico" />
@@ -300,6 +308,8 @@
     <Image Include="res\network.ico" />
     <Image Include="res\object.ico" />
     <Image Include="res\ok.ico" />
+    <Image Include="res\ok_button.ico" />
+    <Image Include="res\Pause.ico" />
     <Image Include="res\Play.ico" />
     <Image Include="res\process-delete.ico" />
     <Image Include="res\process-new.ico" />
@@ -324,6 +334,9 @@
     <ProjectReference Include="..\EventTracing\EventTracing.vcxproj">
       <Project>{68987f0e-6f47-4d9e-9503-b93f5ad5983a}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="manifest.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -11,8 +11,18 @@
 #include "EventsDlg.h"
 #include "EventPropertiesDlg.h"
 #include "ProcessIdFilter.h"
+#include "FiltersDlg.h"
+#include "FilterFactory.h"
 
 CView::CView(IMainFrame* frame) : CViewBase(frame) {
+}
+
+void CView::Activate(bool active) {
+	m_IsActive = active;
+	if (active) {
+		UpdateEventStatus();
+		UpdateUI();
+	}
 }
 
 void CView::AddEvent(std::shared_ptr<EventData> data) {
@@ -39,7 +49,7 @@ void CView::StartMonitoring(TraceManager& tm, bool start) {
 		std::initializer_list<KernelEventTypes> events(types.data(), types.data() + types.size());
 		tm.SetKernelEventTypes(events);
 		tm.SetKernelEventStacks(std::initializer_list<std::wstring>(categories.data(), categories.data() + categories.size()));
-		auto selfFilter = std::make_shared<ProcessIdFilter>(::GetCurrentProcessId(), FilterAction::Exclude);
+		auto selfFilter = std::make_shared<ProcessIdFilter>(::GetCurrentProcessId(), CompareType::Equals, FilterAction::Exclude);
 		tm.RemoveAllFilters();
 		tm.AddFilter(selfFilter);
 	}
@@ -161,6 +171,12 @@ std::wstring CView::GetEventDetails(EventData* data) const {
 	return details;
 }
 
+void CView::UpdateEventStatus() {
+	CString text;
+	text.Format(L"Events: %u", (uint32_t)m_Events.size());
+	GetFrame()->SetPaneText(2, text);
+}
+
 bool CView::IsSortable(int col) const {
 	return !m_IsMonitoring && col != 8;
 }
@@ -211,6 +227,23 @@ LRESULT CView::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOO
 		WS_VISIBLE | WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS |
 		LVS_REPORT | LVS_SHOWSELALWAYS | LVS_OWNERDATA | LVS_SINGLESEL | LVS_SHAREIMAGELISTS);
 	m_List.SetExtendedListViewStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP | LVS_EX_LABELTIP | LVS_EX_DOUBLEBUFFER);
+
+	auto processes = KernelEventCategory::GetCategory(L"Process");
+	ATLASSERT(processes);
+
+	// init events
+
+	EventConfigCategory cat;
+	cat.Name = processes->Name;
+	m_EventsConfig.AddCategory(cat);
+
+	// init filters
+
+	FilterDescription desc;
+	desc.Name = L"Process Id";
+	desc.Action = FilterAction::Exclude;
+	desc.Parameters = std::to_wstring(::GetCurrentProcessId());
+	m_FilterConfig.AddFilter(desc);
 
 	if (s_Images == nullptr) {
 		s_Images.Create(16, 16, ILC_COLOR32, 8, 8);
@@ -265,7 +298,7 @@ LRESULT CView::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOO
 	cm->AddColumn(L"Process Name", LVCFMT_LEFT, 150);
 	cm->AddColumn(L"TID", LVCFMT_RIGHT, 100, ColumnFlags::Numeric | ColumnFlags::Visible);
 	cm->AddColumn(L"Opcode", LVCFMT_CENTER, 45, ColumnFlags::Numeric);
-	cm->AddColumn(L"Provider", LVCFMT_CENTER, 180, ColumnFlags::Numeric);
+	cm->AddColumn(L"Provider", LVCFMT_CENTER, 180, ColumnFlags::Numeric | ColumnFlags::Visible);
 	cm->AddColumn(L"Details", LVCFMT_LEFT, 700);
 
 	cm->UpdateColumns();
@@ -291,7 +324,7 @@ LRESULT CView::OnForwardMsg(UINT, WPARAM, LPARAM lp, BOOL& handled) {
 }
 
 LRESULT CView::OnTimer(UINT, WPARAM id, LPARAM, BOOL&) {
-	if (id == 1) {
+	if (m_IsMonitoring && id == 1) {
 		if(!m_TempEvents.empty()) {
 			std::lock_guard lock(m_EventsLock);
 			m_Events.insert(m_Events.end(), m_TempEvents.begin(), m_TempEvents.end());
@@ -304,6 +337,8 @@ LRESULT CView::OnTimer(UINT, WPARAM id, LPARAM, BOOL&) {
 		UpdateList(m_List, static_cast<int>(m_Events.size()));
 		if (m_AutoScroll)
 			m_List.EnsureVisible(m_List.GetItemCount() - 1, FALSE);
+		if (m_IsActive)
+			UpdateEventStatus();
 	}
 	return 0;
 }
@@ -381,5 +416,45 @@ LRESULT CView::OnConfigureEvents(WORD, WORD, HWND, BOOL&) {
 
 LRESULT CView::OnAutoScroll(WORD, WORD, HWND, BOOL&) {
 	m_AutoScroll = !m_AutoScroll;
+	GetFrame()->GetUpdateUI()->UISetCheck(ID_VIEW_AUTOSCROLL, m_AutoScroll);
+
 	return 0;
+}
+
+LRESULT CView::OnConfigFilters(WORD, WORD, HWND, BOOL&) {
+	CFiltersDlg dlg(m_FilterConfig);
+	if (dlg.DoModal() == IDOK) {
+		// update filters
+		auto& tm = GetFrame()->GetTraceManager();
+		auto paused = tm.IsPaused();
+		if(!paused)
+			tm.Pause(true);
+		tm.RemoveAllFilters();
+		for (int i = 0; i < m_FilterConfig.GetFilterCount(); i++) {
+			auto desc = m_FilterConfig.GetFilter(i);
+			ATLASSERT(desc);
+			auto filter = FilterFactory::CreateFilter(desc->Name.c_str(), desc->Compare, desc->Parameters.c_str(), desc->Action);
+			ATLASSERT(filter);
+			if (filter)
+				tm.AddFilter(filter);
+		}
+		if(!paused)
+			tm.Pause(false);
+	}
+
+	return 0;
+}
+
+LRESULT CView::OnItemChanged(int, LPNMHDR, BOOL&) {
+	UpdateUI();
+
+	return 0;
+}
+
+void CView::UpdateUI() {
+	auto ui = GetFrame()->GetUpdateUI();
+	ui->UISetCheck(ID_VIEW_AUTOSCROLL, m_AutoScroll);
+	auto selected = m_List.GetSelectedIndex();
+	ui->UIEnable(ID_EVENT_PROPERTIES, selected >= 0);
+	ui->UIEnable(ID_EVENT_CALLSTACK, selected >= 0 && m_Events[selected]->GetStackEventData() != nullptr);
 }

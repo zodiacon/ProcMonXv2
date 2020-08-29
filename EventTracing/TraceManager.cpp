@@ -254,7 +254,7 @@ int TraceManager::UpdateEventConfig() {
 }
 
 void TraceManager::OnEventRecord(PEVENT_RECORD rec) {
-	if (_handle == 0)
+	if (_handle == 0 || _isPaused)
 		return;
 
 	auto pid = rec->EventHeader.ProcessId;
@@ -321,7 +321,7 @@ DWORD TraceManager::Run() {
 	return error;
 }
 
-int64_t TraceManager::GetFilteredEventsCount() const {
+uint32_t TraceManager::GetFilteredEventsCount() const {
 	return _filteredEvents;
 }
 
@@ -388,6 +388,10 @@ bool TraceManager::RemoveProcessName(DWORD pid) {
 	return _processes.erase(pid);
 }
 
+bool TraceManager::IsPaused() const {
+	return _isPaused;
+}
+
 bool TraceManager::RemoveFilterAt(int index) {
 	if (index < 0 || index >= _filters.size())
 		return false;
@@ -422,4 +426,20 @@ std::wstring TraceManager::GetDosNameFromNtName(PCWSTR name) {
 			return dosName + (name + ntName.size());
 	}
 	return L"";
+}
+
+bool TraceManager::SetBackupFile(PCWSTR path) {
+	if (path) {
+		wil::unique_hfile hFile(::CreateFile(path, GENERIC_WRITE | GENERIC_READ, 0, nullptr, TRUNCATE_EXISTING, 0, nullptr));
+		if (!hFile)
+			return false;
+		_hMemMap.reset(::CreateFileMapping(hFile.get(), nullptr, PAGE_READWRITE | MEM_RESERVE, 32, 0, nullptr));
+		if (!_hMemMap)
+			return false;
+	}
+	return true;
+}
+
+void TraceManager::Pause(bool pause) {
+	_isPaused = pause;
 }

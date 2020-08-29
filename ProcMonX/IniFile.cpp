@@ -43,6 +43,13 @@ std::vector<CString> IniFile::ReadSection(PCWSTR section) {
 	return names;
 }
 
+bool IniFile::ReadBool(PCWSTR section, PCWSTR name, bool defaultValue) {
+	auto value = ReadInt(section, name, -1);
+	if (value == -1)
+		return defaultValue;
+	return value ? true : false;
+}
+
 bool IniFile::WriteString(PCWSTR section, PCWSTR name, PCWSTR value) {
 	return ::WritePrivateProfileString(section, name, value, _path);
 }
@@ -51,6 +58,10 @@ bool IniFile::WriteInt(PCWSTR section, PCWSTR name, int value, bool hex) {
 	CString text;
 	text.Format(hex ? L"0x%X" : L"%d", value);
 	return WriteString(section, name, text);
+}
+
+bool IniFile::WriteBool(PCWSTR section, PCWSTR name, bool value) {
+	return WriteInt(section, name, value ? 1 : 0);
 }
 
 COLORREF IniFile::ParseHexColor(const CString& hex) {

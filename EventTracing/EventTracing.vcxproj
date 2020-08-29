@@ -158,15 +158,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="EventData.h" />
+    <ClInclude Include="EventNameFilter.h" />
     <ClInclude Include="FilterBase.h" />
     <ClInclude Include="KernelEvents.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ProcessIdFilter.h" />
     <ClInclude Include="ProcessNameFilter.h" />
+    <ClInclude Include="StringCompareFilterBase.h" />
     <ClInclude Include="TraceManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EventData.cpp" />
+    <ClCompile Include="EventNameFilter.cpp" />
     <ClCompile Include="FilterBase.cpp" />
     <ClCompile Include="KernelEvents.cpp" />
     <ClCompile Include="pch.cpp">
@@ -177,6 +180,7 @@
     </ClCompile>
     <ClCompile Include="ProcessIdFilter.cpp" />
     <ClCompile Include="ProcessNameFilter.cpp" />
+    <ClCompile Include="StringCompareFilterBase.cpp" />
     <ClCompile Include="TraceManager.cpp" />
   </ItemGroup>
   <ItemGroup>

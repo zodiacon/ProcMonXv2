@@ -25,10 +25,13 @@ public:
 	//bool RemoveKernelEventTypes(KernelEventTypes types);
 	bool SetKernelEventTypes(std::initializer_list<KernelEventTypes> types);
 	bool SetKernelEventStacks(std::initializer_list<std::wstring> categories);
-
+	bool SetBackupFile(PCWSTR path);
+	void Pause(bool pause);
 	bool Start(EventCallback callback);
 	bool Stop();
 	bool IsRunning() const;
+	bool IsPaused() const;
+
 	void ResetIndex(uint32_t index = 0);
 	int UpdateEventConfig();
 
@@ -39,7 +42,7 @@ public:
 	bool RemoveFilterAt(int index);
 	void RemoveAllFilters();
 	int GetFilterCount() const;
-	int64_t GetFilteredEventsCount() const;
+	uint32_t GetFilteredEventsCount() const;
 
 	bool SwapFilters(int i1, int i2);
 	std::shared_ptr<FilterBase> GetFilter(int index) const;
@@ -78,7 +81,9 @@ private:
 	std::shared_ptr<EventData> _lastExcluded;
 	uint32_t _index{ 0 };
 	std::vector<std::shared_ptr<FilterBase>> _filters;
-	std::atomic<int64_t> _filteredEvents{ 0 };
+	std::atomic<uint32_t> _filteredEvents{ 0 };
+	wil::unique_handle _hMemMap;
 	bool _isTraceProcesses{ true };
+	std::atomic<bool> _isPaused{ false };
 };
 

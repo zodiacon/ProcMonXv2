@@ -47,8 +47,16 @@
 #define IDI_DLL_LOAD                    250
 #define IDI_DLL_UNLOAD                  251
 #define IDI_THREAD_DELETE               252
-#define IDI_ICON4                       253
 #define IDI_THREAD_NEW                  253
+#define IDD_FILTERS                     254
+#define IDI_DOWN_ARROW                  256
+#define IDI_UP_ARROW                    257
+#define IDI_OPEN                        258
+#define IDI_ADD                         259
+#define IDI_FILTER_EDIT                 260
+#define IDI_CANCEL2                     261
+#define IDI_OK2                         262
+#define IDI_PAUSE                       263
 #define IDC_LIST                        1000
 #define IDC_TREE                        1002
 #define IDC_SAVE                        1003
@@ -61,6 +69,18 @@
 #define IDC_PROCESS                     1011
 #define IDC_THREAD                      1012
 #define IDC_COPY                        1013
+#define IDC_UP                          1017
+#define IDC_DOWN                        1018
+#define IDC_DELETE                      1019
+#define IDC_NAMES                       1020
+#define IDC_COMPARE                     1021
+#define IDC_INC_EXC                     1023
+#define IDC_ADD                         1024
+#define IDC_VALUE                       1025
+#define IDC_EDIT                        1026
+#define IDC_BASIC                       1026
+#define IDC_RADIO2                      1027
+#define IDC_ADVANCED                    1027
 #define ID_WINDOW_CLOSE                 32772
 #define ID_WINDOW_CLOSE_ALL             32773
 #define ID_OPTIONS_ALWAYSONTOP          32775
@@ -75,14 +95,15 @@
 #define ID_OPTIONS_SYMBOLS              32785
 #define ID_FILE_NEWTAB                  32786
 #define ID_VIEW_AUTOSCROLL              32787
+#define ID_MONITOR_PAUSE                32788
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        254
-#define _APS_NEXT_COMMAND_VALUE         32788
-#define _APS_NEXT_CONTROL_VALUE         1016
+#define _APS_NEXT_RESOURCE_VALUE        264
+#define _APS_NEXT_COMMAND_VALUE         32789
+#define _APS_NEXT_CONTROL_VALUE         1028
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

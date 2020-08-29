@@ -11,6 +11,7 @@
 #include <shared_mutex>
 #include "EventConfiguration.h"
 #include "SymbolsHandler.h"
+#include "FilterConfiguration.h"
 
 class CView : 
 	public CViewBase<CView>,
@@ -21,6 +22,7 @@ public:
 
 	DECLARE_WND_CLASS(NULL)
 
+	void Activate(bool active);
 	void AddEvent(std::shared_ptr<EventData> data);
 	void StartMonitoring(TraceManager& tm, bool start);
 	CString GetColumnText(HWND, int row, int col) const;
@@ -40,6 +42,7 @@ public:
 	virtual void OnFinalMessage(HWND /*hWnd*/);
 
 	BEGIN_MSG_MAP(CView)
+		NOTIFY_CODE_HANDLER(LVN_ITEMCHANGED, OnItemChanged)
 //		MESSAGE_HANDLER(WM_FORWARDMSG, OnForwardMsg)
 		MESSAGE_HANDLER(WM_TIMER, OnTimer)
 		MESSAGE_HANDLER(WM_CREATE, OnCreate)
@@ -50,6 +53,7 @@ public:
 		COMMAND_ID_HANDLER(ID_VIEW_AUTOSCROLL, OnAutoScroll)
 		MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
 		COMMAND_ID_HANDLER(ID_EVENT_PROPERTIES, OnEventProperties)
+		COMMAND_ID_HANDLER(ID_MONITOR_FILTERS, OnConfigFilters)
 		CHAIN_MSG_MAP(CVirtualListView<CView>)
 		CHAIN_MSG_MAP(CCustomDraw<CView>)
 		CHAIN_MSG_MAP(CViewBase<CView>)
@@ -58,6 +62,8 @@ public:
 private:
 	std::wstring ProcessSpecialEvent(EventData* data) const;
 	std::wstring GetEventDetails(EventData* data) const;
+	void UpdateEventStatus();
+	void UpdateUI();
 
 	// Handler prototypes (uncomment arguments if needed):
 	//	LRESULT MessageHandler(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
@@ -74,6 +80,8 @@ private:
 	LRESULT OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnConfigureEvents(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnAutoScroll(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnConfigFilters(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnItemChanged(int /*idCtrl*/, LPNMHDR /*pnmh*/, BOOL& /*bHandled*/);
 
 private:
 	CListViewCtrl m_List;
@@ -83,8 +91,10 @@ private:
 	std::vector<std::shared_ptr<EventData>> m_OrgEvents;
 	std::vector<std::shared_ptr<EventData>> m_TempEvents;
 	std::mutex m_EventsLock;
-	EventsConfig m_EventsConfig;
+	EventsConfiguration m_EventsConfig;
+	FilterConfiguration m_FilterConfig;
 	bool m_IsMonitoring{ false };
 	bool m_IsDraining{ false };
 	bool m_AutoScroll{ false };
+	bool m_IsActive{ false };
 };

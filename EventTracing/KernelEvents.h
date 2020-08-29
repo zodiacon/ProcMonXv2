@@ -42,21 +42,51 @@ enum class KernelEventTypes : uint64_t {
 	Debug =				EVENT_TRACE_FLAG_DEBUG_EVENTS,
 
 	// Mask[1]
-	PerfMemory =		0x20000001 | (1LL << 32),
-	PerfProfile =		0x20000002 | (1LL << 32),
-	PerfContextSwitch = 0x20000004 | (1LL << 32),
-	PerfDrivers =		0x20000010 | (1LL << 32),
-	PerfPool =			0x20000040 | (1LL << 32),
+	PerfMemory =			0x20000001 | (1LL << 32),
+	PerfProfile =			0x20000002 | (1LL << 32),
+	PerfContextSwitch =		0x20000004 | (1LL << 32),
+	PerfDrivers =			0x20000010 | (1LL << 32),
+	PerfPool =				0x20000040 | (1LL << 32),
+	PerfSyncObjects =		0x20020000 | (1LL << 32),
+	PerfVirtualAlloc =		0x20008000 | (1LL << 32),
+
+	// Mask[2]
+	PerfHeap =			0x40000020 | (2LL << 32),
+	PerfSysCalls =		0x40000040 | (2LL << 32),
+	WorkerThread =		0x48000000 | (2LL << 32),
+	ProcessFreeze =		0x40000002 | (2LL << 32),
+	PerfEvents =		0x40000800 | (2LL << 32),
+	PerfWSDetail =		0x40000008 | (2LL << 32),
+	PerfTimer =			0x40020000 | (2LL << 32),
+	PerfIPI =			0x40400000 | (2LL << 32),
+	PerfClockIntr =		0x40040000 | (2LL << 32),
 
 	// Mask[4]
 	PerfHandles =		0x80000040 | (4LL << 32),
 	PerfObjects =		0x80000080 | (4LL << 32),
 	PerfDebugger =		0x80000800 | (4LL << 32),
+	PerfPower =			0x80008000 | (4LL << 32),
+	PerfDllInfo =		0x80000008 | (4LL << 32),
+	PerfFltIoInit =		0x80080000 | (4LL << 32),
+	PerfFltIO =			0x80100000 | (4LL << 32),
+	PerfFltFastIO =		0x80200000 | (4LL << 32),
+	PerfFltFail =		0x80400000 | (4LL << 32),
+	PerfFlt =			PerfFltIO | PerfFltIoInit | PerfFltFastIO | PerfFltFail,
+	PerfHvProfile =		0x80800000 | (4LL << 32),
 
 	// Mask[6]
 	PerfConfigSystem =	0xC0000001 | (6LL << 32),
 	PerfConfigGraphics = 0xC0000002 | (6LL << 32),
 };
+DEFINE_ENUM_FLAG_OPERATORS(KernelEventTypes);
+
+DEFINE_GUID( /* 54849625-5478-4994-a5ba-3e3b0328c30d */
+	SecurityProviderGuid,
+	0x54849625,
+	0x5478,
+	0x4994,
+	0xa5, 0xba, 0x3e, 0x3b, 0x03, 0x28, 0xc3, 0x0d
+);
 
 DEFINE_GUID( /* 3d6fa8d0-fe05-11d0-9dda-00c04fd7ba7c */
 	ProcessGuid,
@@ -275,6 +305,14 @@ DEFINE_GUID( /* d3de60b2-a663-45d5-9826-a0a5949d2cb0 */
 	0x98, 0x26, 0xa0, 0xa5, 0x94, 0x9d, 0x2c, 0xb0
 );
 
+DEFINE_GUID( /* 3282fc76-feed-498e-8aa7-e70f459d430e */
+	JobGuid,
+	0x3282fc76,
+	0xfeed,
+	0x498e,
+	0x8a, 0xa7, 0xe7, 0x0f, 0x45, 0x9d, 0x43, 0x0e
+);
+
 struct KernelEvent {
 	std::wstring Name;
 	uint32_t Opcode;
@@ -285,6 +323,7 @@ struct KernelEventCategory {
 	KernelEventTypes EnableFlag;
 	const GUID* Guid;
 	std::vector<KernelEvent> Events;
+	bool Advanced{ false };
 
 	static const std::vector<KernelEventCategory>& GetAllCategories();
 	static const KernelEventCategory* GetCategory(PCWSTR name);

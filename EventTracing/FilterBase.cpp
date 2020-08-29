@@ -1,14 +1,10 @@
 #include "pch.h"
 #include "FilterBase.h"
 
-FilterBase::FilterBase(PCWSTR name, FilterAction action) : _name(name), _action(action) {
+FilterBase::FilterBase(std::wstring name, CompareType compare, FilterAction action) : _name(std::move(name)), _compare(compare), _action(action) {
 }
 
 FilterBase::~FilterBase() = default;
-
-void FilterBase::SetName(PCWSTR name) {
-	_name = name;
-}
 
 const std::wstring& FilterBase::GetName() const {
 	return _name;
@@ -24,6 +20,14 @@ bool FilterBase::IsEnabled() const {
 
 void FilterBase::SetAction(FilterAction action) {
 	_action = action;
+}
+
+CompareType FilterBase::GetCompareType() const {
+	return _compare;
+}
+
+void FilterBase::SetCompareType(CompareType compare) {
+	_compare = compare;
 }
 
 FilterAction FilterBase::GetAction() const {

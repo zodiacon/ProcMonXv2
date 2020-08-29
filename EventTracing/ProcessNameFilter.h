@@ -1,24 +1,13 @@
 #pragma once
-#include "FilterBase.h"
+#include "StringCompareFilterBase.h"
 
-enum class CompareType {
-	Equals,
-	NotEqual,
-	Contains,
-	NotContains
-};
-
-class ProcessNameFilter : public FilterBase {
+class ProcessNameFilter final : public StringCompareFilterBase {
 public:
-	using FilterBase::FilterBase;
+	using StringCompareFilterBase::StringCompareFilterBase;
 
-	ProcessNameFilter(std::wstring name, CompareType type);
+	ProcessNameFilter(std::wstring name, CompareType type, FilterAction action);
 
-	// Inherited via FilterBase
-	virtual FilterAction Eval(FilterContext& context) override;
+	virtual FilterAction Eval(FilterContext& context) const override;
 
-private:
-	std::wstring _name;
-	CompareType _type;
 };
 

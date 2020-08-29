@@ -3,45 +3,53 @@
 #include "EventsDlg.h"
 #include "KernelEvents.h"
 #include "View.h"
+#include "DialogHelper.h"
 
-CEventsDlg::CEventsDlg(EventsConfig& config) : m_Config(config) {
+CEventsDlg::CEventsDlg(EventsConfiguration& config) : m_Config(config) {
 }
 
-constexpr WCHAR SaveLoadIniFilter[] = L"ini files (*.ini)\0*.ini\0All Files\0*.*\0";
+void CEventsDlg::BuildEventsTree(const EventsConfiguration& config) {
+	m_Tree.LockWindowUpdate(TRUE);
 
-void CEventsDlg::BuildEventsTree(const EventsConfig& config) {
+	m_Tree.DeleteAllItems();
 	for (auto& category : KernelEventCategory::GetAllCategories()) {
-		int image = CView::GetImageFromEventName(category.Name.c_str());
-		auto item = m_Tree.InsertItem(category.Name.c_str(), image, image, TVI_ROOT, TVI_LAST);
-		item.SetData((DWORD_PTR)&category);
-		auto cat = config.GetCategory(category.Name.c_str());
-		for (auto& evt : category.Events) {
-			image = CView::GetImageFromEventName(evt.Name.c_str());
-			auto child = item.InsertAfter(evt.Name.c_str(), TVI_LAST, image);
-			child.SetData((DWORD_PTR)&evt);
-			if(cat && cat->Contains(evt.Opcode))
-				m_Tree.SetCheckState(child, TRUE);
-		}
-		if (cat) {
-			if (cat->Opcodes.empty()) {
-				// all events must be checked
-				CheckTreeChildren(item, TRUE);
-				m_Tree.SetCheckState(item, TRUE);
+		if (!category.Advanced || m_Advanced) {
+			int image = CView::GetImageFromEventName(category.Name.c_str());
+			auto item = m_Tree.InsertItem(category.Name.c_str(), image, image, TVI_ROOT, TVI_LAST);
+			if (m_Advanced && !category.Advanced)
+				item.SetState(TVIS_BOLD, TVIS_BOLD);
+
+			item.SetData((DWORD_PTR)&category);
+			auto cat = config.GetCategory(category.Name.c_str());
+			for (auto& evt : category.Events) {
+				image = CView::GetImageFromEventName(evt.Name.c_str());
+				auto child = item.InsertAfter(evt.Name.c_str(), TVI_LAST, image);
+				child.SetData((DWORD_PTR)&evt);
+				if (cat && cat->Contains(evt.Opcode))
+					m_Tree.SetCheckState(child, TRUE);
 			}
-			else {
-				item.Expand(TVE_EXPAND);
+			if (cat) {
+				if (cat->Opcodes.empty()) {
+					// all events must be checked
+					CheckTreeChildren(item, TRUE);
+					m_Tree.SetCheckState(item, TRUE);
+				}
+				else {
+					item.Expand(TVE_EXPAND);
+				}
 			}
+			item.SortChildren(FALSE);
 		}
-		item.SortChildren(FALSE);
 	}
 	m_Tree.SortChildren(TVI_ROOT, FALSE);
+	m_Tree.LockWindowUpdate(FALSE);
 }
 
 LRESULT CEventsDlg::OnInitDialog(UINT, WPARAM, LPARAM, BOOL&) {
 	DlgResize_Init(true);
 	m_Tree.Attach(GetDlgItem(IDC_TREE));
-	SetIcon(AtlLoadIconImage(IDI_TOOLS, 0, 16, 16), FALSE);
-	SetIcon(AtlLoadIconImage(IDI_TOOLS, 0, 32, 32), TRUE);
+	DialogHelper::SetDialogIcon(this, IDI_TOOLS);
+	CheckRadioButton(IDC_BASIC, IDC_ADVANCED, m_Advanced ? IDC_ADVANCED : IDC_BASIC);
 
 	m_Tree.ModifyStyle(0, TVS_CHECKBOXES);
 	ATLASSERT(m_Tree.GetStyle() & TVS_CHECKBOXES);
@@ -49,7 +57,7 @@ LRESULT CEventsDlg::OnInitDialog(UINT, WPARAM, LPARAM, BOOL&) {
 
 	auto images = CView::GetEventImageList();
 	m_Tree.SetImageList(images, TVSIL_NORMAL);
-	m_Tree.SetItemHeight(20);
+	m_Tree.SetItemHeight(18);
 	m_Tree.SetIndent(4);
 
 	BuildEventsTree(m_Config);
@@ -81,7 +89,7 @@ void CEventsDlg::CheckTreeChildren(HTREEITEM hParent, bool check) {
 	}
 }
 
-bool CEventsDlg::BuildConfigFromTree(EventsConfig& config) {
+bool CEventsDlg::BuildConfigFromTree(EventsConfiguration& config) {
 	auto item = m_Tree.GetRootItem();
 	CString text;
 	while (item) {
@@ -108,6 +116,14 @@ bool CEventsDlg::BuildConfigFromTree(EventsConfig& config) {
 	}
 
 	return false;
+}
+
+void CEventsDlg::SwitchToAdvancedView(bool advanced) {
+	m_Init = true;
+	EventsConfiguration config;
+	BuildConfigFromTree(config);
+	BuildEventsTree(config);
+	m_Init = false;
 }
 
 LRESULT CEventsDlg::OnTreeItemChanged(int, LPNMHDR hdr, BOOL&) {
@@ -140,7 +156,7 @@ LRESULT CEventsDlg::OnSave(WORD, WORD id, HWND, BOOL&) {
 	CSimpleFileDialog dlg(FALSE, L"ini", nullptr, OFN_EXPLORER | OFN_ENABLESIZING | OFN_OVERWRITEPROMPT,
 		SaveLoadIniFilter, *this);
 	if (dlg.DoModal() == IDOK) {
-		EventsConfig config;
+		EventsConfiguration config;
 		BuildConfigFromTree(config);
 		config.Save(dlg.m_szFileName);
 	}
@@ -152,7 +168,7 @@ LRESULT CEventsDlg::OnLoad(WORD, WORD id, HWND, BOOL&) {
 	CSimpleFileDialog dlg(TRUE, L"ini", nullptr, OFN_EXPLORER | OFN_ENABLESIZING | OFN_FILEMUSTEXIST,
 		SaveLoadIniFilter, *this);
 	if (dlg.DoModal() == IDOK) {
-		EventsConfig config;
+		EventsConfiguration config;
 		if (config.Load(dlg.m_szFileName)) {
 			BuildEventsTree(config);
 		}
@@ -177,6 +193,22 @@ LRESULT CEventsDlg::OnCollapseAll(WORD, WORD id, HWND, BOOL&) {
 		item = item.GetNextSibling();
 	}
 
+	return 0;
+}
+
+LRESULT CEventsDlg::OnBasicView(WORD, WORD id, HWND, BOOL&) {
+	if (m_Advanced) {
+		m_Advanced = false;
+		SwitchToAdvancedView(false);
+	}
+	return 0;
+}
+
+LRESULT CEventsDlg::OnAdvancedView(WORD, WORD id, HWND, BOOL&) {
+	if (!m_Advanced) {
+		m_Advanced = true;
+		SwitchToAdvancedView(true);
+	}
 	return 0;
 }
 

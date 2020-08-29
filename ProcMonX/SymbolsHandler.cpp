@@ -50,9 +50,6 @@ SymbolsHandler::SymbolsHandler(HANDLE hProcess, PCSTR searchPath, DWORD symOptio
 	m_hProcess = hProcess;
 	::SymSetOptions(symOptions);
 	ATLVERIFY(::SymInitialize(m_hProcess, searchPath, TRUE));
-	//::SymRegisterCallback64(m_hProcess, [](auto, auto action, auto data, auto context) {
-	//	return ((SymbolsHandler*)context)->Callback(action, data);
-	//	}, (ULONG64)this);
 }
 
 std::unique_ptr<SymbolsHandler> SymbolsHandler::CreateForProcess(DWORD pid, PCSTR searchPath) {

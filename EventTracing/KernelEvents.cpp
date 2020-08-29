@@ -1,11 +1,13 @@
 #include "pch.h"
 #include "KernelEvents.h"
 
-const std::vector<KernelEventCategory> KernelEvents{
+const std::vector<KernelEventCategory> KernelEvents {
 	{ L"Process", KernelEventTypes::Process, &ProcessGuid,
 		{
 			{ L"Create", 1 },
 			{ L"Delete", 2 },
+			{ L"DC Start", 2 },
+			{ L"DC STop", 3 },
 			{ L"Defunct", 39 },
 			{ L"Perf Counter", 32 },
 			{ L"Perf Counter Rundown", 33 },
@@ -24,6 +26,8 @@ const std::vector<KernelEventCategory> KernelEvents{
 		{
 			{ L"Load", 10 },
 			{ L"Unload", 2 },
+			{ L"DC Start", 2 },
+			{ L"DC STop", 3 },
 			{ L"Relocation", 0x20 },
 			{ L"Kernel Base", 0x21 },
 			{ L"Hypercall Page", 0x22 },
@@ -117,7 +121,7 @@ const std::vector<KernelEventCategory> KernelEvents{
 			{ L"Create Handle", 32 },
 			{ L"Close Handle", 33 },
 			{ L"Duplicate Handle", 34 },
-		}
+		}, true
 	},
 
 	{ L"Objects", KernelEventTypes::PerfObjects, &ObjectGuid,
@@ -126,7 +130,7 @@ const std::vector<KernelEventCategory> KernelEvents{
 			{ L"Delete Object", 49 },
 			{ L"Reference Object", 50 },
 			{ L"Dereference Object", 51 },
-		}
+		}, true
 	},
 
 	{ L"Pool", KernelEventTypes::PerfPool, &PoolGuid,
@@ -139,7 +143,7 @@ const std::vector<KernelEventCategory> KernelEvents{
 			{ L"Add Session Pool Page", 0x25 },
 			{ L"Big Pool Page", 0x26 },
 			{ L"Big Session Pool Page", 0x27 },
-		}
+		}, true
 	},
 
 	{ L"Disk I/O", KernelEventTypes::DiskIO, &DiskIoGuid,
@@ -150,8 +154,6 @@ const std::vector<KernelEventCategory> KernelEvents{
 			{ L"Write Init", 13 },
 			{ L"Flush Init", 15 },
 			{ L"Flush Buffers", 14 },
-			{ L"Major Function Call", 34 },
-			{ L"Major Function Return", 35 },
 		}
 	},
 
@@ -171,13 +173,78 @@ const std::vector<KernelEventCategory> KernelEvents{
 			{ L"Guard Page Fault", 13 },
 			{ L"Hard Page Fault", 14 },
 			{ L"Image Load Backed", 105 },
-		}
+		}, true
 	},
 
 	{ L"Debug", KernelEventTypes::DebugPrint, &GUID_NULL,
 		{
 			{ L"Debug Print", 0x20 },
+		}, true
+	},
+
+	{ L"Heap", KernelEventTypes::PerfHeap, &HeapGuid,
+		{
+			{ L"Heap Create", 0x20 },
+			{ L"Heap Alloc", 0x21 },
+			{ L"Heap ReAlloc", 0x22 },
+			{ L"Heap Destroy", 0x22 },
+			{ L"Heap Free", 0x24 },
+			{ L"Heap Extend", 0x25 },
+			{ L"Heap Snapshot", 0x26 },
+			{ L"Heap Create Snapshot", 0x27 },
+			{ L"Heap Destroy Snapshot", 0x28 },
+			{ L"Heap Extend Snapshot", 0x29 },
+			{ L"Heap Contract", 0x2a },
+			{ L"Heap Lock", 0x2b },
+			{ L"Heap Unlock", 0x2c },
+			{ L"Heap Validate", 0x2d },
+			{ L"Heap Walk", 0x2e },
+		}, true
+	},
+
+	{ L"Job", KernelEventTypes::Job, &JobGuid,
+		{
+			{ L"Create", 0x20 },
+			{ L"Terminate", 0x21 },
+			{ L"Open", 0x22 },
+			{ L"Assign Process", 0x23 },
+			{ L"Remove Process", 0x24 },
+			{ L"Set", 0x25 },
+			{ L"Query", 0x26 },
 		}
+	},
+
+	{ L"Driver", KernelEventTypes::Driver, &DiskIoGuid,
+		{
+			{ L"Init", 0x20 },
+			{ L"Init Complete", 0x21 },
+			{ L"Major Function Call", 0x22 },
+			{ L"Major Function Return", 0x23 },
+			{ L"Completion Routine Call", 0x24 },
+			{ L"Completion Routine Return", 0x25 },
+			{ L"Device Call", 0x26 },
+			{ L"Device Return", 0x27 },
+			{ L"Start I/O Call", 0x28 },
+			{ L"Start I/O Return", 0x29 },
+		}, true
+	},
+
+	{ L"Kernel Thread Pool", KernelEventTypes::WorkerThread, &ThreadGuid,
+		{
+			{ L"Create", 1 },
+			{ L"Delete", 2 },
+		}, true
+	},
+
+	{ L"File System Filter", KernelEventTypes::PerfFlt, &FileIoGuid,
+		{
+			{ L"Pre Operation Init", 0x60 },
+			{ L"Post Operation Init", 0x61 },
+			{ L"Pre Operation Completion", 0x62 },
+			{ L"Post Operation Completion", 0x63 },
+			{ L"Pre Operation Failure", 0x64 },
+			{ L"Post Operation Failure", 0x65 },
+		}, true
 	},
 
 };

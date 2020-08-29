@@ -81,11 +81,12 @@ BEGIN
     BEGIN
         MENUITEM "&Start",                      ID_MONITOR_START
         MENUITEM "S&top",                       ID_MONITOR_STOP
+        MENUITEM "&Pause",                      ID_MONITOR_PAUSE
         MENUITEM SEPARATOR
         MENUITEM "&Clear",                      ID_MONITOR_CLEAR
         MENUITEM SEPARATOR
         MENUITEM "Configure &Events...",        ID_MONITOR_CONFIGUREEVENTS
-        MENUITEM "&Filters...",                 ID_MONITOR_FILTERS
+        MENUITEM "Configure &Filters...",       ID_MONITOR_FILTERS
     END
     POPUP "&Options"
     BEGIN
@@ -203,6 +204,22 @@ IDI_THREAD_DELETE       ICON                    "res\\threads-delete.ico"
 
 IDI_THREAD_NEW          ICON                    "res\\threads-new.ico"
 
+IDI_DOWN_ARROW          ICON                    "res\\arrow_down_blue.ico"
+
+IDI_UP_ARROW            ICON                    "res\\arrow_up_blue.ico"
+
+IDI_OPEN                ICON                    "res\\folder_open.ico"
+
+IDI_ADD                 ICON                    "res\\add.ico"
+
+IDI_FILTER_EDIT         ICON                    "res\\filter-edit.ico"
+
+IDI_CANCEL2             ICON                    "res\\delete_button.ico"
+
+IDI_OK2                 ICON                    "res\\ok_button.ico"
+
+IDI_PAUSE               ICON                    "res\\Pause.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -238,15 +255,17 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | 
 CAPTION "Configure Events"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,69,269,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,135,269,50,14
-    CONTROL         "",IDC_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | WS_BORDER | WS_HSCROLL | WS_TABSTOP,6,6,186,252
+    CONTROL         "Basic",IDC_BASIC,"Button",BS_AUTORADIOBUTTON,6,6,32,10
+    CONTROL         "Advanced",IDC_ADVANCED,"Button",BS_AUTORADIOBUTTON,52,6,48,10
+    PUSHBUTTON      "Expand All",IDC_EXPAND,198,12,50,14
+    PUSHBUTTON      "Collapse All",IDC_COLLAPSE,198,32,50,14
     PUSHBUTTON      "Save...",IDC_SAVE,198,56,50,14
     PUSHBUTTON      "&Load...",IDC_LOAD,198,75,50,14
     PUSHBUTTON      "&Reset",IDC_RESET,198,110,50,14
     PUSHBUTTON      "Defaults",IDC_DEFAULTS,198,128,50,14
-    PUSHBUTTON      "Expand All",IDC_EXPAND,198,12,50,14
-    PUSHBUTTON      "Collapse All",IDC_COLLAPSE,198,32,50,14
+    DEFPUSHBUTTON   "OK",IDOK,69,269,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,135,269,50,14
+    CONTROL         "",IDC_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | WS_BORDER | WS_HSCROLL | WS_TABSTOP,6,24,186,234
 END
 
 IDD_EVENT_PROPS DIALOGEX 0, 0, 369, 272
@@ -256,6 +275,28 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     PUSHBUTTON      "Copy",IDC_COPY,6,6,50,14
     CONTROL         "",IDC_LIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,6,24,354,240
+END
+
+IDD_FILTERS DIALOGEX 0, 0, 387, 248
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Configure Filters"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    COMBOBOX        IDC_NAMES,27,9,76,70,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMPARE,109,9,71,46,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_VALUE,192,9,99,129,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_INC_EXC,297,9,48,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Button1",IDC_ADD,357,5,26,19,BS_ICON
+    CONTROL         "",IDC_LIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,6,30,348,186
+    PUSHBUTTON      "Button1",IDC_UP,358,56,26,18,BS_ICON
+    PUSHBUTTON      "Button1",IDC_DOWN,358,80,26,18,BS_ICON
+    PUSHBUTTON      "Button1",IDC_DELETE,358,104,26,18,BS_ICON
+    PUSHBUTTON      "Button1",IDC_SAVE,358,136,26,18,BS_ICON
+    PUSHBUTTON      "Button1",IDC_LOAD,358,159,26,18,BS_ICON
+    DEFPUSHBUTTON   "OK",IDOK,135,227,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,201,227,50,14
+    LTEXT           "Filter:",IDC_STATIC,6,11,20,8
+    PUSHBUTTON      "Button1",IDC_EDIT,358,29,26,19,BS_ICON
 END
 
 
@@ -297,6 +338,14 @@ BEGIN
         RIGHTMARGIN, 362
         TOPMARGIN, 7
         BOTTOMMARGIN, 265
+    END
+
+    IDD_FILTERS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 380
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 241
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -389,6 +438,11 @@ BEGIN
     0
 END
 
+IDD_FILTERS AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -403,7 +457,7 @@ END
 
 STRINGTABLE
 BEGIN
-    ID_FILE_NEW             "Create a new document\nNew"
+    ID_FILE_NEW             "Create a new tab\nNew"
     ID_FILE_OPEN            "Open an existing document\nOpen"
     ID_FILE_CLOSE           "Close the active document\nClose"
     ID_FILE_SAVE            "Save the active document\nSave"
@@ -482,6 +536,23 @@ END
 STRINGTABLE
 BEGIN
     ATL_IDS_MRU_FILE        "Open this document"
+END
+
+STRINGTABLE
+BEGIN
+    ID_MONITOR_START        "Start Monitoring\nStart"
+    ID_MONITOR_STOP         "Stop Monitoring\nStop"
+    ID_MONITOR_CLEAR        "Delete all events in current view\nDelete All"
+    ID_EVENT_PROPERTIES     "View event properties\nEvent Properties"
+    ID_EVENT_CALLSTACK      "View call stack of the selected event\nCall Stack"
+    ID_MONITOR_CONFIGUREEVENTS "Configure events to monitor\nConfigure Events"
+END
+
+STRINGTABLE
+BEGIN
+    ID_MONITOR_FILTERS      "Configure filters\nConfigure Filters"
+    ID_VIEW_AUTOSCROLL      "Enable or disable automatic scrolling\nAuto Scrolling"
+    ID_MONITOR_PAUSE        "Pause or Resume monitoring\nPause / Resume"
 END
 
 #endif    // English (United States) resources
