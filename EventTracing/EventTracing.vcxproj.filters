@@ -45,6 +45,9 @@
     <ClInclude Include="StringCompareFilterBase.h">
       <Filter>Filters</Filter>
     </ClInclude>
+    <ClInclude Include="PropertyValueFilter.h">
+      <Filter>Filters</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -72,6 +75,9 @@
       <Filter>Filters</Filter>
     </ClCompile>
     <ClCompile Include="StringCompareFilterBase.cpp">
+      <Filter>Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertyValueFilter.cpp">
       <Filter>Filters</Filter>
     </ClCompile>
   </ItemGroup>

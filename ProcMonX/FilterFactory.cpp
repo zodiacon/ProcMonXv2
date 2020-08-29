@@ -3,9 +3,10 @@
 #include "EventNameFilter.h"
 #include "ProcessIdFilter.h"
 #include "ProcessNameFilter.h"
+#include "PropertyValueFilter.h"
 
 static PCWSTR names[] = {
-	L"Process Name", L"Process Id", L"Event Name"
+	L"Process Name", L"Process Id", L"Event Name", L"Property Value",
 };
 
 std::vector<CString> FilterFactory::GetFilterNames() {
@@ -28,6 +29,10 @@ std::shared_ptr<FilterBase> FilterFactory::CreateFilter(PCWSTR name, CompareType
 
 				case 2:
 					filter = std::make_shared<EventNameFilter>(params, compare, action);
+					break;
+
+				case 3:
+					filter = std::make_shared<PropertyValueFilter>(params, compare, action);
 					break;
 			}
 		}

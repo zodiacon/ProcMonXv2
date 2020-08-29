@@ -79,8 +79,8 @@
 #define IDC_VALUE                       1025
 #define IDC_EDIT                        1026
 #define IDC_BASIC                       1026
-#define IDC_RADIO2                      1027
 #define IDC_ADVANCED                    1027
+#define IDC_EXCLUDE                     1030
 #define ID_WINDOW_CLOSE                 32772
 #define ID_WINDOW_CLOSE_ALL             32773
 #define ID_OPTIONS_ALWAYSONTOP          32775
@@ -103,7 +103,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        264
 #define _APS_NEXT_COMMAND_VALUE         32789
-#define _APS_NEXT_CONTROL_VALUE         1028
+#define _APS_NEXT_CONTROL_VALUE         1031
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

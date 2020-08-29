@@ -22,9 +22,15 @@ FilterAction StringCompareFilterBase::Compare(const std::wstring& str) const {
 		case CompareType::Contains:
 		case CompareType::NotContains:
 		{
-			auto pname2 = _text;
-			::_wcslwr_s(pname2.data(), pname2.size());
-			auto substr = ::wcsstr(pname2.c_str(), _text.c_str()) != nullptr;
+			auto text2(_text);
+			::_wcslwr_s(text2.data(), text2.size() + 1);
+			auto str2(str);
+			::_wcslwr_s(str2.data(), str2.size() + 1);
+
+			auto substr = str2.find(text2) != std::wstring::npos;
+			if (substr) {
+				OutputDebugString(L"Equals!!!!!!!!!\n");
+			}
 			if (compare == CompareType::Contains && substr)
 				return GetAction();
 			if (compare == CompareType::NotContains && !substr)
@@ -32,7 +38,12 @@ FilterAction StringCompareFilterBase::Compare(const std::wstring& str) const {
 		}
 		break;
 
+		default:
+			return FilterAction::None;
 	}
+	if (GetAction() == FilterAction::Include)
+		return FilterAction::Exclude;
+
 	return GetDefaultAction();
 }
 

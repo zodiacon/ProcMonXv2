@@ -64,6 +64,7 @@ private:
 	std::wstring GetEventDetails(EventData* data) const;
 	void UpdateEventStatus();
 	void UpdateUI();
+	void ApplyFilters(const FilterConfiguration& config);
 
 	// Handler prototypes (uncomment arguments if needed):
 	//	LRESULT MessageHandler(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)

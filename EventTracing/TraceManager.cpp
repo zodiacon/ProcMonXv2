@@ -203,7 +203,7 @@ bool TraceManager::ParseProcessStartStop(EventData* data) {
 					pname.assign(name, name + strlen(name));
 					AddProcessName(data->GetProperty(L"ProcessId")->GetValue<DWORD>(), pname);
 					assert(!pname.empty());
-					data->SetProcessName(pname);
+					//data->SetProcessName(pname);
 				}
 			}
 			break;
@@ -263,29 +263,6 @@ void TraceManager::OnEventRecord(PEVENT_RECORD rec) {
 	std::shared_ptr<EventData> data(new EventData(rec, GetProcessImageById(pid), eventName, ++_index));
 	//auto data = std::make_shared<EventData>(rec, GetProcessImageById(pid), eventName, ++_index);
 
-	// evaluate filters
-	FilterContext context = { data.get() };
-	auto result = FilterAction::Include;
-	for (auto& filter : _filters) {
-		if (!filter->IsEnabled())
-			continue;
-		auto action = filter->Eval(context);
-		if (action == FilterAction::Exclude) {
-			result = action;
-			break;
-		}
-
-		if (action == FilterAction::Include) {
-			result = FilterAction::Include;
-			break;
-		}
-	}
-	if (result != FilterAction::Include) {
-		_filteredEvents++;
-		_lastExcluded = data;
-		return;
-	}
-
 	// force copying properties
 	data->GetProperties();
 
@@ -307,6 +284,32 @@ void TraceManager::OnEventRecord(PEVENT_RECORD rec) {
 	if (!processEvent && data->GetProcessId() == 0 || data->GetProcessId() == (DWORD)-1) {
 		HandleNoProcessId(data.get());
 	}
+
+	if (!_filters.empty()) {
+		// evaluate filters
+		FilterContext context = { data.get() };
+		auto result = FilterAction::None;
+		for (auto& filter : _filters) {
+			if (!filter->IsEnabled())
+				continue;
+			auto action = filter->Eval(context);
+			if (action == FilterAction::Exclude) {
+				result = action;
+				break;
+			}
+
+			if (action == FilterAction::Include) {
+				result = FilterAction::Include;
+				break;
+			}
+		}
+		if (result == FilterAction::Exclude) {
+			_filteredEvents++;
+			_lastExcluded = data;
+			return;
+		}
+	}
+
 	_lastEvent = data;
 
 	if (_callback && (!processEvent || _isTraceProcesses))
@@ -336,21 +339,23 @@ void TraceManager::HandleNoProcessId(EventData* data) {
 			data->_threadId = tid;
 		}
 	}
-	auto prop = data->GetProperty(L"PID");
-	if (prop == nullptr)
-		prop = data->GetProperty(L"ProcessId");
-	if (prop) {
-		auto pid = prop->GetValue<DWORD>();
-		data->_processId = pid;
-		data->SetProcessName(GetProcessImageById(pid));
-	}
-	else if (tid) {
-		wil::unique_handle hThread(::OpenThread(THREAD_QUERY_LIMITED_INFORMATION, FALSE, tid));
-		if (hThread) {
-			auto pid = ::GetProcessIdOfThread(hThread.get());
-			if (pid) {
-				data->_processId = pid;
-				data->SetProcessName(GetProcessImageById(pid));
+	if (data->GetProcessId() == 0 || data->GetProcessId() == (DWORD)-1) {
+		auto prop = data->GetProperty(L"PID");
+		if (prop == nullptr)
+			prop = data->GetProperty(L"ProcessId");
+		if (prop) {
+			auto pid = prop->GetValue<DWORD>();
+			data->_processId = pid;
+			data->SetProcessName(GetProcessImageById(pid));
+		}
+		else if (tid) {
+			wil::unique_handle hThread(::OpenThread(THREAD_QUERY_LIMITED_INFORMATION, FALSE, tid));
+			if (hThread) {
+				auto pid = ::GetProcessIdOfThread(hThread.get());
+				if (pid) {
+					data->_processId = pid;
+					data->SetProcessName(GetProcessImageById(pid));
+				}
 			}
 		}
 	}

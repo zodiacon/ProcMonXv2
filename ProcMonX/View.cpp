@@ -49,9 +49,7 @@ void CView::StartMonitoring(TraceManager& tm, bool start) {
 		std::initializer_list<KernelEventTypes> events(types.data(), types.data() + types.size());
 		tm.SetKernelEventTypes(events);
 		tm.SetKernelEventStacks(std::initializer_list<std::wstring>(categories.data(), categories.data() + categories.size()));
-		auto selfFilter = std::make_shared<ProcessIdFilter>(::GetCurrentProcessId(), CompareType::Equals, FilterAction::Exclude);
-		tm.RemoveAllFilters();
-		tm.AddFilter(selfFilter);
+		ApplyFilters(m_FilterConfig);
 	}
 	else {
 		m_IsDraining = true;
@@ -298,13 +296,13 @@ LRESULT CView::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOO
 	cm->AddColumn(L"Process Name", LVCFMT_LEFT, 150);
 	cm->AddColumn(L"TID", LVCFMT_RIGHT, 100, ColumnFlags::Numeric | ColumnFlags::Visible);
 	cm->AddColumn(L"Opcode", LVCFMT_CENTER, 45, ColumnFlags::Numeric);
-	cm->AddColumn(L"Provider", LVCFMT_CENTER, 180, ColumnFlags::Numeric | ColumnFlags::Visible);
+	cm->AddColumn(L"Provider", LVCFMT_CENTER, 180, ColumnFlags::Numeric);
 	cm->AddColumn(L"Details", LVCFMT_LEFT, 700);
 
 	cm->UpdateColumns();
 
-	m_TempEvents.reserve(1024);
-	m_Events.reserve(4096);
+	m_TempEvents.reserve(1 << 12);
+	m_Events.reserve(1 << 16);
 	SetTimer(1, 1000, nullptr);
 
 	return 0;
@@ -426,18 +424,10 @@ LRESULT CView::OnConfigFilters(WORD, WORD, HWND, BOOL&) {
 	if (dlg.DoModal() == IDOK) {
 		// update filters
 		auto& tm = GetFrame()->GetTraceManager();
-		auto paused = tm.IsPaused();
+		auto paused = tm.IsRunning() && tm.IsPaused();
 		if(!paused)
 			tm.Pause(true);
-		tm.RemoveAllFilters();
-		for (int i = 0; i < m_FilterConfig.GetFilterCount(); i++) {
-			auto desc = m_FilterConfig.GetFilter(i);
-			ATLASSERT(desc);
-			auto filter = FilterFactory::CreateFilter(desc->Name.c_str(), desc->Compare, desc->Parameters.c_str(), desc->Action);
-			ATLASSERT(filter);
-			if (filter)
-				tm.AddFilter(filter);
-		}
+		ApplyFilters(m_FilterConfig);
 		if(!paused)
 			tm.Pause(false);
 	}
@@ -457,4 +447,19 @@ void CView::UpdateUI() {
 	auto selected = m_List.GetSelectedIndex();
 	ui->UIEnable(ID_EVENT_PROPERTIES, selected >= 0);
 	ui->UIEnable(ID_EVENT_CALLSTACK, selected >= 0 && m_Events[selected]->GetStackEventData() != nullptr);
+}
+
+void CView::ApplyFilters(const FilterConfiguration& config) {
+	auto& tm = GetFrame()->GetTraceManager();
+	tm.RemoveAllFilters();
+	for (int i = 0; i < config.GetFilterCount(); i++) {
+		auto desc = config.GetFilter(i);
+		ATLASSERT(desc);
+		auto filter = FilterFactory::CreateFilter(desc->Name.c_str(), desc->Compare, desc->Parameters.c_str(), desc->Action);
+		ATLASSERT(filter);
+		if (filter) {
+			filter->Enable(desc->Enabled);
+			tm.AddFilter(filter);
+		}
+	}
 }

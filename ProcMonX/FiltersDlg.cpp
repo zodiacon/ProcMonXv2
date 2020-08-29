@@ -131,7 +131,7 @@ LRESULT CFiltersDlg::OnInitDialog(UINT, WPARAM, LPARAM, BOOL&) {
 		((CButton)GetDlgItem(b.button)).SetIcon(AtlLoadIconImage(b.icon, 0, 24, 24));
 	}
 
-	m_List.InsertColumn(0, L"Name", LVCFMT_LEFT, 100);
+	m_List.InsertColumn(0, L"Name", LVCFMT_LEFT, 130);
 	m_List.InsertColumn(1, L"Compare Type", LVCFMT_LEFT, 100);
 	m_List.InsertColumn(2, L"Parameters", LVCFMT_LEFT, 150);
 	m_List.InsertColumn(3, L"Action", LVCFMT_LEFT, 80);
