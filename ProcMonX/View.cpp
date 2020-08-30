@@ -13,6 +13,8 @@
 #include "ProcessIdFilter.h"
 #include "FiltersDlg.h"
 #include "FilterFactory.h"
+#include "ClipboardHelper.h"
+#include "SerializerFactory.h"
 
 CView::CView(IMainFrame* frame) : CViewBase(frame) {
 }
@@ -172,7 +174,7 @@ void CView::UpdateEventStatus() {
 }
 
 bool CView::IsSortable(int col) const {
-	return !m_IsMonitoring && col != 8;
+	return col != 8 && (!m_IsMonitoring || GetFrame()->GetTraceManager().IsPaused());
 }
 
 void CView::DoSort(const SortInfo* si) {
@@ -193,6 +195,66 @@ void CView::DoSort(const SortInfo* si) {
 BOOL CView::PreTranslateMessage(MSG* pMsg) {
 	pMsg;
 	return FALSE;
+}
+
+DWORD CView::OnPrePaint(int, LPNMCUSTOMDRAW) {
+	return CDRF_NOTIFYITEMDRAW;
+}
+
+DWORD CView::OnSubItemPrePaint(int, LPNMCUSTOMDRAW cd) {
+	auto lcd = (LPNMLVCUSTOMDRAW)cd;
+	auto cm = GetColumnManager(m_List);
+	auto sub = cm->GetRealColumn(lcd->iSubItem);
+	lcd->clrTextBk = CLR_INVALID;
+
+	if ((cm->GetColumn(sub).Flags & ColumnFlags::Numeric) == ColumnFlags::Numeric)
+		::SelectObject(cd->hdc, (HFONT)GetFrame()->GetMonoFont());
+	else
+		::SelectObject(cd->hdc, m_hFont);
+
+	int index = (int)cd->dwItemSpec;
+	if (sub == 8 && (m_List.GetItemState(index, LVIS_SELECTED) & LVIS_SELECTED) == 0) {
+		auto& item = m_Events[index];
+		auto start = (size_t)0;
+		auto details = GetEventDetails(item.get());
+		bool bold = false;
+		CDCHandle dc(cd->hdc);
+		std::wstring str;
+		int x = cd->rc.left + 4, y = cd->rc.top;
+		SIZE size;
+		for(;;) {
+			auto pos = details.find(L';', start);
+			if (pos == std::wstring::npos)
+				break;
+			str = details.substr(start, pos - start);
+
+			auto colon = str.find(L':');
+			dc.SetTextColor(::GetSysColor(COLOR_WINDOWTEXT));
+			dc.GetTextExtent(str.c_str(), (int)colon + 1, &size);
+			if (x + size.cx > cd->rc.right)
+				break;
+
+			dc.TextOut(x, y, str.c_str(), (int)colon + 1);
+			x += size.cx;
+
+			dc.SetTextColor(RGB(0, 0, 255));
+			dc.GetTextExtent(str.data() + colon + 1, (int)str.size() - (int)colon - 1, &size);
+			if (x + size.cx > cd->rc.right)
+				break;
+			dc.TextOut(x, y, str.data() + colon + 1, (int)str.size() - (int)colon - 1);
+			x += size.cx + 4;
+
+			start = pos + 1;
+		} 
+		return CDRF_SKIPDEFAULT;
+	}
+
+	return CDRF_NEWFONT | CDRF_NOTIFYSUBITEMDRAW;
+}
+
+DWORD CView::OnItemPrePaint(int, LPNMCUSTOMDRAW cd) {
+	m_hFont = (HFONT)::GetCurrentObject(cd->hdc, OBJ_FONT);
+	return CDRF_NOTIFYSUBITEMDRAW;
 }
 
 CImageList CView::GetEventImageList() {
@@ -285,12 +347,12 @@ LRESULT CView::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOO
 	m_List.SetImageList(s_Images, LVSIL_SMALL);
 
 	auto cm = GetColumnManager(m_List);
-	cm->AddColumn(L"#", 0, 80);
-	cm->AddColumn(L"Time", LVCFMT_RIGHT, 180);
+	cm->AddColumn(L"#", 0, 100, ColumnFlags::Numeric | ColumnFlags::Visible);
+	cm->AddColumn(L"Time", LVCFMT_RIGHT, 180, ColumnFlags::Numeric | ColumnFlags::Visible);
 	cm->AddColumn(L"Event", LVCFMT_LEFT, 160);
-	cm->AddColumn(L"PID", LVCFMT_RIGHT, 100, ColumnFlags::Numeric | ColumnFlags::Visible);
+	cm->AddColumn(L"PID", LVCFMT_RIGHT, 120, ColumnFlags::Numeric | ColumnFlags::Visible);
 	cm->AddColumn(L"Process Name", LVCFMT_LEFT, 150);
-	cm->AddColumn(L"TID", LVCFMT_RIGHT, 100, ColumnFlags::Numeric | ColumnFlags::Visible);
+	cm->AddColumn(L"TID", LVCFMT_RIGHT, 120, ColumnFlags::Numeric | ColumnFlags::Visible);
 	cm->AddColumn(L"Opcode", LVCFMT_CENTER, 45, ColumnFlags::Numeric);
 	cm->AddColumn(L"Provider", LVCFMT_CENTER, 180, ColumnFlags::Numeric);
 	cm->AddColumn(L"Details", LVCFMT_LEFT, 700);
@@ -385,6 +447,59 @@ LRESULT CView::OnClose(UINT, WPARAM, LPARAM, BOOL& handled) {
 	return 0;
 }
 
+LRESULT CView::OnCopy(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
+	auto selected = m_List.GetSelectedIndex();
+	ATLASSERT(selected >= 0);
+	CString text, item;
+	for (int c = 0;; c++) {
+		if (!m_List.GetItemText(selected, c, item))
+			break;
+		text += item + L",";
+	}
+	ClipboardHelper::CopyText(*this, text.Left(text.GetLength() - 1));
+
+	return 0;
+}
+
+LRESULT CView::OnSave(WORD, WORD, HWND, BOOL&) {
+	CSimpleFileDialog dlg(FALSE, L"pmx", nullptr, OFN_EXPLORER | OFN_OVERWRITEPROMPT | OFN_ENABLESIZING,
+		L"ProcMonX files (*.pmx)\0*.pmx\0CSV Files (*csv)\0*.csv\0", *this);
+	if (dlg.DoModal() == IDOK) {
+		CString filename(dlg.m_szFileTitle);
+		auto ext = filename.ReverseFind(L'.');
+		if (ext > 0) {
+			auto serializer = SerializerFactory::CreateFromExtension(filename.Mid(ext + 1));
+			if (serializer) {
+				EventDataSerializerOptions options;
+				CWaitCursor wait;
+				auto eventsCopy = m_OrgEvents;
+				if (!serializer->Save(eventsCopy, options, dlg.m_szFileName))
+					AtlMessageBox(*this, L"Failed to save data", IDS_TITLE, MB_ICONERROR);
+				return 0;
+			}
+		}
+		AtlMessageBox(*this, L"Unknown file extension", IDS_TITLE, MB_ICONEXCLAMATION);
+	}
+	return 0;
+}
+
+LRESULT CView::OnCopyAll(WORD, WORD, HWND, BOOL&) {
+	ATLASSERT(!m_IsMonitoring || GetFrame()->GetTraceManager().IsPaused());
+	CWaitCursor wait;
+	auto count = m_List.GetItemCount();
+	CString text, item;
+	for (int i = 0; i < count; i++) {
+		for (int c = 0;; c++) {
+			if (!m_List.GetItemText(i, c, item))
+				break;
+			text += item + L",";
+		}
+		text.SetAt(text.GetLength() - 1, L'\n');
+	}
+	ClipboardHelper::CopyText(*this, text);
+	return 0;
+}
+
 LRESULT CView::OnConfigureEvents(WORD, WORD, HWND, BOOL&) {
 	CEventsDlg dlg(m_EventsConfig);
 	if (dlg.DoModal() == IDOK) {
@@ -439,9 +554,14 @@ LRESULT CView::OnItemChanged(int, LPNMHDR, BOOL&) {
 
 void CView::UpdateUI() {
 	auto ui = GetFrame()->GetUpdateUI();
+	auto& tm = GetFrame()->GetTraceManager();
+
+	ui->UIEnable(ID_EDIT_COPYALL, !m_IsMonitoring || tm.IsPaused());
+	ui->UIEnable(ID_FILE_SAVE, !m_IsMonitoring || tm.IsPaused());
 	ui->UISetCheck(ID_VIEW_AUTOSCROLL, m_AutoScroll);
 	auto selected = m_List.GetSelectedIndex();
 	ui->UIEnable(ID_EVENT_PROPERTIES, selected >= 0);
+	ui->UIEnable(ID_EDIT_COPY, selected >= 0);
 	ui->UIEnable(ID_EVENT_CALLSTACK, selected >= 0 && m_Events[selected]->GetStackEventData() != nullptr);
 }
 

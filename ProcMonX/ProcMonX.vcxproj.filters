@@ -84,11 +84,17 @@
     <ClCompile Include="FilterConfiguration.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FilterFactory.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CSVEventDataSerializer.cpp">
       <Filter>Serializers</Filter>
+    </ClCompile>
+    <ClCompile Include="BinaryEventDataSerializer.cpp">
+      <Filter>Serializers</Filter>
+    </ClCompile>
+    <ClCompile Include="FilterFactory.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="SerializerFactory.cpp">
+      <Filter>Helpers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -155,14 +161,20 @@
     <ClInclude Include="FilterConfiguration.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FilterFactory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="IEventDataSerializer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CSVEventDataSerializer.h">
       <Filter>Serializers</Filter>
+    </ClInclude>
+    <ClInclude Include="BinaryEventDataSerializer.h">
+      <Filter>Serializers</Filter>
+    </ClInclude>
+    <ClInclude Include="FilterFactory.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="SerializerFactory.h">
+      <Filter>Helpers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

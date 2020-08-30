@@ -89,6 +89,8 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 	UIEnable(ID_MONITOR_STOP, FALSE);
 	UIEnable(ID_MONITOR_PAUSE, FALSE);
 
+	m_MonoFont.CreatePointFont(100, L"Consolas");
+
 	PostMessage(WM_COMMAND, ID_FILE_NEW);
 
 	return 0;
@@ -274,9 +276,8 @@ BOOL CMainFrame::TrackPopupMenu(HMENU hMenu, HWND hWnd, POINT* pt, UINT flags) {
 	return m_CmdBar.TrackPopupMenu(hMenu, flags, pt->x, pt->y);
 }
 
-CFont& CMainFrame::GetMonoFont() {
-	static CFont font;
-	return font;
+HFONT CMainFrame::GetMonoFont() {
+	return m_MonoFont;
 }
 
 void CMainFrame::ViewDestroyed(void* view) {

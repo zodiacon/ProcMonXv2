@@ -212,7 +212,7 @@ const std::vector<KernelEventCategory> KernelEvents {
 			{ L"Remove Process", 0x24 },
 			{ L"Set", 0x25 },
 			{ L"Query", 0x26 },
-		}
+		}, true
 	},
 
 	{ L"Driver", KernelEventTypes::Driver, &DiskIoGuid,

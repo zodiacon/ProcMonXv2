@@ -36,6 +36,12 @@ public:
 
 	BOOL PreTranslateMessage(MSG* pMsg);
 
+	// custom draw
+
+	DWORD OnPrePaint(int /*idCtrl*/, LPNMCUSTOMDRAW /*lpNMCustomDraw*/);
+	DWORD OnSubItemPrePaint(int /*idCtrl*/, LPNMCUSTOMDRAW /*lpNMCustomDraw*/);
+	DWORD OnItemPrePaint(int /*idCtrl*/, LPNMCUSTOMDRAW /*lpNMCustomDraw*/);
+
 	static CImageList GetEventImageList();
 	static int GetImageFromEventName(PCWSTR name);
 
@@ -50,6 +56,9 @@ public:
 		MESSAGE_HANDLER(WM_CLOSE, OnClose)
 		COMMAND_ID_HANDLER(ID_MONITOR_CONFIGUREEVENTS, OnConfigureEvents)
 		COMMAND_ID_HANDLER(ID_MONITOR_CLEAR, OnClear)
+		COMMAND_ID_HANDLER(ID_EDIT_COPY, OnCopy)
+		COMMAND_ID_HANDLER(ID_FILE_SAVE, OnSave)
+		COMMAND_ID_HANDLER(ID_EDIT_COPYALL, OnCopyAll)
 		COMMAND_ID_HANDLER(ID_VIEW_AUTOSCROLL, OnAutoScroll)
 		MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
 		COMMAND_ID_HANDLER(ID_EVENT_PROPERTIES, OnEventProperties)
@@ -80,6 +89,9 @@ private:
 	LRESULT OnEventProperties(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnConfigureEvents(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnCopy(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnSave(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnCopyAll(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnAutoScroll(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnConfigFilters(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnItemChanged(int /*idCtrl*/, LPNMHDR /*pnmh*/, BOOL& /*bHandled*/);
@@ -94,6 +106,7 @@ private:
 	std::mutex m_EventsLock;
 	EventsConfiguration m_EventsConfig;
 	FilterConfiguration m_FilterConfig;
+	HFONT m_hFont;
 	bool m_IsMonitoring{ false };
 	bool m_IsDraining{ false };
 	bool m_AutoScroll{ false };

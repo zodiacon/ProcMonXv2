@@ -55,6 +55,7 @@ BEGIN
     BEGIN
         MENUITEM "&New Tab\tCtrl+N",            ID_FILE_NEW
         MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM SEPARATOR
         MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
         MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
         MENUITEM SEPARATOR
@@ -63,6 +64,7 @@ BEGIN
     POPUP "&Edit"
     BEGIN
         MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM "Copy &All",                   ID_EDIT_COPYALL
     END
     POPUP "&View"
     BEGIN
@@ -83,7 +85,7 @@ BEGIN
         MENUITEM "S&top",                       ID_MONITOR_STOP
         MENUITEM "&Pause",                      ID_MONITOR_PAUSE
         MENUITEM SEPARATOR
-        MENUITEM "&Clear",                      ID_MONITOR_CLEAR
+        MENUITEM "&Clear All",                  ID_MONITOR_CLEAR
         MENUITEM SEPARATOR
         MENUITEM "Configure &Events...",        ID_MONITOR_CONFIGUREEVENTS
         MENUITEM "Configure &Filters...",       ID_MONITOR_FILTERS
@@ -113,6 +115,7 @@ BEGIN
         MENUITEM "&Call Stack...",              ID_EVENT_CALLSTACK
         MENUITEM SEPARATOR
         MENUITEM "Copy",                        ID_EDIT_COPY
+        MENUITEM "Copy &All",                   ID_EDIT_COPYALL
     END
 END
 

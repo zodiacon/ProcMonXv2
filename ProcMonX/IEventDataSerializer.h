@@ -5,6 +5,7 @@
 struct EventDataSerializerOptions {
 	bool ResolveSymbols{ false };
 	bool WriteHeaderLine{ true };
+	bool CompressOutput{ false };
 	uint32_t StartIndex{ (uint32_t)-1 };
 };
 

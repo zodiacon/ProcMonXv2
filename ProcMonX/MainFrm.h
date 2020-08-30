@@ -26,7 +26,7 @@ public:
 
 	// Inherited via IMainFrame
 	BOOL TrackPopupMenu(HMENU hMenu, HWND hWnd, POINT* pt = nullptr, UINT flags = 0) override;
-	CFont& GetMonoFont() override;
+	HFONT GetMonoFont() override;
 	void ViewDestroyed(void*) override;
 	TraceManager& GetTraceManager() override;
 	BOOL SetPaneText(int index, PCWSTR text) override;
@@ -52,7 +52,7 @@ public:
 		NOTIFY_CODE_HANDLER(TBVN_PAGEACTIVATED, OnTabActivated)
 		CHAIN_MSG_MAP(CAutoUpdateUI<CMainFrame>)
 		CHAIN_MSG_MAP(CFrameWindowImpl<CMainFrame>)
-		COMMAND_RANGE_HANDLER(0x8000, 0x8fff, OnForwardToActiveTab)
+		COMMAND_RANGE_HANDLER(0x8000, 0xefff, OnForwardToActiveTab)
 	END_MSG_MAP()
 
 private:
@@ -89,6 +89,7 @@ private:
 	CTabView m_view;
 	CToolBarCtrl m_ToolBar;
 	TraceManager m_tm;
+	CFont m_MonoFont;
 	CIcon m_RunIcon, m_StopIcon, m_PauseIcon;
 	CView* m_pCurrentView{ nullptr };
 	CView* m_pMonitorView{ nullptr };
