@@ -49,6 +49,8 @@ enum class KernelEventTypes : uint64_t {
 	PerfPool =				0x20000040 | (1LL << 32),
 	PerfSyncObjects =		0x20020000 | (1LL << 32),
 	PerfVirtualAlloc =		0x20008000 | (1LL << 32),
+	PerfSession =			0x20400000 | (1LL << 32),
+	PerfMemInfo =			0x20080000 | (1LL << 32),
 
 	// Mask[2]
 	PerfHeap =			0x40000020 | (2LL << 32),
@@ -60,6 +62,7 @@ enum class KernelEventTypes : uint64_t {
 	PerfTimer =			0x40020000 | (2LL << 32),
 	PerfIPI =			0x40400000 | (2LL << 32),
 	PerfClockIntr =		0x40040000 | (2LL << 32),
+	Mask2All =			0x4fffffff | (2LL << 32),
 
 	// Mask[4]
 	PerfHandles =		0x80000040 | (4LL << 32),
@@ -73,6 +76,7 @@ enum class KernelEventTypes : uint64_t {
 	PerfFltFail =		0x80400000 | (4LL << 32),
 	PerfFlt =			PerfFltIO | PerfFltIoInit | PerfFltFastIO | PerfFltFail,
 	PerfHvProfile =		0x80800000 | (4LL << 32),
+	Mask4All =			0x8fffffff | (2LL << 32),
 
 	// Mask[6]
 	PerfConfigSystem =	0xC0000001 | (6LL << 32),

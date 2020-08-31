@@ -13,7 +13,7 @@ void CEventsDlg::BuildEventsTree(const EventsConfiguration& config) {
 
 	m_Tree.DeleteAllItems();
 	for (auto& category : KernelEventCategory::GetAllCategories()) {
-		if (!category.Advanced || m_Advanced) {
+		if (category.Advanced == m_Advanced) {
 			int image = CView::GetImageFromEventName(category.Name.c_str());
 			auto item = m_Tree.InsertItem(category.Name.c_str(), image, image, TVI_ROOT, TVI_LAST);
 			if (m_Advanced && !category.Advanced)
@@ -60,6 +60,8 @@ LRESULT CEventsDlg::OnInitDialog(UINT, WPARAM, LPARAM, BOOL&) {
 	m_Tree.SetItemHeight(18);
 	m_Tree.SetIndent(4);
 
+	m_TempConfig = m_Config;
+
 	BuildEventsTree(m_Config);
 	m_Init = false;
 
@@ -93,8 +95,8 @@ bool CEventsDlg::BuildConfigFromTree(EventsConfiguration& config) {
 	auto item = m_Tree.GetRootItem();
 	CString text;
 	while (item) {
-		EventConfigCategory category;
 		item.GetText(text);
+		EventConfigCategory category;
 		category.Name = text;
 		if (m_Tree.GetCheckState(item)) {
 			// entire category selected
@@ -115,14 +117,14 @@ bool CEventsDlg::BuildConfigFromTree(EventsConfiguration& config) {
 		item = item.GetNextSibling();
 	}
 
-	return false;
+	return true;
 }
 
 void CEventsDlg::SwitchToAdvancedView(bool advanced) {
 	m_Init = true;
-	EventsConfiguration config;
-	BuildConfigFromTree(config);
-	BuildEventsTree(config);
+	m_TempConfig.RemoveAdvanced(!advanced);
+	BuildConfigFromTree(m_TempConfig);
+	BuildEventsTree(m_TempConfig);
 	m_Init = false;
 }
 
@@ -214,8 +216,9 @@ LRESULT CEventsDlg::OnAdvancedView(WORD, WORD id, HWND, BOOL&) {
 
 LRESULT CEventsDlg::OnCloseCmd(WORD, WORD id, HWND, BOOL&) {
 	if (id == IDOK) {
-		m_Config.Clear();
-		BuildConfigFromTree(m_Config);
+		m_TempConfig.RemoveAdvanced(m_Advanced);
+		BuildConfigFromTree(m_TempConfig);
+		m_Config = m_TempConfig;
 	}
 	EndDialog(id);
 	return 0;

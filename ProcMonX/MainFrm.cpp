@@ -189,8 +189,12 @@ LRESULT CMainFrame::OnWindowActivate(WORD /*wNotifyCode*/, WORD wID, HWND /*hWnd
 	return 0;
 }
 
-LRESULT CMainFrame::OnAlwaysOnTop(WORD, WORD, HWND, BOOL&) {
-	return LRESULT();
+LRESULT CMainFrame::OnAlwaysOnTop(WORD, WORD id, HWND, BOOL&) {
+	bool onTop = GetExStyle() & WS_EX_TOPMOST;
+	SetWindowPos(onTop ? HWND_NOTOPMOST : HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+	UISetCheck(id, !onTop);
+	
+	return 0;
 }
 
 LRESULT CMainFrame::OnMonitorStart(WORD, WORD, HWND, BOOL&) {
@@ -314,6 +318,7 @@ void CMainFrame::InitCommandBar() {
 		{ ID_FILE_SAVE_AS, IDI_SAVE_AS },
 		{ ID_EDIT_COPY, IDI_COPY },
 		{ ID_MONITOR_PAUSE, IDI_PAUSE },
+		{ ID_VIEW_AUTOSCROLL, IDI_SCROLL },
 	};
 	for (auto& cmd : cmds)
 		m_CmdBar.AddIcon(AtlLoadIcon(cmd.icon), cmd.id);
@@ -332,6 +337,8 @@ void CMainFrame::InitToolBar(CToolBarCtrl& tb, int size) {
 		{ ID_MONITOR_START, IDI_PLAY },
 		{ ID_MONITOR_PAUSE, IDI_PAUSE },
 		{ ID_MONITOR_STOP, IDI_STOP },
+		{ 0 },
+		{ ID_VIEW_AUTOSCROLL, IDI_SCROLL },
 		{ 0 },
 		{ ID_MONITOR_CLEAR, IDI_CANCEL },
 		{ 0 },

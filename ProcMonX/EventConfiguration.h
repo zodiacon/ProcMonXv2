@@ -16,6 +16,7 @@ public:
 	const std::vector<EventConfigCategory>& GetCategories() const;
 	const EventConfigCategory* const GetCategory(PCWSTR name) const;
 	EventConfigCategory* GetCategory(PCWSTR name);
+	int RemoveAdvanced(bool advanced);
 
 	bool Save(PCWSTR path);
 	bool Load(PCWSTR path, bool clean = true);

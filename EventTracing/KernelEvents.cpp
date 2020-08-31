@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "KernelEvents.h"
+#include <winternl.h>
 
 const std::vector<KernelEventCategory> KernelEvents {
 	{ L"Process", KernelEventTypes::Process, &ProcessGuid,
@@ -17,10 +18,24 @@ const std::vector<KernelEventCategory> KernelEvents {
 
 	{ L"Thread", KernelEventTypes::Thread, &ThreadGuid,
 		{
+			{ L"Send Message", 0x21 },
+			{ L"Receive Message", 0x22 },
+			{ L"Wait For Reply", 0x23 },
+			{ L"Wait For New Message", 0x24 },
+			{ L"Unwait", 0x25 },
+			{ L"Connect Request", 0x26 },
+			{ L"Connect Success", 0x27 },
+			{ L"Connect Fail", 0x28 },
+			{ L"Close Port", 0x29 },
+		}
+	},
+
+	{ L"ALPC", KernelEventTypes::ALPC, &ALPCGuid,
+		{
 			{ L"Start", 1 },
 			{ L"End", 2 },
 			{ L"Set Name", 72 },
-		}
+		}, true
 	},
 
 	{ L"Image", KernelEventTypes::ImageLoad, &ImageLoadGuid,
@@ -87,7 +102,7 @@ const std::vector<KernelEventCategory> KernelEvents {
 		}
 	},
 
-	{ L"Network", KernelEventTypes::Network, &TcpIpGuid,
+	{ L"TCP", KernelEventTypes::Network, &TcpIpGuid,
 		{
 			{ L"TCP Send IPv4", EVENT_TRACE_TYPE_SEND },
 			{ L"TCP Receive IPv4", EVENT_TRACE_TYPE_RECEIVE },
@@ -106,14 +121,23 @@ const std::vector<KernelEventCategory> KernelEvents {
 			{ L"TCP Copy IPv6", 34 },
 			{ L"TCP Connect IPv6", 28 },
 			{ L"TCP Accept IPv6", 31 },
+			{ L"Copy ARP", EVENT_TRACE_TYPE_COPY_ARP },
+			{ L"Full Ack", EVENT_TRACE_TYPE_ACKFULL },
+			{ L"Partial Ack", EVENT_TRACE_TYPE_ACKPART },
+			{ L"Duplicate Ack", EVENT_TRACE_TYPE_ACKDUP },
+		}
+	},
+
+	{ L"UDP", KernelEventTypes::Network, &UdpIpGuid,
+		{
 			{ L"UDP Send IPv4", 10 },
 			{ L"UDP Receive IPv4", 11 },
 			{ L"UDP Send IPv6", 26 },
 			{ L"UDP Receive IPv6", 27 },
-			//{ L"Copy ARP", EVENT_TRACE_TYPE_COPY_ARP },
-			//{ L"Full Ack", EVENT_TRACE_TYPE_ACKFULL },
-			//{ L"Partial Ack", EVENT_TRACE_TYPE_ACKPART },
-			//{ L"Duplicate Ack", EVENT_TRACE_TYPE_ACKDUP },
+			{ L"UDP Send IPv4", 10 },
+			{ L"UDP Receive IPv4", 11 },
+			{ L"UDP Send IPv6", 26 },
+			{ L"UDP Receive IPv6", 27 },
 		}
 	},
 
@@ -134,7 +158,7 @@ const std::vector<KernelEventCategory> KernelEvents {
 		}, true
 	},
 
-	{ L"Pool", KernelEventTypes::PerfPool, &PoolGuid,
+	{ L"Kernel Pool", KernelEventTypes::PerfPool, &PoolGuid,
 		{
 			{ L"Pool Alloc", 0x20 },
 			{ L"Pool Session Alloc", 0x21 },
@@ -247,6 +271,13 @@ const std::vector<KernelEventCategory> KernelEvents {
 			{ L"Post Operation Failure", 0x65 },
 		}, true
 	},
+
+	//{ L"Experimental", KernelEventTypes::PerfHeap, &HeapGuid,
+	//	{
+	//		{ L"Create", 1 },
+	//		{ L"Delete", 2 },
+	//	}, true
+	//},
 
 };
 

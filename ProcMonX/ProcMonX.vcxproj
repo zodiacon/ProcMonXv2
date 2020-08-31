@@ -237,6 +237,7 @@
     <ClCompile Include="FilterConfiguration.cpp" />
     <ClCompile Include="FilterFactory.cpp" />
     <ClCompile Include="FiltersDlg.cpp" />
+    <ClCompile Include="FormatHelper.cpp" />
     <ClCompile Include="IniFile.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="ProcMonX.cpp" />
@@ -260,6 +261,7 @@
     <ClInclude Include="CSVEventDataSerializer.h" />
     <ClInclude Include="DialogHelper.h" />
     <ClInclude Include="EventConfiguration.h" />
+    <ClInclude Include="FormatHelper.h" />
     <ClInclude Include="IEventDataSerializer.h" />
     <ClInclude Include="EventPropertiesDlg.h" />
     <ClInclude Include="EventsDlg.h" />
@@ -288,6 +290,7 @@
     <Image Include="res\add.ico" />
     <Image Include="res\arrow_down_blue.ico" />
     <Image Include="res\arrow_up_blue.ico" />
+    <Image Include="res\autoscroll.ico" />
     <Image Include="res\cancel.ico" />
     <Image Include="res\clip_copy.ico" />
     <Image Include="res\delete_button.ico" />

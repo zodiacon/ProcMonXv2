@@ -259,11 +259,11 @@ void TraceManager::OnEventRecord(PEVENT_RECORD rec) {
 
 	auto pid = rec->EventHeader.ProcessId;
 	auto& eventName = GetkernelEventName(rec);
+	if (eventName.empty() && _dumpUnnamedEvents)
+		return;
+
 	// use the separate heap
 	std::shared_ptr<EventData> data(new EventData(rec, GetProcessImageById(pid), eventName, ++_index));
-	if (::GetLastError() != ERROR_SUCCESS && _dumpUnnamedEvents) {
-		return;
-	}
 
 	// force copying properties
 	data->GetProperties();

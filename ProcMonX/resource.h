@@ -57,6 +57,8 @@
 #define IDI_CANCEL2                     261
 #define IDI_OK2                         262
 #define IDI_PAUSE                       263
+#define IDI_ICON1                       264
+#define IDI_SCROLL                      264
 #define IDC_LIST                        1000
 #define IDC_TREE                        1002
 #define IDC_SAVE                        1003
@@ -103,7 +105,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        264
+#define _APS_NEXT_RESOURCE_VALUE        265
 #define _APS_NEXT_COMMAND_VALUE         32790
 #define _APS_NEXT_CONTROL_VALUE         1033
 #define _APS_NEXT_SYMED_VALUE           101

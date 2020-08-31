@@ -5,6 +5,7 @@
 #include "SortHelper.h"
 #include "ClipboardHelper.h"
 #include "CallStackDlg.h"
+#include "FormatHelper.h"
 
 CEventPropertiesDlg::CEventPropertiesDlg(EventData* data) : m_pData(data) {
 }
@@ -30,7 +31,7 @@ LRESULT CEventPropertiesDlg::OnInitDialog(UINT, WPARAM, LPARAM, BOOL&) {
 	DlgResize_Init(true);
 
 	CString text;
-	text.Format(L"Event #%u Properties)", m_pData->GetIndex());
+	text.Format(L"Event #%u (%s)", m_pData->GetIndex(), m_pData->GetEventName().c_str());
 	SetWindowText(text);
 
 	m_List.InsertColumn(0, L"Name", LVCFMT_LEFT, 120);
@@ -62,7 +63,10 @@ LRESULT CEventPropertiesDlg::OnInitDialog(UINT, WPARAM, LPARAM, BOOL&) {
 	for (auto& prop : m_pData->GetProperties()) {
 		if (prop.Name.substr(0, 8) == L"Reserved")
 			continue;
-		InsertItem(prop.Name.c_str(), m_pData->FormatProperty(prop).c_str());
+		auto value = FormatHelper::FormatProperty(m_pData, prop);
+		if (value.empty())
+			value = m_pData->FormatProperty(prop);
+		InsertItem(prop.Name.c_str(), value.c_str());
 	}
 
 	return 0;

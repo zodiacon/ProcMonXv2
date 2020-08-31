@@ -223,6 +223,8 @@ IDI_OK2                 ICON                    "res\\ok_button.ico"
 
 IDI_PAUSE               ICON                    "res\\Pause.ico"
 
+IDI_SCROLL              ICON                    "res\\autoscroll.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //

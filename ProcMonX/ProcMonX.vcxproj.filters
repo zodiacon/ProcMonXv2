@@ -96,6 +96,9 @@
     <ClCompile Include="SerializerFactory.cpp">
       <Filter>Helpers</Filter>
     </ClCompile>
+    <ClCompile Include="FormatHelper.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainFrm.h">
@@ -174,6 +177,9 @@
       <Filter>Helpers</Filter>
     </ClInclude>
     <ClInclude Include="SerializerFactory.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="FormatHelper.h">
       <Filter>Helpers</Filter>
     </ClInclude>
   </ItemGroup>
@@ -325,6 +331,9 @@
       <Filter>Resource Files\Icons</Filter>
     </Image>
     <Image Include="res\Pause.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\autoscroll.ico">
       <Filter>Resource Files\Icons</Filter>
     </Image>
   </ItemGroup>

@@ -25,6 +25,15 @@ EventConfigCategory* EventsConfiguration::GetCategory(PCWSTR name) {
 	return it == _categories.end() ? nullptr : &(*it);
 }
 
+int EventsConfiguration::RemoveAdvanced(bool advanced) {
+	auto it = std::remove_if(_categories.begin(), _categories.end(), [&](const auto& cat) { 
+		return KernelEventCategory::GetCategory(cat.Name.c_str())->Advanced == advanced; 
+		});
+	_categories.erase(it, _categories.end());
+
+	return 0;
+}
+
 bool EventsConfiguration::Save(PCWSTR path) {
 	::DeleteFile(path);
 	IniFile file(path);

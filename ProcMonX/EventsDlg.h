@@ -59,6 +59,7 @@ private:
 
 private:
 	EventsConfiguration& m_Config;
+	EventsConfiguration m_TempConfig;
 	CTreeViewCtrlEx m_Tree;
 	int m_Recurse{ 0 };
 	bool m_Init{ true };
