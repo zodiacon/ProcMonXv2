@@ -6,5 +6,6 @@ struct FormatHelper {
 	static CString FormatTime(LONGLONG ts);
 	static CString VirtualAllocFlagsToString(DWORD flags, bool withNumeric = false);
 	static CString MajorFunctionToString(UCHAR mf);
+	static PCWSTR ObjectTypeToString(int type);
 };
 

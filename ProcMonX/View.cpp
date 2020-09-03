@@ -16,6 +16,7 @@
 #include "ClipboardHelper.h"
 #include "SerializerFactory.h"
 #include "FormatHelper.h"
+#include <execution>
 
 CView::CView(IMainFrame* frame) : CViewBase(frame) {
 }
@@ -180,7 +181,7 @@ bool CView::IsSortable(int col) const {
 }
 
 void CView::DoSort(const SortInfo* si) {
-	std::sort(m_Events.begin(), m_Events.end(), [&](auto& i1, auto& i2) {
+	auto compare = [&](auto& i1, auto& i2) {
 		switch (si->SortColumn) {
 			case 0: return SortHelper::SortNumbers(i1->GetIndex(), i2->GetIndex(), si->SortAscending);
 			case 1: return SortHelper::SortNumbers(i1->GetTimeStamp(), i2->GetTimeStamp(), si->SortAscending);
@@ -191,7 +192,12 @@ void CView::DoSort(const SortInfo* si) {
 			case 6: return SortHelper::SortNumbers(i1->GetEventDescriptor().Opcode, i2->GetEventDescriptor().Opcode, si->SortAscending);
 		}
 		return false;
-		});
+	};
+
+	if (m_Events.size() < 20000)
+		std::sort(m_Events.begin(), m_Events.end(), compare);
+	else
+		std::sort(std::execution::par, m_Events.begin(), m_Events.end(), compare);
 }
 
 BOOL CView::PreTranslateMessage(MSG* pMsg) {
@@ -329,8 +335,10 @@ LRESULT CView::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOO
 			{ IDI_REGISTRY, L"Registry" },
 			{ IDI_FILE, L"FileIo" },
 			{ IDI_FILE, L"File" },
-			{ IDI_HANDLE, L"Object" },
 			{ IDI_HANDLE, L"Objects" },
+			{ IDI_HANDLE, L"Object" },
+			{ IDI_OBJECT, L"Object/CreateHandle" },
+			{ IDI_OBJECT, L"Object/CloseHandle" },
 			{ IDI_OBJECT, L"Handles" },
 			{ IDI_DISK, L"DiskIo" },
 			{ IDI_DISK, L"Disk I/O" },

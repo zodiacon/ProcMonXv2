@@ -3,6 +3,66 @@
 #include "TraceManager.h"
 #include <functional>
 
+#pragma comment(lib, "ntdll")
+
+typedef enum _OBJECT_INFORMATION_CLASS {
+	ObjectBasicInformation, // OBJECT_BASIC_INFORMATION
+	ObjectNameInformation, // OBJECT_NAME_INFORMATION
+	ObjectTypeInformation, // OBJECT_TYPE_INFORMATION
+	ObjectTypesInformation, // OBJECT_TYPES_INFORMATION
+	ObjectHandleFlagInformation, // OBJECT_HANDLE_FLAG_INFORMATION
+	ObjectSessionInformation,
+	ObjectSessionObjectInformation,
+	MaxObjectInfoClass
+} OBJECT_INFORMATION_CLASS;
+
+typedef struct _UNICODE_STRING {
+	USHORT Length;
+	USHORT MaximumLength;
+	PWSTR  Buffer;
+} UNICODE_STRING;
+typedef UNICODE_STRING* PUNICODE_STRING;
+typedef const UNICODE_STRING* PCUNICODE_STRING;
+
+extern "C" NTSTATUS NTAPI NtQueryObject(
+	_In_opt_ HANDLE Handle,
+	_In_ OBJECT_INFORMATION_CLASS ObjectInformationClass,
+	_Out_writes_bytes_opt_(ObjectInformationLength) PVOID ObjectInformation,
+	_In_ ULONG ObjectInformationLength,
+	_Out_opt_ PULONG ReturnLength);
+
+typedef struct _OBJECT_TYPE_INFORMATION {
+	UNICODE_STRING TypeName;
+	ULONG TotalNumberOfObjects;
+	ULONG TotalNumberOfHandles;
+	ULONG TotalPagedPoolUsage;
+	ULONG TotalNonPagedPoolUsage;
+	ULONG TotalNamePoolUsage;
+	ULONG TotalHandleTableUsage;
+	ULONG HighWaterNumberOfObjects;
+	ULONG HighWaterNumberOfHandles;
+	ULONG HighWaterPagedPoolUsage;
+	ULONG HighWaterNonPagedPoolUsage;
+	ULONG HighWaterNamePoolUsage;
+	ULONG HighWaterHandleTableUsage;
+	ULONG InvalidAttributes;
+	GENERIC_MAPPING GenericMapping;
+	ULONG ValidAccessMask;
+	BOOLEAN SecurityRequired;
+	BOOLEAN MaintainHandleCount;
+	UCHAR TypeIndex; // since WINBLUE
+	CHAR ReservedByte;
+	ULONG PoolType;
+	ULONG DefaultPagedPoolCharge;
+	ULONG DefaultNonPagedPoolCharge;
+} OBJECT_TYPE_INFORMATION, * POBJECT_TYPE_INFORMATION;
+
+typedef struct _OBJECT_TYPES_INFORMATION {
+	ULONG NumberOfTypes;
+	OBJECT_TYPE_INFORMATION TypeInformation[1];
+} OBJECT_TYPES_INFORMATION, * POBJECT_TYPES_INFORMATION;
+
+
 std::wstring FormatHelper::FormatProperty(const EventData* data, const EventProperty& prop) {
 	static const auto statusFunction = [](auto, auto& p) {
 		CString result;
@@ -36,6 +96,11 @@ std::wstring FormatHelper::FormatProperty(const EventData* data, const EventProp
 			if (value[0] == L'\\')
 				value = TraceManager::GetDosNameFromNtName(value.c_str());
 			return value;
+			} },
+		{ L"ObjectType", [](auto, auto& p) -> std::wstring {
+			ATLASSERT(p.GetLength() == sizeof(USHORT));
+			auto type = p.GetValue<USHORT>();
+			return std::to_wstring(type) + L" (" + ObjectTypeToString(type) + L")";
 			} },
 	};
 
@@ -115,22 +180,46 @@ CString FormatHelper::MajorFunctionToString(UCHAR mf) {
 	static PCWSTR major_flt2[] = {
 		L"FAST_IO_CHECK_IF_POSSIBLE",
 		L"NETWORK_QUERY_OPEN",
-		L"MDL_READ",       
+		L"MDL_READ",
 		L"MDL_READ_COMPLETE",
-		L"PREPARE_MDL_WRITE",     
+		L"PREPARE_MDL_WRITE",
 		L"MDL_WRITE_COMPLETE",
-		L"VOLUME_MOUNT",   
+		L"VOLUME_MOUNT",
 		L"VOLUME_DISMOUNT"
-	};	  
+	};
 
 	CString text;
 	if (mf < _countof(major))
 		text.Format(L"IRP_MJ_%s (%d)", major[mf], (int)mf);
-	else if(mf >= 255 - 7)
+	else if (mf >= 255 - 7)
 		text.Format(L"IRP_MJ_%s (%d)", major_flt[255 - mf - 1], (int)mf);
 	else if (mf >= 255 - 20)
 		text.Format(L"IRP_MJ_%s (%d)", major_flt2[255 - mf - 7], (int)mf);
 	else
 		text.Format(L"%d", (int)mf);
 	return text;
+}
+
+PCWSTR FormatHelper::ObjectTypeToString(int type) {
+	static std::unordered_map<int, std::wstring> types;
+	if (types.empty()) {
+		const ULONG len = 1 << 14;
+		BYTE buffer[len];
+		if (0 != ::NtQueryObject(nullptr, ObjectTypesInformation, buffer, len, nullptr))
+			return L"";
+
+		auto p = reinterpret_cast<OBJECT_TYPES_INFORMATION*>(buffer);
+		auto count = p->NumberOfTypes;
+		types.reserve(count);
+
+		auto raw = &p->TypeInformation[0];
+		for (ULONG i = 0; i < count; i++) {
+			types.insert({ raw->TypeIndex, std::wstring(raw->TypeName.Buffer, raw->TypeName.Length / sizeof(WCHAR)) });
+
+			auto temp = (BYTE*)raw + sizeof(OBJECT_TYPE_INFORMATION) + raw->TypeName.MaximumLength;
+			temp += sizeof(PVOID) - 1;
+			raw = reinterpret_cast<OBJECT_TYPE_INFORMATION*>((ULONG_PTR)temp / sizeof(PVOID) * sizeof(PVOID));
+		}
+	}
+	return types.empty() ? L"" : types[type].c_str();
 }
