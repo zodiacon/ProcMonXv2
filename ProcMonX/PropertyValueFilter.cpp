@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "PropertyValueFilter.h"
 #include "EventData.h"
+#include "FormatHelper.h"
 
 PropertyValueFilter::PropertyValueFilter(std::wstring name, CompareType type, FilterAction action) 
 : StringCompareFilterBase(L"Property Value", name, type, action){

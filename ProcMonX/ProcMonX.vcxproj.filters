@@ -25,6 +25,9 @@
     <Filter Include="Serializers">
       <UniqueIdentifier>{c7365453-1340-4079-8cff-24256efbd73e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Filters">
+      <UniqueIdentifier>{97b9f4db-ee27-40d1-aa45-085173e9e123}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ProcMonX.cpp">
@@ -98,6 +101,21 @@
     </ClCompile>
     <ClCompile Include="FormatHelper.cpp">
       <Filter>Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="EventNameFilter.cpp">
+      <Filter>Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="ProcessIdFilter.cpp">
+      <Filter>Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="ProcessNameFilter.cpp">
+      <Filter>Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertyNameFilter.cpp">
+      <Filter>Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertyValueFilter.cpp">
+      <Filter>Filters</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -181,6 +199,21 @@
     </ClInclude>
     <ClInclude Include="FormatHelper.h">
       <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="EventNameFilter.h">
+      <Filter>Filters</Filter>
+    </ClInclude>
+    <ClInclude Include="ProcessIdFilter.h">
+      <Filter>Filters</Filter>
+    </ClInclude>
+    <ClInclude Include="ProcessNameFilter.h">
+      <Filter>Filters</Filter>
+    </ClInclude>
+    <ClInclude Include="PropertyNameFilter.h">
+      <Filter>Filters</Filter>
+    </ClInclude>
+    <ClInclude Include="PropertyValueFilter.h">
+      <Filter>Filters</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

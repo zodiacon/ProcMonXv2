@@ -1,4 +1,5 @@
 #pragma once
+
 #include "FilterBase.h"
 
 class ProcessIdFilter : public FilterBase {

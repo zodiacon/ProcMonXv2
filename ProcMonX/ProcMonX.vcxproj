@@ -230,6 +230,7 @@
     <ClCompile Include="CSVEventDataSerializer.cpp" />
     <ClCompile Include="DialogHelper.cpp" />
     <ClCompile Include="EventConfiguration.cpp" />
+    <ClCompile Include="EventNameFilter.cpp" />
     <ClCompile Include="EventPropertiesDlg.cpp" />
     <ClCompile Include="EventsDlg.cpp" />
     <ClCompile Include="ClipboardHelper.cpp" />
@@ -240,6 +241,8 @@
     <ClCompile Include="FormatHelper.cpp" />
     <ClCompile Include="IniFile.cpp" />
     <ClCompile Include="MainFrm.cpp" />
+    <ClCompile Include="ProcessIdFilter.cpp" />
+    <ClCompile Include="ProcessNameFilter.cpp" />
     <ClCompile Include="ProcMonX.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -247,6 +250,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="PropertyNameFilter.cpp" />
+    <ClCompile Include="PropertyValueFilter.cpp" />
     <ClCompile Include="SerializerFactory.cpp" />
     <ClCompile Include="SortHelper.cpp" />
     <ClCompile Include="SymbolManager.cpp" />
@@ -261,6 +266,7 @@
     <ClInclude Include="CSVEventDataSerializer.h" />
     <ClInclude Include="DialogHelper.h" />
     <ClInclude Include="EventConfiguration.h" />
+    <ClInclude Include="EventNameFilter.h" />
     <ClInclude Include="FormatHelper.h" />
     <ClInclude Include="IEventDataSerializer.h" />
     <ClInclude Include="EventPropertiesDlg.h" />
@@ -272,6 +278,10 @@
     <ClInclude Include="FiltersDlg.h" />
     <ClInclude Include="IniFile.h" />
     <ClInclude Include="MainFrm.h" />
+    <ClInclude Include="ProcessIdFilter.h" />
+    <ClInclude Include="ProcessNameFilter.h" />
+    <ClInclude Include="PropertyNameFilter.h" />
+    <ClInclude Include="PropertyValueFilter.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="SerializerFactory.h" />

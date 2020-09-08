@@ -33,20 +33,8 @@
     <ClInclude Include="FilterBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ProcessIdFilter.h">
-      <Filter>Filters</Filter>
-    </ClInclude>
-    <ClInclude Include="ProcessNameFilter.h">
-      <Filter>Filters</Filter>
-    </ClInclude>
-    <ClInclude Include="EventNameFilter.h">
-      <Filter>Filters</Filter>
-    </ClInclude>
     <ClInclude Include="StringCompareFilterBase.h">
-      <Filter>Filters</Filter>
-    </ClInclude>
-    <ClInclude Include="PropertyValueFilter.h">
-      <Filter>Filters</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -65,20 +53,8 @@
     <ClCompile Include="FilterBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ProcessIdFilter.cpp">
-      <Filter>Filters</Filter>
-    </ClCompile>
-    <ClCompile Include="ProcessNameFilter.cpp">
-      <Filter>Filters</Filter>
-    </ClCompile>
-    <ClCompile Include="EventNameFilter.cpp">
-      <Filter>Filters</Filter>
-    </ClCompile>
     <ClCompile Include="StringCompareFilterBase.cpp">
-      <Filter>Filters</Filter>
-    </ClCompile>
-    <ClCompile Include="PropertyValueFilter.cpp">
-      <Filter>Filters</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

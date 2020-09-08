@@ -158,19 +158,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="EventData.h" />
-    <ClInclude Include="EventNameFilter.h" />
     <ClInclude Include="FilterBase.h" />
     <ClInclude Include="KernelEvents.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="ProcessIdFilter.h" />
-    <ClInclude Include="ProcessNameFilter.h" />
-    <ClInclude Include="PropertyValueFilter.h" />
     <ClInclude Include="StringCompareFilterBase.h" />
     <ClInclude Include="TraceManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EventData.cpp" />
-    <ClCompile Include="EventNameFilter.cpp" />
     <ClCompile Include="FilterBase.cpp" />
     <ClCompile Include="KernelEvents.cpp" />
     <ClCompile Include="pch.cpp">
@@ -179,9 +174,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="ProcessIdFilter.cpp" />
-    <ClCompile Include="ProcessNameFilter.cpp" />
-    <ClCompile Include="PropertyValueFilter.cpp" />
     <ClCompile Include="StringCompareFilterBase.cpp" />
     <ClCompile Include="TraceManager.cpp" />
   </ItemGroup>

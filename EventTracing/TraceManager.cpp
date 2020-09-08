@@ -6,7 +6,6 @@
 #include <VersionHelpers.h>
 #include <algorithm>
 #include "FilterBase.h"
-#include "ProcessIdFilter.h"
 
 #pragma comment(lib, "tdh")
 
