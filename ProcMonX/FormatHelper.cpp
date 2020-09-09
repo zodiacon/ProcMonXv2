@@ -102,6 +102,17 @@ std::wstring FormatHelper::FormatProperty(const EventData* data, const EventProp
 			auto type = p.GetValue<USHORT>();
 			return std::to_wstring(type) + L" (" + ObjectTypeToString(type) + L")";
 			} },
+		{ L"Tag", [](auto data, auto& p) -> std::wstring {
+			if (p.GetLength() != sizeof(DWORD))
+				return data->FormatProperty(p);
+			auto tag = p.GetValue<DWORD>();
+			auto chars = (const char*)&tag;
+			CStringA str(chars[0]);
+			((str += chars[1]) += chars[2]) += chars[3];
+			CStringA text;
+			text.Format("%s (0x%X)", str, tag);
+			return std::wstring(CString(text));
+			} },
 	};
 
 	auto it = functions.find(data->GetEventName() + L";" + prop.Name);
