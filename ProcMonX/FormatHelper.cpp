@@ -62,6 +62,36 @@ typedef struct _OBJECT_TYPES_INFORMATION {
 	OBJECT_TYPE_INFORMATION TypeInformation[1];
 } OBJECT_TYPES_INFORMATION, * POBJECT_TYPES_INFORMATION;
 
+typedef struct _SYSTEM_TIMEOFDAY_INFORMATION {
+	LARGE_INTEGER BootTime;
+	LARGE_INTEGER CurrentTime;
+	LARGE_INTEGER TimeZoneBias;
+	ULONG TimeZoneId;
+	ULONG Reserved;
+	ULONGLONG BootTimeBias;
+	ULONGLONG SleepTimeBias;
+} SYSTEM_TIMEOFDAY_INFORMATION, * PSYSTEM_TIMEOFDAY_INFORMATION;
+
+enum SYSTEM_INFORMATION_CLASS {
+	SystemTimeOfDayInformation = 3
+};
+
+extern "C" NTSTATUS NTAPI NtQuerySystemInformation(
+	_In_ SYSTEM_INFORMATION_CLASS SystemInformationClass,
+	_Out_writes_bytes_opt_(SystemInformationLength) PVOID SystemInformation,
+	_In_ ULONG SystemInformationLength,
+	_Out_opt_ PULONG ReturnLength);
+
+uint64_t GetBootTime() {
+	static int64_t time = 0;
+	if (time == 0) {
+		SYSTEM_TIMEOFDAY_INFORMATION info;
+		if (0 == ::NtQuerySystemInformation(SystemTimeOfDayInformation, &info, sizeof(info), nullptr))
+			time = info.BootTime.QuadPart;
+	}
+
+	return time;
+}
 
 std::wstring FormatHelper::FormatProperty(const EventData* data, const EventProperty& prop) {
 	static const auto statusFunction = [](auto, auto& p) {
@@ -78,10 +108,17 @@ std::wstring FormatHelper::FormatProperty(const EventData* data, const EventProp
 		return (PCWSTR)text;
 	};
 
+	static const auto initialTimeToString = [](auto, auto& p) -> std::wstring {
+		ATLASSERT(p.GetLength() == sizeof(LONGLONG));
+		auto time = p.GetValue<time_t>();
+		auto initTime = GetBootTime() + time;
+		return std::wstring(FormatTime(initTime));
+	};
+
 	static const std::unordered_map<std::wstring, std::function<std::wstring(const EventData*, const EventProperty&)>> functions{
 		{ L"Status", statusFunction },
 		{ L"NtStatus", statusFunction },
-		{ L"InitialTime", int64ToHex },
+		{ L"InitialTime", initialTimeToString },
 		{ L"TimeDateStamp", statusFunction },
 		{ L"PageFault/VirtualAlloc;Flags", [](auto, auto& p) -> std::wstring {
 			ATLASSERT(p.GetLength() == sizeof(DWORD));

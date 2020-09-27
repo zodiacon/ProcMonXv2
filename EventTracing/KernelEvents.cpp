@@ -197,6 +197,7 @@ const std::vector<KernelEventCategory> KernelEvents {
 			{ L"Copy on Write", 12 },
 			{ L"Guard Page Fault", 13 },
 			{ L"Hard Page Fault", 14 },
+			{ L"Access Violation", 15 },
 			{ L"Image Load Backed", 105 },
 		}, true
 	},

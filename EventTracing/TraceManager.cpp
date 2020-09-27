@@ -79,7 +79,7 @@ bool TraceManager::Start(EventCallback cb) {
 		_properties->Wnode.Flags = WNODE_FLAG_TRACED_GUID;
 		_properties->Wnode.ClientContext = 1;
 		_properties->FlushTimer = 1;
-		_properties->LogFileMode = EVENT_TRACE_REAL_TIME_MODE | EVENT_TRACE_NO_PER_PROCESSOR_BUFFERING | EVENT_TRACE_SYSTEM_LOGGER_MODE;
+		_properties->LogFileMode = EVENT_TRACE_REAL_TIME_MODE | EVENT_TRACE_USE_LOCAL_SEQUENCE | EVENT_TRACE_SYSTEM_LOGGER_MODE;
 		_properties->LoggerNameOffset = sizeof(EVENT_TRACE_PROPERTIES);
 
 		error = ::StartTrace(&_handle, sessionName, _properties);
@@ -99,6 +99,14 @@ bool TraceManager::Start(EventCallback cb) {
 		Stop();
 		return false;
 	}
+
+	/* experimental
+	WCHAR kernelGuidStr[] = L"{22fb2cd6-0e7b-422b-a0c7-2fad1fd0e716}";
+	GUID kernelGuid;
+	if (SUCCEEDED(::CLSIDFromString(kernelGuidStr, &kernelGuid))) {
+		error = ::EnableTraceEx2(_handle, &kernelGuid, EVENT_CONTROL_CODE_ENABLE_PROVIDER, TRACE_LEVEL_VERBOSE, 0, 0, INFINITE, nullptr);
+	}
+	*/
 
 	_traceLog.Context = this;
 	_traceLog.LoggerName = (PWSTR)KERNEL_LOGGER_NAME;
