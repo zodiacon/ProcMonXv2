@@ -131,7 +131,7 @@ IDR_MAINFRAME           ICON                    "res\\ProcMonX.ico"
 
 IDI_CANCEL              ICON                    "res\\cancel.ico"
 
-IDI_DRIVER              ICON                    "C:\\Dev\\ProcMonX\\ProcMonX\\res\\Driver.ico"
+IDI_DRIVER              ICON                    "res\\Driver.ico"
 
 IDI_FILTER              ICON                    "res\\filter.ico"
 
@@ -179,11 +179,11 @@ IDI_GEAR                ICON                    "res\\gear.ico"
 
 IDI_FILE                ICON                    "res\\file.ico"
 
-IDI_HANDLE              ICON                    "C:\\Dev\\ProcMonX\\ProcMonX\\res\\handle.ico"
+IDI_HANDLE              ICON                    "res\\handle.ico"
 
-IDI_OBJECT              ICON                    "C:\\Dev\\ProcMonX\\ProcMonX\\res\\object.ico"
+IDI_OBJECT              ICON                    "res\\object.ico"
 
-IDI_DISK                ICON                    "C:\\Dev\\ProcMonX\\ProcMonX\\res\\storage.ico"
+IDI_DISK                ICON                    "res\\storage.ico"
 
 IDI_HEAP                ICON                    "res\\heap.ico"
 
