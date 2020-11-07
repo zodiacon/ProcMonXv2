@@ -1,6 +1,7 @@
 #pragma once
 
 #include "KernelEvents.h"
+#include <atomic>
 #include <shared_mutex>
 #include <string>
 #include <unordered_map>
