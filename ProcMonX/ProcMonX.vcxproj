@@ -21,6 +21,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{87B2E77F-E722-4830-B4CB-80D8179BEAA3}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -125,7 +126,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WINDOWS;STRICT;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalIncludeDirectories>..\EventTracing;..\Utils</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -187,6 +188,9 @@
     <Manifest>
       <AdditionalManifestFiles>manifest.xml</AdditionalManifestFiles>
     </Manifest>
+    <PostBuildEvent>
+      <Command>signtool /i digicert /sha256</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -197,7 +201,7 @@
       <DebugInformationFormat />
       <PreprocessorDefinitions>_WINDOWS;STRICT;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalIncludeDirectories>..\EventTracing;..\Utils</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -222,6 +226,9 @@
     <Manifest>
       <AdditionalManifestFiles>manifest.xml</AdditionalManifestFiles>
     </Manifest>
+    <PostBuildEvent>
+      <Command>signtool sign /i DigiCert /fd sha256 $(TargetPath)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AboutDlg.cpp" />
@@ -252,6 +259,7 @@
     </ClCompile>
     <ClCompile Include="PropertyNameFilter.cpp" />
     <ClCompile Include="PropertyValueFilter.cpp" />
+    <ClCompile Include="QuickFindDlg.cpp" />
     <ClCompile Include="SerializerFactory.cpp" />
     <ClCompile Include="SortHelper.cpp" />
     <ClCompile Include="SymbolManager.cpp" />
@@ -282,6 +290,7 @@
     <ClInclude Include="ProcessNameFilter.h" />
     <ClInclude Include="PropertyNameFilter.h" />
     <ClInclude Include="PropertyValueFilter.h" />
+    <ClInclude Include="QuickFindDlg.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="SerializerFactory.h" />
@@ -339,6 +348,7 @@
     <Image Include="res\registry.ico" />
     <Image Include="res\save.ico" />
     <Image Include="res\save_as.ico" />
+    <Image Include="res\search.ico" />
     <Image Include="res\stack.ico" />
     <Image Include="res\Stop.ico" />
     <Image Include="res\storage.ico" />

@@ -2,10 +2,10 @@
 #include "ClipboardHelper.h"
 
 
-bool ClipboardHelper::CopyText(HWND hWnd, PCWSTR text) {
+bool ClipboardHelper::CopyText(HWND hWnd, const CString& text) {
 	if (::OpenClipboard(hWnd)) {
 		::EmptyClipboard();
-		auto size = (::wcslen(text) + 1) * sizeof(WCHAR);
+		auto size = (text.GetLength() + 1) * sizeof(WCHAR);
 		auto hData = ::GlobalAlloc(GMEM_MOVEABLE, size);
 		if (hData) {
 			auto p = ::GlobalLock(hData);

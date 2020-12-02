@@ -7,6 +7,7 @@
 #include "aboutdlg.h"
 #include "MainFrm.h"
 #include "EventData.h"
+#include "QuickFindDlg.h"
 
 const int WINDOW_MENU_POSITION = 6;
 
@@ -14,6 +15,9 @@ CMainFrame::CMainFrame() {
 }
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg) {
+	if (m_pQuickFindDlg && m_pQuickFindDlg->IsDialogMessage(pMsg))
+		return TRUE;
+
 	if (CFrameWindowImpl<CMainFrame>::PreTranslateMessage(pMsg))
 		return TRUE;
 
@@ -271,6 +275,26 @@ LRESULT CMainFrame::OnTabActivated(int, LPNMHDR hdr, BOOL&) {
 	return 0;
 }
 
+LRESULT CMainFrame::OnQuickFind(WORD, WORD, HWND, BOOL&) {
+	if (!m_pQuickFindDlg) {
+		m_pQuickFindDlg = new CQuickFindDlg(this);
+		m_pQuickFindDlg->Create(*this);
+		m_pQuickFindDlg->ShowWindow(SW_SHOW);
+	}
+	m_pQuickFindDlg->BringWindowToTop();
+	m_pQuickFindDlg->SetFocus();
+
+	return 0;
+}
+
+void CMainFrame::DoFind(PCWSTR text, const QuickFindOptions& options) {
+	m_pCurrentView->SendMessage(WM_COMMAND, ID_SEARCH_FINDNEXT);
+}
+
+void CMainFrame::WindowClosed() {
+	m_pQuickFindDlg = nullptr;
+}
+
 BOOL CMainFrame::TrackPopupMenu(HMENU hMenu, HWND hWnd, POINT* pt, UINT flags) {
 	POINT cursorPos;
 	if (pt == nullptr) {
@@ -319,6 +343,8 @@ void CMainFrame::InitCommandBar() {
 		{ ID_EDIT_COPY, IDI_COPY },
 		{ ID_MONITOR_PAUSE, IDI_PAUSE },
 		{ ID_VIEW_AUTOSCROLL, IDI_SCROLL },
+		{ ID_SEARCH_QUICKFIND, IDI_FIND },
+		{ ID_SEARCH_FINDALL, IDI_SEARCH },
 	};
 	for (auto& cmd : cmds)
 		m_CmdBar.AddIcon(AtlLoadIcon(cmd.icon), cmd.id);

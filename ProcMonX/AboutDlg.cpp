@@ -14,3 +14,9 @@ LRESULT CAboutDlg::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, 
 	EndDialog(wID);
 	return 0;
 }
+
+LRESULT CAboutDlg::OnClickSyslink(int, LPNMHDR, BOOL&) {
+	::ShellExecute(nullptr, L"open", L"https://github.com/zodiacon/procmonxv2", nullptr, nullptr, SW_SHOWDEFAULT);
+
+	return 0;
+}

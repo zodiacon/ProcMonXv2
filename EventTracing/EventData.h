@@ -17,7 +17,7 @@ struct EventProperty {
 
 	template<typename T>
 	T GetValue() const {
-		static_assert(std::is_pod<T>() && !std::is_pointer<T>());
+		static_assert(std::is_trivially_copyable<T>() && !std::is_pointer<T>());
 		assert(sizeof(T) == Data.size());
 		return *(T*)Data.data();
 	}

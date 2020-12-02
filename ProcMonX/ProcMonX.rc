@@ -74,6 +74,13 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
     END
+    POPUP "&Search"
+    BEGIN
+        MENUITEM "&Quick Find...\tCtrl+F",      ID_SEARCH_QUICKFIND
+        MENUITEM "&Find All...\tCtrl+Shift+F",  ID_SEARCH_FINDALL
+        MENUITEM SEPARATOR
+        MENUITEM "Find &Next\tF3",              ID_SEARCH_FINDNEXT
+    END
     POPUP "&Event"
     BEGIN
         MENUITEM "&Properties...",              ID_EVENT_PROPERTIES
@@ -225,6 +232,8 @@ IDI_PAUSE               ICON                    "res\\Pause.ico"
 
 IDI_SCROLL              ICON                    "res\\autoscroll.ico"
 
+IDI_SEARCH              ICON                    "res\\search.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -233,12 +242,14 @@ IDI_SCROLL              ICON                    "res\\autoscroll.ico"
 
 IDD_ABOUTBOX DIALOGEX 0, 0, 187, 102
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "About Process Explorer X"
+CAPTION "About Process Monitor X"
 FONT 9, "Segoe UI", 0, 0, 0x0
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,68,81,50,14
-    CTEXT           "Process Monitor X v2.0 Alpha\n\n(C)2020 Pavel Yosifovich",IDC_STATIC,42,24,108,32
+    CTEXT           "Process Monitor X v2.0 Beta 1\n\n©2020 Pavel Yosifovich",IDC_STATIC,42,24,108,28
     ICON            IDR_MAINFRAME,IDC_STATIC,6,6,20,20
+    CONTROL         "<a>https://github.com/zodiacon/procmonxv2</a>",IDC_SYSLINK1,
+                    "SysLink",WS_TABSTOP,27,55,138,14
 END
 
 IDD_STACK DIALOGEX 0, 0, 339, 278
@@ -306,6 +317,23 @@ BEGIN
     PUSHBUTTON      "Button1",IDC_EDIT,358,29,26,19,BS_ICON
 END
 
+IDD_FIND DIALOGEX 0, 0, 249, 140
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Quick Find"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Search text:",IDC_STATIC,14,11,41,8
+    EDITTEXT        IDC_TEXT,60,9,134,14,ES_AUTOHSCROLL
+    GROUPBOX        "Search Items",IDC_STATIC,12,37,99,65
+    CONTROL         "Process Names",IDC_PROCESSES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,19,53,64,10
+    CONTROL         "Event Names",IDC_EVENT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,19,68,58,10
+    CONTROL         "Event Details",IDC_DETAILS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,19,83,58,10
+    GROUPBOX        "Search Options",IDC_STATIC,127,37,99,65
+    CONTROL         "Search Down",IDC_DOWN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,137,55,58,10
+    CONTROL         "Case Sensitive",IDC_CASESENSITIVE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,137,70,63,10
+    DEFPUSHBUTTON   "Find &Next",IDC_FINDNEXT,99,119,50,14,WS_DISABLED
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -354,6 +382,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 235
     END
+
+    IDD_FIND, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 242
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 133
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -365,20 +401,23 @@ END
 
 IDR_MAINFRAME ACCELERATORS
 BEGIN
-    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL
-    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL
-    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL
-    "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL
-    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL
-    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL
-    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL
-    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL
-    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT
-    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT
-    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL
-    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT
-    VK_F6,          ID_NEXT_PANE,           VIRTKEY 
-    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
+    "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+    VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
+    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
+    "F",            ID_SEARCH_FINDALL,      VIRTKEY, SHIFT, CONTROL, NOINVERT
+    "F",            ID_SEARCH_QUICKFIND,    VIRTKEY, CONTROL, NOINVERT
+    VK_F3,          ID_SEARCH_FINDNEXT,     VIRTKEY, NOINVERT
 END
 
 
@@ -450,6 +489,11 @@ BEGIN
     0
 END
 
+IDD_FIND AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -458,7 +502,7 @@ END
 
 STRINGTABLE
 BEGIN
-    IDR_MAINFRAME           "Process Monitor X v2.0 Alpha"
+    IDR_MAINFRAME           "Process Monitor X v2.0 Beta 1"
     IDS_TITLE               "Process Monitor X"
 END
 

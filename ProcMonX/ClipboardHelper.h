@@ -2,6 +2,6 @@
 
 class ClipboardHelper final {
 public:
-	static bool CopyText(HWND hWnd, PCWSTR text);
+	static bool CopyText(HWND hWnd, const CString& text);
 };
 

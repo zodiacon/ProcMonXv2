@@ -117,6 +117,9 @@
     <ClCompile Include="PropertyValueFilter.cpp">
       <Filter>Filters</Filter>
     </ClCompile>
+    <ClCompile Include="QuickFindDlg.cpp">
+      <Filter>Dialogs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainFrm.h">
@@ -214,6 +217,9 @@
     </ClInclude>
     <ClInclude Include="PropertyValueFilter.h">
       <Filter>Filters</Filter>
+    </ClInclude>
+    <ClInclude Include="QuickFindDlg.h">
+      <Filter>Dialogs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -367,6 +373,9 @@
       <Filter>Resource Files\Icons</Filter>
     </Image>
     <Image Include="res\autoscroll.ico">
+      <Filter>Resource Files\Icons</Filter>
+    </Image>
+    <Image Include="res\search.ico">
       <Filter>Resource Files\Icons</Filter>
     </Image>
   </ItemGroup>

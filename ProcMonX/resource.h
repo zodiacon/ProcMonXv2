@@ -59,6 +59,8 @@
 #define IDI_PAUSE                       263
 #define IDI_ICON1                       264
 #define IDI_SCROLL                      264
+#define IDI_SEARCH                      265
+#define IDD_FIND                        266
 #define IDC_LIST                        1000
 #define IDC_TREE                        1002
 #define IDC_SAVE                        1003
@@ -84,6 +86,13 @@
 #define IDC_ADVANCED                    1027
 #define IDC_STACK                       1031
 #define IDC_RESOLVE_SYM                 1032
+#define IDC_SYSLINK1                    1033
+#define IDC_TEXT                        1034
+#define IDC_PROCESSES                   1035
+#define IDC_EVENT                       1036
+#define IDC_DETAILS                     1037
+#define IDC_CASESENSITIVE               1040
+#define IDC_FINDNEXT                    1042
 #define ID_WINDOW_CLOSE                 32772
 #define ID_WINDOW_CLOSE_ALL             32773
 #define ID_OPTIONS_ALWAYSONTOP          32775
@@ -100,14 +109,17 @@
 #define ID_VIEW_AUTOSCROLL              32787
 #define ID_MONITOR_PAUSE                32788
 #define ID_EDIT_COPYALL                 32789
+#define ID_SEARCH_QUICKFIND             32790
+#define ID_SEARCH_FINDALL               32791
+#define ID_SEARCH_FINDNEXT              32795
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        265
-#define _APS_NEXT_COMMAND_VALUE         32790
-#define _APS_NEXT_CONTROL_VALUE         1033
+#define _APS_NEXT_RESOURCE_VALUE        268
+#define _APS_NEXT_COMMAND_VALUE         32797
+#define _APS_NEXT_CONTROL_VALUE         1043
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -16,6 +16,8 @@
 #include "ClipboardHelper.h"
 #include "SerializerFactory.h"
 #include "FormatHelper.h"
+#include "QuickFindDlg.h"
+
 #include <execution>
 
 CView::CView(IMainFrame* frame) : CViewBase(frame) {
@@ -560,6 +562,77 @@ LRESULT CView::OnConfigFilters(WORD, WORD, HWND, BOOL&) {
 
 LRESULT CView::OnItemChanged(int, LPNMHDR, BOOL&) {
 	UpdateUI();
+
+	return 0;
+}
+
+LRESULT CView::OnFindNext(WORD, WORD, HWND, BOOL&) {
+	auto& options = CQuickFindDlg::GetSearchOptions();
+	auto& text = CQuickFindDlg::GetSearchText();
+
+	auto step = options.SearchDown ? 1 : -1;
+	auto count = (int)m_Events.size();
+	if (count == 0)
+		return 0;
+
+	auto selected = m_List.GetSelectedIndex() + step;
+	if (selected < 0)
+		selected = count - 1;
+	else if (selected >= count)
+		selected = 0;
+
+	auto start = selected;
+	auto search = text;
+	auto cs = options.CaseSensitive;
+	if (!cs)
+		search.MakeLower();
+
+	// perfrom search
+	bool found = false;
+	do {
+		auto& evt = *m_Events[selected];
+		if (options.SearchProcesses) {
+			CString text = evt.GetProcessName().c_str();
+			if (!cs)
+				text.MakeLower();
+			if (text.Find(search) >= 0) {
+				found = true;
+				break;
+			}
+		}
+		if (options.SearchEvents) {
+			CString text = evt.GetEventName().c_str();
+			if (!cs)
+				text.MakeLower();
+			if (text.Find(search) >= 0) {
+				found = true;
+				break;
+			}
+		}
+		if (options.SearchDetails) {
+			CString text = GetEventDetails(&evt).c_str();
+			if (!cs)
+				text.MakeLower();
+			if (text.Find(search) >= 0) {
+				found = true;
+				break;
+			}
+		}
+
+		// move to the next row
+		selected += step;
+		if (selected >= count)
+			selected = 0;
+		else if (selected < 0)
+			selected = count - 1;
+	} while (selected != start);
+
+	if (found) {
+		m_List.SelectItem(selected);
+		m_List.SetFocus();
+	}
+	else
+		AtlMessageBox(*this, L"Text not found", IDS_TITLE, MB_ICONINFORMATION);
 
 	return 0;
 }

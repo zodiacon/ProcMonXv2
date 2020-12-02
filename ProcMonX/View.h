@@ -55,6 +55,7 @@ public:
 		COMMAND_ID_HANDLER(ID_EVENT_CALLSTACK, OnCallStack)
 		MESSAGE_HANDLER(WM_CLOSE, OnClose)
 		COMMAND_ID_HANDLER(ID_MONITOR_CONFIGUREEVENTS, OnConfigureEvents)
+		COMMAND_ID_HANDLER(ID_SEARCH_FINDNEXT, OnFindNext)
 		COMMAND_ID_HANDLER(ID_MONITOR_CLEAR, OnClear)
 		COMMAND_ID_HANDLER(ID_EDIT_COPY, OnCopy)
 		COMMAND_ID_HANDLER(ID_FILE_SAVE, OnSave)
@@ -95,6 +96,7 @@ private:
 	LRESULT OnAutoScroll(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnConfigFilters(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnItemChanged(int /*idCtrl*/, LPNMHDR /*pnmh*/, BOOL& /*bHandled*/);
+	LRESULT OnFindNext(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 
 private:
 	CListViewCtrl m_List;
