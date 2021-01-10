@@ -89,12 +89,12 @@ CString CView::GetColumnText(HWND, int row, int col) const {
 				text.Format(L"%u (0x%X)", tid, tid);
 			break;
 		}
-		case 6: text.Format(L"%d", (int)item->GetEventDescriptor().Opcode);
-		case 7: 
-			::StringFromGUID2(item->GetProviderId(), text.GetBufferSetLength(64), 64);
-			break;
+		//case 6: text.Format(L"%d", (int)item->GetEventDescriptor().Opcode);
+		//case 7: 
+		//	::StringFromGUID2(item->GetProviderId(), text.GetBufferSetLength(64), 64);
+		//	break;
 
-		case 8:
+		case 6:
 			return GetEventDetails(item).c_str();
 	}
 
@@ -367,8 +367,8 @@ LRESULT CView::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOO
 	cm->AddColumn(L"PID", LVCFMT_RIGHT, 120, ColumnFlags::Numeric | ColumnFlags::Visible);
 	cm->AddColumn(L"Process Name", LVCFMT_LEFT, 150);
 	cm->AddColumn(L"TID", LVCFMT_RIGHT, 120, ColumnFlags::Numeric | ColumnFlags::Visible);
-	cm->AddColumn(L"Opcode", LVCFMT_CENTER, 45, ColumnFlags::Numeric);
-	cm->AddColumn(L"Provider", LVCFMT_CENTER, 180, ColumnFlags::Numeric);
+	//cm->AddColumn(L"Opcode", LVCFMT_CENTER, 45, ColumnFlags::Numeric);
+	//cm->AddColumn(L"Provider", LVCFMT_CENTER, 180, ColumnFlags::Numeric);
 	cm->AddColumn(L"Details", LVCFMT_LEFT, 700);
 
 	cm->UpdateColumns();

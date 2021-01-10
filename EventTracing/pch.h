@@ -7,7 +7,8 @@
 #ifndef PCH_H
 #define PCH_H
 
-// add headers that you want to pre-compile here
+#define _HAS_EXCEPTIONS 0
+
 #include <Windows.h>
 
 #define INITGUID

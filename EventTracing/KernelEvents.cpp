@@ -42,8 +42,8 @@ const std::vector<KernelEventCategory> KernelEvents {
 		{
 			{ L"Load", 10 },
 			{ L"Unload", 2 },
-			{ L"DC Start", 3 },
-			{ L"DC Stop", 4 },
+			//{ L"DC Start", 3 },
+			//{ L"DC Stop", 4 },
 			{ L"Relocation", 0x20 },
 			{ L"Kernel Base", 0x21 },
 			{ L"Hypercall Page", 0x22 },
