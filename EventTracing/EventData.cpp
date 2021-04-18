@@ -140,16 +140,20 @@ uint32_t EventData::GetIndex() const {
 }
 
 std::wstring EventData::FormatProperty(const EventProperty& property) const {
-	ULONG size;
-	EVENT_MAP_INFO* eventMap = nullptr;
+	ULONG size = 0;
+	PEVENT_MAP_INFO eventMap = nullptr;
+	std::unique_ptr<BYTE[]> mapBuffer;
 	auto& prop = property.Info;
 	WCHAR buffer[1024];
 	auto info = reinterpret_cast<PTRACE_EVENT_INFO>(_buffer.get());
 	if (prop.nonStructType.MapNameOffset) {
 		auto mapName = (PWSTR)((PBYTE)info + prop.nonStructType.MapNameOffset);
-		eventMap = reinterpret_cast<EVENT_MAP_INFO*>(buffer);
-		size = sizeof(buffer);
-		::TdhGetEventMapInformation(_record, mapName, eventMap, &size);
+		if(ERROR_INSUFFICIENT_BUFFER == ::TdhGetEventMapInformation(_record, mapName, nullptr, &size)) {
+			mapBuffer = std::make_unique<BYTE[]>(size);
+			eventMap = reinterpret_cast<PEVENT_MAP_INFO>(mapBuffer.get());
+			if(ERROR_SUCCESS != ::TdhGetEventMapInformation(_record, mapName, eventMap, &size))
+				eventMap = nullptr;
+		}
 	}
 	size = sizeof(buffer);
 

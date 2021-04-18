@@ -100,13 +100,12 @@ bool TraceManager::Start(EventCallback cb) {
 		return false;
 	}
 
-	/* experimental
-	WCHAR kernelGuidStr[] = L"{22fb2cd6-0e7b-422b-a0c7-2fad1fd0e716}";
-	GUID kernelGuid;
-	if (SUCCEEDED(::CLSIDFromString(kernelGuidStr, &kernelGuid))) {
-		error = ::EnableTraceEx2(_handle, &kernelGuid, EVENT_CONTROL_CODE_ENABLE_PROVIDER, TRACE_LEVEL_VERBOSE, 0, 0, INFINITE, nullptr);
-	}
-	*/
+	//WCHAR srpc[] = L"{6AD52B32-D609-4BE9-AE07-CE8DAE937E39}";
+	//GUID rpc;
+	//if (SUCCEEDED(::CLSIDFromString(srpc, &rpc))) {
+	//	ENABLE_TRACE_PARAMETERS params = { ENABLE_TRACE_PARAMETERS_VERSION_2 };
+	//	error = ::EnableTraceEx2(_handle, &rpc, EVENT_CONTROL_CODE_ENABLE_PROVIDER, TRACE_LEVEL_VERBOSE, 0, 0, INFINITE, &params);
+	//}
 
 	_traceLog.Context = this;
 	_traceLog.LoggerName = (PWSTR)KERNEL_LOGGER_NAME;

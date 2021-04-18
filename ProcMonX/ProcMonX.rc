@@ -246,7 +246,7 @@ CAPTION "About Process Monitor X"
 FONT 9, "Segoe UI", 0, 0, 0x0
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,68,81,50,14
-    CTEXT           "Process Monitor X v2.0 Beta 1\n\n©2020 Pavel Yosifovich",IDC_STATIC,42,24,108,28
+    CTEXT           "Process Monitor X v2.0 Beta 1\n\n©2020-2021 Pavel Yosifovich",IDC_STATIC,42,24,108,28
     ICON            IDR_MAINFRAME,IDC_STATIC,6,6,20,20
     CONTROL         "<a>https://github.com/zodiacon/procmonxv2</a>",IDC_SYSLINK1,
                     "SysLink",WS_TABSTOP,27,55,138,14
@@ -446,7 +446,7 @@ BEGIN
             VALUE "FileDescription", "Process Monitor X v2"
             VALUE "FileVersion", "1, 0, 0, 1"
             VALUE "InternalName", "ProcMonXv2"
-            VALUE "LegalCopyright", "(C)2020 Pavel Yosifovich"
+            VALUE "LegalCopyright", "©2020-2021 Pavel Yosifovich"
             VALUE "OriginalFilename", "ProcMonX.exe"
             VALUE "ProductName", "Process Monitor X v2"
             VALUE "ProductVersion", "2.0.0.1"

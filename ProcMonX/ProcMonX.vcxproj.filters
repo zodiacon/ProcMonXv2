@@ -28,6 +28,9 @@
     <Filter Include="Filters">
       <UniqueIdentifier>{97b9f4db-ee27-40d1-aa45-085173e9e123}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Models">
+      <UniqueIdentifier>{1202ef93-c460-4ecd-bf50-cba8e0a99e2a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ProcMonX.cpp">
@@ -119,6 +122,9 @@
     </ClCompile>
     <ClCompile Include="QuickFindDlg.cpp">
       <Filter>Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Settings.cpp">
+      <Filter>Models</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -220,6 +226,9 @@
     </ClInclude>
     <ClInclude Include="QuickFindDlg.h">
       <Filter>Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="Settings.h">
+      <Filter>Models</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

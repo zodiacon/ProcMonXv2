@@ -6,28 +6,22 @@
 using namespace StructuredStorage;
 
 bool BinaryEventDataSerializer::Save(const std::vector<std::shared_ptr<EventData>>& events, const EventDataSerializerOptions& options, PCWSTR path) {
-	try {
-		auto file = CompoundFile::Create(path);
-		if (file == nullptr)
-			return false;
-
-		uint32_t i = 0;
-		CString text;
-		WriteMetadata(file.get(), events);
-		for (uint32_t i = 0; i < (uint32_t)events.size(); i++) {
-			auto& evt = events[i];
-			text.Format(L"Event%u", i);
-			ATLTRACE(L"Writing event %u\n", i);
-			auto dir = file->CreateStructuredDirectory((PCWSTR)text);
-			WriteEventData(dir.get(), evt.get());
-		}
-	}
-	catch (const ComException& ex) {
-		ATLTRACE(L"Failed in BinaryEventDataSerializer::Save (HR=0x%X)\n", ex.HResult);
+	auto file = CompoundFile::Create(path);
+	if(file == nullptr)
 		return false;
+
+	uint32_t i = 0;
+	CString text;
+	WriteMetadata(file.get(), events);
+	for(uint32_t i = 0; i < (uint32_t)events.size(); i++) {
+		auto& evt = events[i];
+		text.Format(L"Event%u", i);
+		ATLTRACE(L"Writing event %u\n", i);
+		auto dir = file->CreateStructuredDirectory((PCWSTR)text);
+		WriteEventData(dir.get(), evt.get());
 	}
 
-	if (options.CompressOutput) {
+	if(options.CompressOutput) {
 		// compress output file
 
 	}
@@ -64,11 +58,11 @@ void BinaryEventDataSerializer::WriteEventData(StructuredDirectory* dir, const E
 	//WriteSimpleData(dir, L"ProviderId", data->GetProviderId());
 	//WriteSimpleData(dir, L"TimeStamp", data->GetTimeStamp());
 	auto props = data->GetProperties();
-	if (!props.empty()) {
+	if(!props.empty()) {
 		auto file = dir->CreateStructuredFile(L"Properties");
 		CompoundFileReaderWriter writer(*file);
 
-		for (auto& prop : props) {
+		for(auto& prop : props) {
 			writer.Write(prop.Name);
 			writer.Write(prop.GetLength());
 			file->Write(prop.GetData(), prop.GetLength());
@@ -77,7 +71,7 @@ void BinaryEventDataSerializer::WriteEventData(StructuredDirectory* dir, const E
 		}
 	}
 	auto stackData = data->GetStackEventData();
-	if (stackData) {
+	if(stackData) {
 		auto stackDir = dir->CreateStructuredDirectory(L"Stack");
 		WriteEventData(stackDir.get(), stackData);
 	}

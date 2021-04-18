@@ -263,6 +263,7 @@
     <ClCompile Include="PropertyValueFilter.cpp" />
     <ClCompile Include="QuickFindDlg.cpp" />
     <ClCompile Include="SerializerFactory.cpp" />
+    <ClCompile Include="Settings.cpp" />
     <ClCompile Include="SortHelper.cpp" />
     <ClCompile Include="SymbolManager.cpp" />
     <ClCompile Include="SymbolsHandler.cpp" />
@@ -296,6 +297,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="SerializerFactory.h" />
+    <ClInclude Include="Settings.h" />
     <ClInclude Include="SortHelper.h" />
     <ClInclude Include="SymbolManager.h" />
     <ClInclude Include="SymbolsHandler.h" />

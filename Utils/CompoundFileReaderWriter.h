@@ -12,14 +12,14 @@ namespace StructuredStorage {
 
 		template<typename T>
 		void Write(const T& value) {
-			static_assert(std::is_pod<T>(), "T must be POD");
+			static_assert(std::is_trivially_copyable<T>(), "T must be POD");
 
 			m_File.Write(&value, sizeof(value));
 		}
 
 		template<typename T>
 		void Read(T& value) {
-			static_assert(std::is_pod<T>() , "T must be POD");
+			static_assert(std::is_trivially_copyable<T>() , "T must be POD");
 
 			m_File.Read(&value, sizeof(value));
 		}
