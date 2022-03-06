@@ -27,7 +27,7 @@ const std::vector<KernelEventCategory> KernelEvents {
 			{ L"Connect Success", 0x27 },
 			{ L"Connect Fail", 0x28 },
 			{ L"Close Port", 0x29 },
-		}
+		}, true
 	},
 
 	{ L"Thread", KernelEventTypes::ALPC, &ALPCGuid,
@@ -35,7 +35,7 @@ const std::vector<KernelEventCategory> KernelEvents {
 			{ L"Start", 1 },
 			{ L"End", 2 },
 			{ L"Set Name", 72 },
-		}, true
+		}
 	},
 
 	{ L"Image", KernelEventTypes::ImageLoad, &ImageLoadGuid,
