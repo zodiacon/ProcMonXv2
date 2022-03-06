@@ -16,7 +16,7 @@ const std::vector<KernelEventCategory> KernelEvents {
 		}
 	},
 
-	{ L"Thread", KernelEventTypes::Thread, &ThreadGuid,
+	{ L"ALPC", KernelEventTypes::Thread, &ThreadGuid,
 		{
 			{ L"Send Message", 0x21 },
 			{ L"Receive Message", 0x22 },
@@ -30,7 +30,7 @@ const std::vector<KernelEventCategory> KernelEvents {
 		}
 	},
 
-	{ L"ALPC", KernelEventTypes::ALPC, &ALPCGuid,
+	{ L"Thread", KernelEventTypes::ALPC, &ALPCGuid,
 		{
 			{ L"Start", 1 },
 			{ L"End", 2 },

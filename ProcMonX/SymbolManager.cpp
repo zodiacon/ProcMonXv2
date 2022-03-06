@@ -6,6 +6,14 @@ SymbolManager& SymbolManager::Get() {
     return mgr;
 }
 
+SymbolManager::~SymbolManager() {
+    Term();
+}
+
+void SymbolManager::Term() {
+    _procSymbols.clear();
+}
+
 SymbolsHandler* SymbolManager::GetCommon() {
     return &_commonSymbols;
 }

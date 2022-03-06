@@ -5,6 +5,9 @@
 class SymbolManager {
 public:
 	static SymbolManager& Get();
+	~SymbolManager();
+	void Term();
+
 	SymbolsHandler* GetCommon();
 	SymbolsHandler* GetForProcess(DWORD pid);
 
