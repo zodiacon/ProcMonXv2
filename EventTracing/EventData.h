@@ -67,7 +67,8 @@ protected:
 
 private:
 	inline static HANDLE s_hHeap = nullptr;
-	inline static uint32_t s_Count = 0;
+	inline static CRITICAL_SECTION s_HeapLock = {0};
+	inline static volatile uint32_t s_Count = 0;
 
 	ULONG _threadId, _processId;
 	EVENT_DESCRIPTOR _eventDescriptor;
