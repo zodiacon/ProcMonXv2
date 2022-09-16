@@ -427,7 +427,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,1
+ FILEVERSION 2,0,0,1
  PRODUCTVERSION 2,0,0,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -444,7 +444,7 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "FileDescription", "Process Monitor X v2"
-            VALUE "FileVersion", "1, 0, 0, 1"
+            VALUE "FileVersion", "2.0.0.1"
             VALUE "InternalName", "ProcMonXv2"
             VALUE "LegalCopyright", "©2020-2021 Pavel Yosifovich"
             VALUE "OriginalFilename", "ProcMonX.exe"
