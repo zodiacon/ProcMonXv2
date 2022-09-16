@@ -45,17 +45,34 @@ EventData::EventData(PEVENT_RECORD rec, std::wstring processName, const std::wst
 }
 
 void* EventData::operator new(size_t size) {
-	if (s_Count++ == 0) {
+	if (InterlockedIncrement(&s_Count) == 1) {
+		InitializeCriticalSection(&s_HeapLock);
 		s_hHeap = ::HeapCreate(HEAP_NO_SERIALIZE, 1 << 24, 0);
 		assert(s_hHeap);
 	}
-	return ::HeapAlloc(s_hHeap, 0, size);
+
+	EnterCriticalSection(&s_HeapLock);
+
+	const LPVOID p = ::HeapAlloc(s_hHeap, 0, size);
+
+	LeaveCriticalSection(&s_HeapLock);
+
+	return p;
 }
 
 void EventData::operator delete(void* p) {
+
+	EnterCriticalSection(&s_HeapLock);
+
 	::HeapFree(s_hHeap, 0, p);
-	if (--s_Count == 0)
-		::HeapDestroy(s_hHeap);
+
+	LeaveCriticalSection(&s_HeapLock);
+
+	if (InterlockedDecrement(&s_Count) == 0) {
+		if (s_hHeap) {
+			::HeapDestroy(s_hHeap);
+		}
+	}
 }
 
 DWORD EventData::GetProcessId() const {

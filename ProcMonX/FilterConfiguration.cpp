@@ -68,7 +68,7 @@ bool FilterConfiguration::Load(PCWSTR path) {
     for (int i = 1;; i++) {
         text.Format(L"Filter%d", i);
         auto name = file.ReadString(text, L"Type");
-        if (name.IsEmpty())
+        if (name.IsEmpty() || name == L"")
             break;
         FilterDescription desc;
         desc.Name = name;
@@ -76,7 +76,7 @@ bool FilterConfiguration::Load(PCWSTR path) {
         desc.DefaultAction = (FilterAction)file.ReadInt(text, L"DefaultAction");
         desc.Enabled = file.ReadBool(text, L"Enabled", true);
         desc.Parameters = file.ReadString(text, L"Parameters");
-
+        AddFilter(desc);
     }
     return true;
 }
