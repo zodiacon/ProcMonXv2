@@ -128,7 +128,7 @@ bool TraceManager::Start(EventCallback cb) {
 
 bool TraceManager::Stop() {
 	if (_handle) {
-		::ControlTrace(_hTrace, KERNEL_LOGGER_NAME, _properties, EVENT_TRACE_CONTROL_STOP);
+		::ControlTrace(_handle, KERNEL_LOGGER_NAME, _properties, EVENT_TRACE_CONTROL_STOP);
 		_handle = 0;
 	}
 	if (_hTrace) {
