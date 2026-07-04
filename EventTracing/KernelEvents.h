@@ -76,7 +76,7 @@ enum class KernelEventTypes : uint64_t {
 	PerfFltFail =		0x80400000 | (4LL << 32),
 	PerfFlt =			PerfFltIO | PerfFltIoInit | PerfFltFastIO | PerfFltFail,
 	PerfHvProfile =		0x80800000 | (4LL << 32),
-	Mask4All =			0x8fffffff | (2LL << 32),
+	Mask4All =			0x8fffffff | (4LL << 32),
 
 	// Mask[6]
 	PerfConfigSystem =	0xC0000001 | (6LL << 32),

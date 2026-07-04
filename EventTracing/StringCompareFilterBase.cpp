@@ -38,8 +38,8 @@ FilterAction StringCompareFilterBase::Compare(const std::wstring& str) const {
 		default:
 			return FilterAction::None;
 	}
-	if (GetAction() == FilterAction::Include)
-		return FilterAction::Exclude;
+	//if (GetAction() == FilterAction::Include)
+	//	return FilterAction::Exclude;
 
 	return GetDefaultAction();
 }

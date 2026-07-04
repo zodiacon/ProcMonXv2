@@ -45,34 +45,11 @@ EventData::EventData(PEVENT_RECORD rec, std::wstring processName, const std::wst
 }
 
 void* EventData::operator new(size_t size) {
-	if (InterlockedIncrement(&s_Count) == 1) {
-		InitializeCriticalSection(&s_HeapLock);
-		s_hHeap = ::HeapCreate(HEAP_NO_SERIALIZE, 1 << 24, 0);
-		assert(s_hHeap);
-	}
-
-	EnterCriticalSection(&s_HeapLock);
-
-	const LPVOID p = ::HeapAlloc(s_hHeap, 0, size);
-
-	LeaveCriticalSection(&s_HeapLock);
-
-	return p;
+	return ::HeapAlloc(s_hHeap, 0, size);
 }
 
 void EventData::operator delete(void* p) {
-
-	EnterCriticalSection(&s_HeapLock);
-
 	::HeapFree(s_hHeap, 0, p);
-
-	LeaveCriticalSection(&s_HeapLock);
-
-	if (InterlockedDecrement(&s_Count) == 0) {
-		if (s_hHeap) {
-			::HeapDestroy(s_hHeap);
-		}
-	}
 }
 
 DWORD EventData::GetProcessId() const {
@@ -117,6 +94,8 @@ const std::vector<EventProperty>& EventData::GetProperties() const {
 		EventProperty property(prop);
 		property.Name.assign((WCHAR*)((BYTE*)info + prop.NameOffset));
 		ULONG len = prop.length;
+		if (prop.Flags & PropertyParamLength)
+			len = _properties[len].GetValue<USHORT>();
 		if (len == 0) {
 			PROPERTY_DATA_DESCRIPTOR desc;
 			desc.PropertyName = (ULONGLONG)property.Name.c_str();
