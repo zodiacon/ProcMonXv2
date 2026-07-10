@@ -489,6 +489,8 @@ LRESULT CView::OnSave(WORD, WORD, HWND, BOOL&) {
 				auto eventsCopy = m_OrgEvents;
 				if (!serializer->Save(eventsCopy, options, dlg.m_szFileName))
 					AtlMessageBox(*this, L"Failed to save data", IDS_TITLE, MB_ICONERROR);
+				else
+					AtlMessageBox(*this, L"CSV Data saved successfully", IDS_TITLE, MB_ICONINFORMATION);
 				return 0;
 			}
 		}
